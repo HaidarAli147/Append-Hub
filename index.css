@@ -25,7 +25,7 @@ header {
 
 .Subjectsf {
     padding: 10px 0;
-    position: fixed;
+    position: absolute;
     top: 120px; 
     left: 0;
     width: 100%;
@@ -37,7 +37,7 @@ header {
 
 .Subjectst {
     padding: 10px 0;
-    position: fixed;
+    position: absolute;
     top: 240px; 
     left: 0;
     width: 100%;
