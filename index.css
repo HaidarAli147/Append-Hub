@@ -1,53 +1,50 @@
-
 body {
-    background-image: url('new/Background.png');
-    background-repeat: no-repeat;
-    background-size: 100%;
-    padding-top: 300px;
+    background-color: #8768ad;
+    background-image: url("Bracks.png"); 
+    background-repeat: no-repeat; 
+    background-size: 100% auto; 
+    padding-top: 320px; 
     margin: 0;
     font-family: 'Edu VIC WA NT Hand', cursive;
     color: white;
-}head{
-     background-color: #000000;
+}
+
+header {
+    background-color: #000000;
     padding: 10px 0;
     position: fixed;
+    top: 0; 
+    left: 0;
     width: 100%;
     display: flex;
     justify-content: space-around;
     align-items: center;
-}
-header {
     color: white;
-}
-
-
-foot {
-         background-color: #990fe4;
-     bottom: 0;
-    position: fixed;
-    z-index: 30;
-    width: 100%;
+    z-index: 100; 
 }
 
 .Subjectsf {
-    
     padding: 10px 0;
     position: fixed;
+    top: 120px; 
+    left: 0;
     width: 100%;
     display: flex;
     justify-content: space-around;
     align-items: center;
+    z-index: 90;
 }
+
 .Subjectst {
-    
     padding: 10px 0;
     position: fixed;
+    top: 240px; 
+    left: 0;
     width: 100%;
     display: flex;
     justify-content: space-around;
     align-items: center;
-    top: 240px;
-    
+    z-index: 90;
 }
 
 .Subjectsf a, .Subjectst a {
@@ -55,107 +52,43 @@ foot {
     text-decoration: none;
     padding: 14px 20px;
     transition: background-color 0.3s;
+    border: 2px solid transparent; 
 }
 
 .Subjectsf a:hover, .Subjectst a:hover {
     background-color: #5e4f73;
     border-radius: 4px;
 }
+
 .Subjectsf a:nth-child(1) { background-color: #ff6b6b; } 
 .Subjectsf a:nth-child(2) { background-color: #4ecdc4; } 
 .Subjectsf a:nth-child(3) { background-color: #ffd93d; } 
 .Subjectst a:nth-child(1) { background-color: #3fda7a; } 
 .Subjectst a:nth-child(2) { background-color: #f12345; }
-.Subjectst a:nth-child(3) { background-color: blue; }
+.Subjectst a:nth-child(3) { background-color: blue; font-size: 20px; }
 
-foot a:nth-child(1) {
+.Intro {
+    margin-top: 50px;
+    color: white;
+    font-family: 'Edu VIC WA NT Hand', cursive;
+}
+
+footer {
+    background-color: #990fe4;
+    position: fixed;
+    bottom: 0; 
+    left: 0;
+    width: 100%;
+    z-index: 100;
+    padding: 10px 0;
+}
+
+footer a:nth-child(1) {
     width: 40px;      
     height: auto;      
 }
-body {
-    background-color: #8768ad;
-    background-image:url("Bracks.png"); 
-    background-repeat: no-repeat; 
-    background-size: 100%; 
-    padding-top: 60px; 
-    margin: 0;
-       font-family: 'Edu VIC WA NT Hand', cursive;
-       color: white;
-    
-
-
-}
-.Intro {
-    margin-top: 230px;
-    color: white;
-    font-family: 'Edu VIC WA NT Hand', cursive;
-}
-head{
-     background-color: #000000;
-    padding: 10px 0;
-    position: fixed;
-    width: 100%;
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
-}
-header {
-    color: white;
-}
-
-
-foot {
-         background-color: #990fe4;
-     bottom: 0;
-    position: fixed;
-    z-index: 30;
-    width: 100%;
-}
-
-.Subjectsf {
-    
-    padding: 10px 0;
-    position: fixed;
-    width: 100%;
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
-}
-.Subjectst {
-    
-    padding: 10px 0;
-    position: fixed;
-    width: 100%;
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
-    top: 240px;
-    
-}
-
-.Subjectsf a, .Subjectst a {
-    color: white;
-    text-decoration: none;
-    padding: 14px 20px;
-    transition: background-color 0.3s;
-}
-
-.Subjectsf a:hover, .Subjectst a:hover {
-    background-color: #5e4f73;
-    border-radius: 4px;
-}
-.Subjectsf a:nth-child(1) { background-color: #ff6b6b; } 
-.Subjectsf a:nth-child(2) { background-color: #4ecdc4; } 
-.Subjectsf a:nth-child(3) { background-color: #ffd93d; } 
-.Subjectst a:nth-child(1) { background-color: #3fda7a; } 
-.Subjectst a:nth-child(2) { background-color: #f12345; }
-.Subjectst a:nth-child(3) { background-color: blue; font-size:20px; }
-
 
 .social-icon {
     width: 60px;
     height: auto;
 }
-
-
-
