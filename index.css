@@ -1,3 +1,4 @@
+@media screen and (max-width: 768px) {
 body {
     background-color: #8768ad;
     background-image: url("Bracks.png"); 
@@ -7,6 +8,9 @@ body {
     margin: 0;
     font-family: 'Edu VIC WA NT Hand', cursive;
     color: white;
+    padding-top: 70px; /* Reduces top gap on phones */
+        padding-bottom: 70px;
+        background-size: cover; /* Fits background nicely on mobile */
 }
 
 header {
@@ -91,4 +95,5 @@ footer a:nth-child(1) {
 .social-icon {
     width: 60px;
     height: auto;
+}
 }
