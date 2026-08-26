@@ -1,4 +1,4 @@
-@media screen and (max-width: 768px) {
+
 body {
     background-color: #8768ad;
     background-image: url("Bracks.png"); 
@@ -96,4 +96,4 @@ footer a:nth-child(1) {
     width: 60px;
     height: auto;
 }
-}
+
