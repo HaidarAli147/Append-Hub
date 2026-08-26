@@ -3,172 +3,197 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Brack Study - Ultimate Quiz</title>
-  
-  <link rel="stylesheet" href="index.css">
+  <title>Brack Study - Quiz</title>
+
   <style>
+    /* ==========================================
+       QUIZ STYLES
+       ========================================== */
+    body {
+        background-color: #8768ad;
+        font-family: 'Edu VIC WA NT Hand', cursive, sans-serif;
+        color: white;
+        margin: 0;
+        padding: 20px 10px;
+    }
+
+    header {
+        background-color: #99689D;
+        padding: 10px 0;
+        text-align: center;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+    }
+
     .quiz-card {
-    background: rgba(43, 27, 61, 0.95);
-    border: 2px solid rgba(255, 255, 255, 0.15);
-    border-radius: 16px;
-    padding: 30px;
-    max-width: 650px;
-    margin: 20px auto;
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
-    backdrop-filter: blur(10px);
-    transition: all 0.3s ease;
-}
+        background: rgba(43, 27, 61, 0.95);
+        border: 2px solid rgba(255, 255, 255, 0.15);
+        border-radius: 16px;
+        padding: 25px;
+        max-width: 600px;
+        margin: 0 auto;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+        backdrop-filter: blur(10px);
+    }
 
-.stats-row {
-    display: flex;
-    justify-content: space-between;
-    font-weight: bold;
-    font-size: 16px;
-    margin-bottom: 12px;
-}
+    .stats-row {
+        display: flex;
+        justify-content: space-between;
+        font-weight: bold;
+        font-size: 16px;
+        margin-bottom: 12px;
+    }
 
-#streak-count { color: #ff9f43; }
-#score-display { color: #ffd93d; }
+    #streak-count { color: #ff9f43; }
+    #score-display { color: #ffd93d; }
 
-.progress-bar-container {
-    width: 100%;
-    height: 8px;
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 10px;
-    overflow: hidden;
-    margin-bottom: 15px;
-}
+    .progress-bar-container {
+        width: 100%;
+        height: 8px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 10px;
+        overflow: hidden;
+        margin-bottom: 15px;
+    }
 
-#progress-bar {
-    height: 100%;
-    width: 0%;
-    background: linear-gradient(90deg, #4ecdc4, #3fda7a);
-    transition: width 0.4s ease;
-}
+    #progress-bar {
+        height: 100%;
+        width: 0%;
+        background: linear-gradient(90deg, #4ecdc4, #3fda7a);
+        transition: width 0.4s ease;
+    }
 
-#question-counter {
-    font-size: 13px;
-    color: #a29bfe;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-}
+    #question-counter {
+        font-size: 13px;
+        color: #a29bfe;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
 
-#question-title {
-    font-size: 22px;
-    margin: 10px 0 20px 0;
-    line-height: 1.4;
-}
+    #question-title {
+        font-size: 22px;
+        margin: 10px 0 20px 0;
+        line-height: 1.4;
+    }
 
-.btn-grid {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-}
+    .btn-grid {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
 
-.quiz-btn {
-    background: #5e4f73;
-    color: white;
-    border: 2px solid rgba(255, 255, 255, 0.2);
-    border-radius: 10px;
-    padding: 14px 20px;
-    font-size: 16px;
-    font-family: inherit;
-    cursor: pointer;
-    text-align: left;
-    transition: transform 0.15s ease, background 0.2s ease, border-color 0.2s ease;
-}
+    .quiz-btn {
+        background: #5e4f73;
+        color: white;
+        border: 2px solid rgba(255, 255, 255, 0.2);
+        border-radius: 10px;
+        padding: 14px 20px;
+        font-size: 16px;
+        font-family: inherit;
+        cursor: pointer;
+        text-align: left;
+        transition: transform 0.15s ease, background 0.2s ease;
+    }
 
-.quiz-btn:hover:not(:disabled) {
-    transform: translateY(-2px);
-    background: #8768ad;
-    border-color: #ffffff;
-}
+    .quiz-btn:hover:not(:disabled) {
+        transform: translateY(-2px);
+        background: #8768ad;
+        border-color: #ffffff;
+    }
 
-.quiz-btn.correct {
-    background: #2ed573 !important;
-    border-color: #ffffff !important;
-    color: #000;
-    font-weight: bold;
-}
+    .quiz-btn.correct {
+        background: #2ed573 !important;
+        border-color: #ffffff !important;
+        color: #000;
+        font-weight: bold;
+    }
 
-.quiz-btn.wrong {
-    background: #ff4757 !important;
-    border-color: #ffffff !important;
-    color: #fff;
-}
+    .quiz-btn.wrong {
+        background: #ff4757 !important;
+        border-color: #ffffff !important;
+        color: #fff;
+    }
 
-.quiz-input {
-    width: 100%;
-    padding: 14px;
-    font-size: 18px;
-    border: 2px solid rgba(255, 255, 255, 0.3);
-    border-radius: 10px;
-    background: #3d2d54;
-    color: white;
-    outline: none;
-    box-sizing: border-box;
-}
+    .quiz-input {
+        width: 100%;
+        padding: 14px;
+        font-size: 18px;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-radius: 10px;
+        background: #3d2d54;
+        color: white;
+        outline: none;
+        box-sizing: border-box;
+    }
 
-.quiz-input:focus {
-    border-color: #3fda7a;
-}
+    .quiz-input:focus {
+        border-color: #3fda7a;
+    }
 
-.explanation-card {
-    margin-top: 20px;
-    padding: 15px;
-    background: rgba(255, 255, 255, 0.08);
-    border-left: 4px solid #ffd93d;
-    border-radius: 6px;
-    animation: fadeIn 0.3s ease;
-}
+    .explanation-card {
+        margin-top: 20px;
+        padding: 15px;
+        background: rgba(255, 255, 255, 0.08);
+        border-left: 4px solid #ffd93d;
+        border-radius: 6px;
+    }
 
-.explanation-card p {
-    margin: 5px 0 0 0;
-    font-size: 14px;
-    line-height: 1.4;
-}
+    .explanation-card p {
+        margin: 5px 0 0 0;
+        font-size: 14px;
+        line-height: 1.4;
+    }
 
-.result-screen {
-    text-align: center;
-    padding: 20px 0;
-}
+    /* NEXT QUESTION BUTTON STYLING */
+    .next-action-btn {
+        width: 100%;
+        margin-top: 20px;
+        background-color: #ffd93d !important;
+        color: #333 !important;
+        font-weight: bold !important;
+        text-align: center !important;
+        font-size: 18px !important;
+        border: none !important;
+    }
 
-.trophy-icon { font-size: 60px; margin-bottom: 10px; }
+    .next-action-btn:hover {
+        background-color: #f1c40f !important;
+        transform: scale(1.02);
+    }
 
-.final-stats {
-    background: rgba(0, 0, 0, 0.2);
-    padding: 15px;
-    border-radius: 10px;
-    margin: 20px 0;
-    font-size: 18px;
-}
+    .result-screen {
+        text-align: center;
+        padding: 20px 0;
+    }
 
-.feedback-msg {
-    font-size: 18px;
-    color: #ffd93d;
-    margin-bottom: 20px;
-}
+    .trophy-icon { font-size: 60px; margin-bottom: 10px; }
 
-#restart-btn {
-    background: #3fda7a;
-    color: #000;
-    border: none;
-    padding: 14px 30px;
-    font-size: 18px;
-    font-weight: bold;
-    border-radius: 30px;
-    cursor: pointer;
-    transition: transform 0.2s ease;
-}
+    .final-stats {
+        background: rgba(0, 0, 0, 0.2);
+        padding: 15px;
+        border-radius: 10px;
+        margin: 20px 0;
+        font-size: 18px;
+    }
 
-#restart-btn:hover { transform: scale(1.05); }
+    .feedback-msg {
+        font-size: 18px;
+        color: #ffd93d;
+        margin-bottom: 20px;
+    }
 
-.hide { display: none !important; }
+    #restart-btn {
+        background: #3fda7a;
+        color: #000;
+        border: none;
+        padding: 14px 30px;
+        font-size: 18px;
+        font-weight: bold;
+        border-radius: 30px;
+        cursor: pointer;
+    }
 
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(5px); }
-    to { opacity: 1; transform: translateY(0); }
-}
+    .hide { display: none !important; }
   </style>
 </head>
 <body>
@@ -177,7 +202,7 @@
     <h1>Brack Study</h1>
   </header>
 
-  <main class="Intro">
+  <main>
     <div class="quiz-card">
       
       <!-- TOP DASHBOARD -->
@@ -204,6 +229,9 @@
         <p id="explanation-text"></p>
       </div>
 
+      <!-- NEXT BUTTON CONTAINER -->
+      <button id="next-btn" class="quiz-btn next-action-btn hide">Next Question ➔</button>
+
       <!-- RESULTS OVERLAY -->
       <div id="result-box" class="result-screen hide">
         <div class="trophy-icon">🏆</div>
@@ -218,223 +246,235 @@
 
     </div>
   </main>
-<script>
-  const questions = [
-  {
-    type: "multiple-choice",
-    question: "What does HTML stand for?",
-    answers: [
-      { text: "Hyper Text Markup Language", correct: true },
-      { text: "High Tech Modern Language", correct: false },
-      { text: "Hyperlink Text Machine Logic", correct: false },
-      { text: "Home Tool Markup Language", correct: false }
-    ],
-    explanation: "HTML is the standard markup language used to structure and display pages on the Web."
-  },
-  {
-    type: "fill-in-blank",
-    question: "Fill in the blank: CSS stands for Cascading ____ Sheets.",
-    correctAnswer: "Style",
-    explanation: "CSS (Cascading Style Sheets) controls the visual presentation, layout, and colors of web pages."
-  },
-  {
-    type: "fill-in-blank",
-    question: "Fill in the blank: 12 x 12 = ____.",
-    correctAnswer: "144",
-    explanation: "12 multiplied by 12 equals 144."
-  },
-  {
-    type: "multiple-choice",
-    question: "Which subject button on Brack Study uses a red background?",
-    answers: [
-      { text: "Coding", correct: true },
-      { text: "Science", correct: false },
-      { text: "Math", correct: false },
-      { text: "History", correct: false }
-    ],
-    explanation: "Coding is styled with the `#ff6b6b` reddish hue in the top subject line."
-  }
-];
 
-let currentQuestionIndex = 0;
-let score = 0;
-let streak = 0;
-let totalPoints = 0;
+  <script>
+    // ==========================================
+    // QUIZ LOGIC
+    // ==========================================
+    const questions = [
+      {
+        type: "multiple-choice",
+        question: "What does HTML stand for?",
+        answers: [
+          { text: "Hyper Text Markup Language", correct: true },
+          { text: "High Tech Modern Language", correct: false },
+          { text: "Hyperlink Text Machine Logic", correct: false },
+          { text: "Home Tool Markup Language", correct: false }
+        ],
+        explanation: "HTML is the standard markup language used to structure and display pages on the Web."
+      },
+      {
+        type: "fill-in-blank",
+        question: "Fill in the blank: CSS stands for Cascading ____ Sheets.",
+        correctAnswer: "Style",
+        explanation: "CSS (Cascading Style Sheets) controls the visual presentation, layout, and colors of web pages."
+      },
+      {
+        type: "fill-in-blank",
+        question: "Fill in the blank: 12 x 12 = ____.",
+        correctAnswer: "144",
+        explanation: "12 multiplied by 12 equals 144."
+      },
+      {
+        type: "multiple-choice",
+        question: "Which subject button on Brack Study uses a red background?",
+        answers: [
+          { text: "Coding", correct: true },
+          { text: "Science", correct: false },
+          { text: "Math", correct: false },
+          { text: "History", correct: false }
+        ],
+        explanation: "Coding is styled with the `#ff6b6b` reddish hue in the top subject line."
+      }
+    ];
 
-const questionTitle = document.getElementById("question-title");
-const questionCounter = document.getElementById("question-counter");
-const answerButtons = document.getElementById("answer-buttons");
-const progressBar = document.getElementById("progress-bar");
-const streakDisplay = document.getElementById("streak-count");
-const scoreDisplay = document.getElementById("score-display");
-const explanationBox = document.getElementById("explanation-box");
-const explanationText = document.getElementById("explanation-text");
-const resultBox = document.getElementById("result-box");
+    let currentQuestionIndex = 0;
+    let score = 0;
+    let streak = 0;
+    let totalPoints = 0;
 
-// Synth Sound Effects Generator
-function playSound(type) {
-  const ctx = new (window.AudioContext || window.webkitAudioContext)();
-  const osc = ctx.createOscillator();
-  const gain = ctx.createGain();
-  osc.connect(gain);
-  gain.connect(ctx.destination);
+    const questionTitle = document.getElementById("question-title");
+    const questionCounter = document.getElementById("question-counter");
+    const answerButtons = document.getElementById("answer-buttons");
+    const progressBar = document.getElementById("progress-bar");
+    const streakDisplay = document.getElementById("streak-count");
+    const scoreDisplay = document.getElementById("score-display");
+    const explanationBox = document.getElementById("explanation-box");
+    const explanationText = document.getElementById("explanation-text");
+    const nextBtn = document.getElementById("next-btn");
+    const resultBox = document.getElementById("result-box");
 
-  if (type === "correct") {
-    osc.frequency.setValueAtTime(587.33, ctx.currentTime);
-    osc.frequency.setValueAtTime(880, ctx.currentTime + 0.1);
-    gain.gain.fadeOut(0.3);
-    osc.start();
-    osc.stop(ctx.currentTime + 0.3);
-  } else {
-    osc.type = "sawtooth";
-    osc.frequency.setValueAtTime(150, ctx.currentTime);
-    gain.gain.fadeOut(0.2);
-    osc.start();
-    osc.stop(ctx.currentTime + 0.2);
-  }
-}
+    function playSound(type) {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
 
-function startQuiz() {
-  currentQuestionIndex = 0;
-  score = 0;
-  streak = 0;
-  totalPoints = 0;
-  
-  resultBox.classList.add("hide");
-  document.getElementById("quiz-header").classList.remove("hide");
-  answerButtons.classList.remove("hide");
-  
-  updateDashboard();
-  showQuestion();
-}
-
-function updateDashboard() {
-  streakDisplay.textContent = `🔥 ${streak} Streak`;
-  scoreDisplay.textContent = `✨ ${totalPoints} Points`;
-  
-  const progressPercent = (currentQuestionIndex / questions.length) * 100;
-  progressBar.style.width = `${progressPercent}%`;
-}
-
-function showQuestion() {
-  resetState();
-  const q = questions[currentQuestionIndex];
-  questionTitle.textContent = q.question;
-  questionCounter.textContent = `Question ${currentQuestionIndex + 1} of ${questions.length}`;
-
-  if (q.type === "multiple-choice") {
-    q.answers.forEach(ans => {
-      const btn = document.createElement("button");
-      btn.textContent = ans.text;
-      btn.classList.add("quiz-btn");
-      if (ans.correct) btn.dataset.correct = "true";
-      btn.addEventListener("click", selectMultipleChoice);
-      answerButtons.appendChild(btn);
-    });
-  } else if (q.type === "fill-in-blank") {
-    const input = document.createElement("input");
-    input.type = "text";
-    input.id = "blank-input";
-    input.placeholder = "Type your answer...";
-    input.classList.add("quiz-input");
-
-    const submitBtn = document.createElement("button");
-    submitBtn.textContent = "Submit Answer";
-    submitBtn.classList.add("quiz-btn");
-    submitBtn.style.marginTop = "10px";
-    submitBtn.style.textAlign = "center";
-    submitBtn.addEventListener("click", () => checkBlankAnswer(q.correctAnswer));
-
-    input.addEventListener("keypress", (e) => {
-      if (e.key === "Enter") checkBlankAnswer(q.correctAnswer);
-    });
-
-    answerButtons.appendChild(input);
-    answerButtons.appendChild(submitBtn);
-    input.focus();
-  }
-}
-
-function resetState() {
-  explanationBox.classList.add("hide");
-  while (answerButtons.firstChild) {
-    answerButtons.removeChild(answerButtons.firstChild);
-  }
-}
-
-function handleAnswerResult(isCorrect, explanation) {
-  if (isCorrect) {
-    playSound("correct");
-    score++;
-    streak++;
-    const multiplier = streak > 1 ? streak : 1;
-    totalPoints += 100 * multiplier;
-  } else {
-    playSound("wrong");
-    streak = 0;
-  }
-
-  updateDashboard();
-
-  if (explanation) {
-    explanationText.textContent = explanation;
-    explanationBox.classList.remove("hide");
-  }
-
-  setTimeout(() => {
-    currentQuestionIndex++;
-    if (currentQuestionIndex < questions.length) {
-      showQuestion();
-    } else {
-      showScore();
+      if (type === "correct") {
+        osc.frequency.setValueAtTime(587.33, ctx.currentTime);
+        osc.frequency.setValueAtTime(880, ctx.currentTime + 0.1);
+        gain.gain.fadeOut(0.3);
+        osc.start();
+        osc.stop(ctx.currentTime + 0.3);
+      } else {
+        osc.type = "sawtooth";
+        osc.frequency.setValueAtTime(150, ctx.currentTime);
+        gain.gain.fadeOut(0.2);
+        osc.start();
+        osc.stop(ctx.currentTime + 0.2);
+      }
     }
-  }, 2200);
-}
 
-function selectMultipleChoice(e) {
-  const selectedBtn = e.target;
-  const isCorrect = selectedBtn.dataset.correct === "true";
+    function startQuiz() {
+      currentQuestionIndex = 0;
+      score = 0;
+      streak = 0;
+      totalPoints = 0;
+      
+      resultBox.classList.add("hide");
+      document.getElementById("quiz-header").classList.remove("hide");
+      answerButtons.classList.remove("hide");
+      
+      updateDashboard();
+      showQuestion();
+    }
 
-  Array.from(answerButtons.children).forEach(btn => {
-    if (btn.dataset.correct === "true") btn.classList.add("correct");
-    btn.disabled = true;
-  });
+    function updateDashboard() {
+      streakDisplay.textContent = `🔥 ${streak} Streak`;
+      scoreDisplay.textContent = `✨ ${totalPoints} Points`;
+      
+      const progressPercent = (currentQuestionIndex / questions.length) * 100;
+      progressBar.style.width = `${progressPercent}%`;
+    }
 
-  if (!isCorrect) selectedBtn.classList.add("wrong");
+    function showQuestion() {
+      resetState();
+      const q = questions[currentQuestionIndex];
+      questionTitle.textContent = q.question;
+      questionCounter.textContent = `Question ${currentQuestionIndex + 1} of ${questions.length}`;
 
-  handleAnswerResult(isCorrect, questions[currentQuestionIndex].explanation);
-}
+      if (q.type === "multiple-choice") {
+        q.answers.forEach(ans => {
+          const btn = document.createElement("button");
+          btn.textContent = ans.text;
+          btn.classList.add("quiz-btn");
+          if (ans.correct) btn.dataset.correct = "true";
+          btn.addEventListener("click", selectMultipleChoice);
+          answerButtons.appendChild(btn);
+        });
+      } else if (q.type === "fill-in-blank") {
+        const input = document.createElement("input");
+        input.type = "text";
+        input.id = "blank-input";
+        input.placeholder = "Type your answer...";
+        input.classList.add("quiz-input");
 
-function checkBlankAnswer(correctAnswer) {
-  const input = document.getElementById("blank-input");
-  const isCorrect = input.value.trim().toLowerCase() === correctAnswer.trim().toLowerCase();
+        const submitBtn = document.createElement("button");
+        submitBtn.textContent = "Submit Answer";
+        submitBtn.classList.add("quiz-btn");
+        submitBtn.style.marginTop = "10px";
+        submitBtn.style.textAlign = "center";
+        submitBtn.addEventListener("click", () => checkBlankAnswer(q.correctAnswer));
 
-  input.disabled = true;
-  input.style.border = isCorrect ? "2px solid #2ed573" : "2px solid #ff4757";
+        input.addEventListener("keypress", (e) => {
+          if (e.key === "Enter") checkBlankAnswer(q.correctAnswer);
+        });
 
-  handleAnswerResult(isCorrect, questions[currentQuestionIndex].explanation);
-}
+        answerButtons.appendChild(input);
+        answerButtons.appendChild(submitBtn);
+        input.focus();
+      }
+    }
 
-function showScore() {
-  resetState();
-  progressBar.style.width = "100%";
-  document.getElementById("quiz-header").classList.add("hide");
-  answerButtons.classList.add("hide");
-  
-  const accuracy = Math.round((score / questions.length) * 100);
-  
-  document.getElementById("final-score").textContent = `Score: ${totalPoints} Points (${score}/${questions.length})`;
-  document.getElementById("final-accuracy").textContent = `Accuracy: ${accuracy}%`;
-  
-  const feedback = document.getElementById("feedback-message");
-  if (accuracy === 100) feedback.textContent = "🌟 Perfect Score! You're a master!";
-  else if (accuracy >= 70) feedback.textContent = "👍 Great Job! Almost perfect!";
-  else feedback.textContent = "💪 Keep Practicing! You'll get it next time.";
+    function resetState() {
+      explanationBox.classList.add("hide");
+      nextBtn.classList.add("hide");
 
-  resultBox.classList.remove("hide");
-}
+      while (answerButtons.firstChild) {
+        answerButtons.removeChild(answerButtons.firstChild);
+      }
+    }
 
-startQuiz();
-</script>
+    function handleAnswerResult(isCorrect, explanation) {
+      if (isCorrect) {
+        playSound("correct");
+        score++;
+        streak++;
+        const multiplier = streak > 1 ? streak : 1;
+        totalPoints += 100 * multiplier;
+      } else {
+        playSound("wrong");
+        streak = 0;
+      }
+
+      updateDashboard();
+
+      if (explanation) {
+        explanationText.textContent = explanation;
+        explanationBox.classList.remove("hide");
+      }
+
+      // Show the Next Question Button
+      nextBtn.textContent = currentQuestionIndex === questions.length - 1 ? "See Final Results 🏆" : "Next Question ➔";
+      nextBtn.classList.remove("hide");
+    }
+
+    nextBtn.addEventListener("click", () => {
+      currentQuestionIndex++;
+      if (currentQuestionIndex < questions.length) {
+        showQuestion();
+      } else {
+        showScore();
+      }
+    });
+
+    function selectMultipleChoice(e) {
+      const selectedBtn = e.target;
+      const isCorrect = selectedBtn.dataset.correct === "true";
+
+      Array.from(answerButtons.children).forEach(btn => {
+        if (btn.dataset.correct === "true") btn.classList.add("correct");
+        btn.disabled = true;
+      });
+
+      if (!isCorrect) selectedBtn.classList.add("wrong");
+
+      handleAnswerResult(isCorrect, questions[currentQuestionIndex].explanation);
+    }
+
+    function checkBlankAnswer(correctAnswer) {
+      const input = document.getElementById("blank-input");
+      if (!input || input.disabled) return;
+
+      const isCorrect = input.value.trim().toLowerCase() === correctAnswer.trim().toLowerCase();
+
+      input.disabled = true;
+      input.style.border = isCorrect ? "2px solid #2ed573" : "2px solid #ff4757";
+
+      handleAnswerResult(isCorrect, questions[currentQuestionIndex].explanation);
+    }
+
+    function showScore() {
+      resetState();
+      progressBar.style.width = "100%";
+      document.getElementById("quiz-header").classList.add("hide");
+      answerButtons.classList.add("hide");
+      
+      const accuracy = Math.round((score / questions.length) * 100);
+      
+      document.getElementById("final-score").textContent = `Score: ${totalPoints} Points (${score}/${questions.length})`;
+      document.getElementById("final-accuracy").textContent = `Accuracy: ${accuracy}%`;
+      
+      const feedback = document.getElementById("feedback-message");
+      if (accuracy === 100) feedback.textContent = "🌟 Perfect Score! You're a master!";
+      else if (accuracy >= 70) feedback.textContent = "👍 Great Job! Almost perfect!";
+      else feedback.textContent = "💪 Keep Practicing! You'll get it next time.";
+
+      resultBox.classList.remove("hide");
+    }
+
+    startQuiz();
+  </script>
 </body>
 </html>
