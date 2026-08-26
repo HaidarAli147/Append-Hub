@@ -1,1 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Brack Study - Quiz</title>
+  
+  <link rel="stylesheet" href="index.css">
+  <style>
+    .quiz-input {
+    width: 100%;
+    padding: 12px 16px;
+    font-size: 18px;
+    border: 2px solid #ffffff;
+    border-radius: 6px;
+    background-color: #5e4f73;
+    color: white;
+    outline: none;
+    box-sizing: border-box;
+}
 
+.quiz-input::placeholder {
+    color: #cccccc;
+}
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Brack Study</h1>
+  </header>
+
+  <main class="Intro">
+    <div class="quiz-container">
+      
+      <div id="quiz-header">
+        <h2 id="question-title">Loading Question...</h2>
+        <span id="question-counter">Question 1 of 4</span>
+      </div>
+
+      <div id="answer-buttons" class="btn-grid">
+      </div>
+
+      <div id="result-box" class="hide">
+        <h2>Quiz Complete! 🎉</h2>
+        <p id="final-score">You scored 0 out of 0</p>
+        <button id="restart-btn" onclick="startQuiz()">Try Again</button>
+      </div>
+
+    </div>
+  </main>
+
+  <script>
+    // Add "type: fill-in-the-blank" to any question you want!
+const questions = [
+  {
+    type: "multiple-choice",
+    question: "What does HTML stand for?",
+    answers: [
+      { text: "Hyper Text Markup Language", correct: true },
+      { text: "High Tech Modern Language", correct: false },
+      { text: "Hyperlink Text Machine Logic", correct: false },
+      { text: "Home Tool Markup Language", correct: false }
+    ]
+  },
+  {
+    type: "fill-in-blank",
+    question: "Fill in the blank: The main markup language for creating web pages is ____.",
+    correctAnswer: "HTML" // Case-insensitive matching
+  },
+  {
+    type: "fill-in-blank",
+    question: "Fill in the blank: 10 + 15 = ____.",
+    correctAnswer: "25"
+  },
+  {
+    type: "multiple-choice",
+    question: "Which subject color is yellow on Brack Study?",
+    answers: [
+      { text: "Coding", correct: false },
+      { text: "Science", correct: true },
+      { text: "History", correct: false },
+      { text: "Geography", correct: false }
+    ]
+  }
+];
+
+let currentQuestionIndex = 0;
+let score = 0;
+
+const questionTitle = document.getElementById("question-title");
+const questionCounter = document.getElementById("question-counter");
+const answerButtons = document.getElementById("answer-buttons");
+const resultBox = document.getElementById("result-box");
+const finalScore = document.getElementById("final-score");
+
+function startQuiz() {
+  currentQuestionIndex = 0;
+  score = 0;
+  resultBox.classList.add("hide");
+  answerButtons.classList.remove("hide");
+  document.getElementById("quiz-header").classList.remove("hide");
+  showQuestion();
+}
+
+function showQuestion() {
+  resetState();
+  let currentQuestion = questions[currentQuestionIndex];
+  questionTitle.textContent = currentQuestion.question;
+  questionCounter.textContent = `Question ${currentQuestionIndex + 1} of ${questions.length}`;
+
+  if (currentQuestion.type === "multiple-choice") {
+    // Render Multiple Choice Buttons
+    currentQuestion.answers.forEach(answer => {
+      const button = document.createElement("button");
+      button.textContent = answer.text;
+      button.classList.add("quiz-btn");
+      if (answer.correct) {
+        button.dataset.correct = answer.correct;
+      }
+      button.addEventListener("click", selectMultipleChoiceAnswer);
+      answerButtons.appendChild(button);
+    });
+  } else if (currentQuestion.type === "fill-in-blank") {
+    // Render Fill-in-the-Blank Input & Submit Button
+    const input = document.createElement("input");
+    input.type = "text";
+    input.id = "blank-input";
+    input.placeholder = "Type your answer here...";
+    input.classList.add("quiz-input");
+
+    const submitBtn = document.createElement("button");
+    submitBtn.textContent = "Submit Answer";
+    submitBtn.classList.add("quiz-btn");
+    submitBtn.style.marginTop = "10px";
+    submitBtn.addEventListener("click", () => checkBlankAnswer(currentQuestion.correctAnswer));
+
+    // Allow pressing "Enter" key to submit
+    input.addEventListener("keypress", (e) => {
+      if (e.key === "Enter") checkBlankAnswer(currentQuestion.correctAnswer);
+    });
+
+    answerButtons.appendChild(input);
+    answerButtons.appendChild(submitBtn);
+    input.focus();
+  }
+}
+
+function resetState() {
+  while (answerButtons.firstChild) {
+    answerButtons.removeChild(answerButtons.firstChild);
+  }
+}
+
+function selectMultipleChoiceAnswer(e) {
+  const selectedBtn = e.target;
+  const isCorrect = selectedBtn.dataset.correct === "true";
+
+  if (isCorrect) {
+    selectedBtn.classList.add("correct");
+    score++;
+  } else {
+    selectedBtn.classList.add("wrong");
+  }
+
+  Array.from(answerButtons.children).forEach(button => {
+    if (button.dataset.correct === "true") {
+      button.classList.add("correct");
+    }
+    button.disabled = true;
+  });
+
+  nextQuestionDelay();
+}
+
+function checkBlankAnswer(correctAnswer) {
+  const input = document.getElementById("blank-input");
+  const userAnswer = input.value.trim().toLowerCase();
+  const expectedAnswer = correctAnswer.trim().toLowerCase();
+
+  const feedbackMsg = document.createElement("p");
+  feedbackMsg.style.fontWeight = "bold";
+  feedbackMsg.style.fontSize = "18px";
+  feedbackMsg.style.marginTop = "10px";
+
+  if (userAnswer === expectedAnswer) {
+    input.style.border = "3px solid #3fda7a";
+    input.style.backgroundColor = "rgba(63, 218, 122, 0.2)";
+    feedbackMsg.textContent = "✓ Correct!";
+    feedbackMsg.style.color = "#3fda7a";
+    score++;
+  } else {
+    input.style.border = "3px solid #ff6b6b";
+    input.style.backgroundColor = "rgba(255, 107, 107, 0.2)";
+    feedbackMsg.textContent = `✗ Wrong! Correct answer: ${correctAnswer}`;
+    feedbackMsg.style.color = "#ff6b6b";
+  }
+
+  input.disabled = true;
+  answerButtons.appendChild(feedbackMsg);
+
+  nextQuestionDelay();
+}
+
+function nextQuestionDelay() {
+  setTimeout(() => {
+    currentQuestionIndex++;
+    if (currentQuestionIndex < questions.length) {
+      showQuestion();
+    } else {
+      showScore();
+    }
+  }, 1800);
+}
+
+function showScore() {
+  resetState();
+  document.getElementById("quiz-header").classList.add("hide");
+  answerButtons.classList.add("hide");
+  resultBox.classList.remove("hide");
+  finalScore.textContent = `You scored ${score} out of ${questions.length}!`;
+}
+
+startQuiz();
+  </script>
+</body>
+</html>
