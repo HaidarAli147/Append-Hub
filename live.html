@@ -1,30 +1,21 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <title>Brack Study Stream</title>
-  
-  <!-- Official Video.js Stylesheet -->
   <link href="index.css" rel="stylesheet" />
+  <script src="https://vjs.zencdn.net/8.3.0/video.min.js"></script>
 </head>
 <body>
 
-  <!-- Video.js Player -->
   <video 
     id="brack-study-stream" 
-    class="video-js vjs-default-skin vjs-big-play-centered" 
+    class="video-js vjs-default-skin" 
     controls 
-    preload="auto"
+    autoplay 
+    muted 
     width="800" 
-    height="450"
-    data-setup='{}'>
-    
-    <!-- Added type="application/x-mpegURL" so Video.js knows it's an HLS stream -->
-    <source src="https://livepeercdn.studio/hls/b23efw3l7ks0k5ms/index.m3u8" type="application/x-mpegURL">
+    height="450">
+    <source src="https://livepeercdn.studio/hls/b23efw3l7ks0k5ms/index.m3u8">
   </video>
-
-  <!-- Video.js JavaScript File -->
-  <script src="https://vjs.zencdn.net/8.3.0/video.min.js"></script>
 
 </body>
 </html>
