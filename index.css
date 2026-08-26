@@ -8,9 +8,9 @@ body {
     margin: 0;
     font-family: 'Edu VIC WA NT Hand', cursive;
     color: white;
-    padding-top: 70px; /* Reduces top gap on phones */
+    padding-top: 70px; 
         padding-bottom: 70px;
-        background-size: cover; /* Fits background nicely on mobile */
+        background-size: cover; 
 }
 
 header {
