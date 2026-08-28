@@ -79,6 +79,9 @@ header {
     
 }
 
+.Footer-Intro {
+background-color: #8768ad;
+}
 footer {
     background-color: #990fe4;
     position: fixed;
