@@ -114,6 +114,8 @@ footer {
 .social-media {
     padding-top: 10px;
         background-color: #7a0fc2;
+        background-image: linear-gradient(180deg, #990fe4, #6d0ba6);
+
 }
 .social-media span {
     display: block;
