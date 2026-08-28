@@ -6,7 +6,6 @@
   <title>Brack Study - Quiz</title>
 
   <style>
-    /* BASIC SETUP */
     * {
         box-sizing: border-box;
         margin: 0;
@@ -28,7 +27,6 @@
         box-shadow: 0 2px 10px rgba(0,0,0,0.3);
     }
 
-    /* CARD CONTAINER */
     .quiz-card {
         background: #2b1b3d;
         border: 2px solid rgba(255, 255, 255, 0.2);
@@ -183,7 +181,6 @@
   <main>
     <div class="quiz-card">
       
-      <!-- TOP HEADER -->
       <div id="quiz-header">
         <div class="stats-row">
           <span id="streak-count">🔥 0 Streak</span>
@@ -198,19 +195,15 @@
         <h2 id="question-title">Loading Question...</h2>
       </div>
 
-      <!-- ANSWERS HERE -->
       <div id="answer-buttons" class="btn-grid"></div>
 
-      <!-- EXPLANATION HERE -->
       <div id="explanation-box" class="explanation-card hide">
         <strong id="explanation-title">Explanation:</strong>
         <p id="explanation-text"></p>
       </div>
 
-      <!-- NEXT BUTTON -->
       <button id="next-btn" class="quiz-btn next-action-btn hide">Next Question ➔</button>
 
-      <!-- RESULTS HERE -->
       <div id="result-box" class="result-screen hide">
         <div style="font-size: 50px; margin-bottom: 10px;">🏆</div>
         <h2>Quiz Completed!</h2>
@@ -229,37 +222,37 @@
     const questions = [
       {
         type: "multiple-choice",
-        question: "What does HTML stand for?",
+        question: "What does the 'print' function do in Python?",
         answers: [
-          { text: "Hyper Text Markup Language", correct: true },
-          { text: "High Tech Modern Language", correct: false },
-          { text: "Hyperlink Text Machine Logic", correct: false },
-          { text: "Home Tool Markup Language", correct: false }
+          { text: "A. It reads input from the user ", correct: false },
+          { text: "B. It displays output on the screen", correct: true },
+          { text: "C. It saves data to a file", correct: false },
+          { text: "D. It performs mathematical calculations", correct: false }
         ],
-        explanation: "HTML is the standard markup language used to structure pages on the Web."
+        explanation: "B is correct, because the print comand shows an output on the screen"
       },
       {
         type: "fill-in-blank",
-        question: "Fill in the blank: CSS stands for Cascading ____ Sheets.",
-        correctAnswer: "Style",
-        explanation: "CSS (Cascading Style Sheets) controls colors, layout, and appearance."
+        question: "Fill in the blank: The _______ function is used to prompt the user for data and read their response",
+        correctAnswer: "input",
+        explanation: "the input command is used to prompt the user "
       },
       {
         type: "fill-in-blank",
-        question: "Fill in the blank: 12 x 12 = ____.",
-        correctAnswer: "144",
-        explanation: "12 multiplied by 12 equals 144."
+        question: "Short Answer: write a print command that has the letter x inside it: ",
+        correctAnswer: ["print('x')", 'print("x")'],
+        explanation: "print('x') is the correct"
       },
       {
         type: "multiple-choice",
-        question: "Which subject button on Brack Study uses a red background?",
+        question: "Choose the Commands that are correct:",
         answers: [
-          { text: "Coding", correct: true },
-          { text: "Science", correct: false },
-          { text: "Math", correct: false },
-          { text: "History", correct: false }
+          { text: 'input("what is your name")', correct: true },
+          { text: 'print("Hello world")', correct: false },
+          { text: '("what is your name)input', correct: false },
+          { text: 'Hello world("print")', correct: false }
         ],
-        explanation: "Coding uses the reddish button styling on Brack Study."
+        explanation: 'input("what is your name") is correct because it uses valid syntax.'
       }
     ];
 
@@ -268,7 +261,6 @@
     let streak = 0;
     let totalPoints = 0;
 
-    // Wait for page to fully load before running script
     window.addEventListener("DOMContentLoaded", () => {
       startQuiz();
     });
@@ -396,7 +388,11 @@
       const input = document.getElementById("blank-input");
       if (!input || input.disabled) return;
 
-      const isCorrect = input.value.trim().toLowerCase() === correctAnswer.trim().toLowerCase();
+      const userVal = input.value.trim().toLowerCase();
+
+      const isCorrect = Array.isArray(correctAnswer)
+        ? correctAnswer.some(ans => ans.toLowerCase() === userVal)
+        : userVal === correctAnswer.trim().toLowerCase();
 
       input.disabled = true;
       input.style.border = isCorrect ? "2px solid #2ed573" : "2px solid #ff4757";
@@ -416,9 +412,9 @@
       document.getElementById("final-accuracy").textContent = `Accuracy: ${accuracy}%`;
       
       const feedback = document.getElementById("feedback-message");
-      if (accuracy === 100) feedback.textContent = "🌟 Perfect Score! You're a master!";
-      else if (accuracy >= 70) feedback.textContent = "👍 Great Job! Almost perfect!";
-      else feedback.textContent = "💪 Keep Practicing! You'll get it next time.";
+      if (accuracy === 100) feedback.textContent = " Perfect Score! You're a master!";
+      else if (accuracy >= 70) feedback.textContent = " Great Job! Almost perfect!";
+      else feedback.textContent = " Keep Practicing! You'll get it next time.";
 
       document.getElementById("result-box").classList.remove("hide");
     }
