@@ -1,104 +1,156 @@
-
+* {
+    box-sizing: border-box;
+}
+html, body {
+    height: 100%;
+    margin: 0;
+}
 body {
     background-color: #8768ad;
-    background-image: url("Bracks.png"); 
-    background-repeat: no-repeat; 
-    background-size: 100% auto; 
-    padding-top: 320px; 
-    margin: 0;
+    background-image: url("Bracks.png");
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-attachment: fixed;
     font-family: 'Edu VIC WA NT Hand', cursive;
     color: white;
-    padding-top: 70px; 
-        padding-bottom: 70px;
-        background-size: cover; 
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
 }
-
 header {
     background-color: #99689D;
-    padding: 10px 0;
-    position: fixed;
-    top: 0; 
-    left: 0;
+    padding: 10px 20px;
+    position: sticky;
+    top: 0;
     width: 100%;
     display: flex;
     justify-content: space-around;
     align-items: center;
     color: white;
-    z-index: 100; 
+    z-index: 100;
+    text-align: center;
 }
-
+header h1 {
+    font-size: 1.5rem;
+    margin: 10px 0;
+}
 .Subjectsf {
     padding: 10px 0;
-    position: absolute;
-    top: 120px; 
-    left: 0;
+    position: sticky;
+    top: 70px;
     width: 100%;
     display: flex;
+    flex-wrap: wrap;
     justify-content: space-around;
     align-items: center;
     z-index: 90;
+    gap: 8px;
+    background-color: #8768ad;
 }
-
 .Subjectst {
     padding: 10px 0;
-    position: absolute;
-    top: 240px; 
-    left: 0;
+    position: sticky;
+    top: 128px;
     width: 100%;
     display: flex;
+    flex-wrap: wrap;
     justify-content: space-around;
     align-items: center;
     z-index: 90;
+    gap: 8px;
+    background-color: #8768ad;
 }
-
 .Subjectsf a, .Subjectst a {
     color: white;
     text-decoration: none;
-    padding: 14px 20px;
+    padding: 10px 16px;
     transition: background-color 0.3s;
-    border: 2px solid transparent; 
+    border: 2px solid transparent;
+    font-size: 1rem;
 }
-
 .Subjectsf a:hover, .Subjectst a:hover {
     background-color: #5e4f73;
     border-radius: 4px;
 }
-
-.Subjectsf a:nth-child(1) { background-color: #ff6b6b; } 
-.Subjectsf a:nth-child(2) { background-color: #4ecdc4; } 
-.Subjectsf a:nth-child(3) { background-color: #ffd93d; } 
-.Subjectst a:nth-child(1) { background-color: #3fda7a; } 
+.Subjectsf a:nth-child(1) { background-color: #ff6b6b; }
+.Subjectsf a:nth-child(2) { background-color: #4ecdc4; }
+.Subjectsf a:nth-child(3) { background-color: #ffd93d; }
+.Subjectst a:nth-child(1) { background-color: #3fda7a; }
 .Subjectst a:nth-child(2) { background-color: #f12345; }
 .Subjectst a:nth-child(3) { background-color: blue; font-size: 20px; }
-
+.content {
+    flex: 1;
+}
 .Intro {
     margin-top: 50px;
     color: white;
     font-family: 'Edu VIC WA NT Hand', cursive;
-    bottom: 0;
-    
-}
-
-.Footer-Intro {
-background-color: #8768ad;
 }
 footer {
-    background-color: #990fe4;
-    position: fixed;
-    bottom: 0; 
-    left: 0;
+    background-color: #7a0fc2;
+    background-image: linear-gradient(180deg, #990fe4, #6d0ba6);
     width: 100%;
-    z-index: 100;
-    padding: 10px 0;
+    padding: 30px 20px 20px;
+    margin-top: auto;
+    text-align: center;
+    box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.25);
 }
-
-footer a:nth-child(1) {
-    width: 40px;      
-    height: auto;      
+.Footer-Intro {
+    max-width: 700px;
+    margin: 0 auto 20px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.25);
 }
-
+.Footer-Intro h2 {
+    margin: 0 0 10px;
+    font-size: 1.4rem;
+}
+.Footer-Intro p {
+    margin: 8px 0;
+    line-height: 1.5;
+    font-size: 1rem;
+    opacity: 0.95;
+}
+.social-media {
+    padding-top: 10px;
+}
+.social-media span {
+    display: block;
+    margin-bottom: 12px;
+    font-size: 1.1rem;
+}
 .social-icon {
     width: 60px;
     height: auto;
+    margin: 0 10px;
+    transition: transform 0.2s;
+}
+.social-icon:hover {
+    transform: scale(1.1);
 }
 
+@media (max-width: 600px) {
+    header h1 {
+        font-size: 1.1rem;
+    }
+    .Subjectsf {
+        top: 60px;
+    }
+    .Subjectst {
+        top: 118px;
+    }
+    .Subjectsf a, .Subjectst a {
+        padding: 8px 12px;
+        font-size: 0.9rem;
+    }
+    .Footer-Intro h2 {
+        font-size: 1.2rem;
+    }
+    .Footer-Intro p {
+        font-size: 0.9rem;
+    }
+    .social-icon {
+        width: 45px;
+        margin: 0 6px;
+    }
+}
