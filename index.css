@@ -150,10 +150,23 @@ footer {
         font-size: 1.2rem;
     }
     .Footer-Intro p {
-        font-size: 0.9rem;
+        font-size: 0.9rem;  
     }
     .social-icon {
         width: 45px;
         margin: 0 6px;
     }
+}
+.live {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background-color: #ff4c4c;
+    color: white;
+    padding: 10px 15px;
+    border-radius: 50%;
+    font-size: 1rem;
+    text-align: center;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    transition: transform 0.2s, background-color 0.3s;
 }
