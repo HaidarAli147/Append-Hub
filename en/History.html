@@ -13,13 +13,70 @@
     width: 50px;      
     height: auto;
 }
+
+/* Container positioning */
+.lang-dropdown {
+  position: relative;
+  display: inline-block;
+}
+ 
+/* Style your main language button */
+.lang-btn {
+  background-color: #333;
+  color: #fff;
+  padding: 10px 15px;
+  font-size: 14px;
+  cursor: pointer;
+  border-radius: 4px;
+  border: none;
+}
+ 
+/* Hide the menu file list by default */
+.lang-menu {
+  display: none;
+  position: absolute;
+  right: 0; /* Aligns menu to the right edge of the button (use left: 0 for RTL pages) */
+  background-color: #ffffff;
+  min-width: 150px;
+  box-shadow: 0px 8px 16px rgba(0,0,0,0.15);
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  z-index: 100;
+}
+ 
+/* Style the file links inside the menu */
+.lang-menu a {
+  color: #333;
+  padding: 12px 16px;
+  text-decoration: none;
+  display: block;
+  font-family: sans-serif;
+  font-size: 14px;
+}
+ 
+/* Visual feedback when hovering over a language option */
+.lang-menu a:hover {
+  background-color: #f1f1f1;
+}
+ 
+/* Pure CSS Magic: Show the menu when hovering over the container */
+.lang-dropdown:hover .lang-menu {
+  display: block;
+}
+
     </style>
 </head>
 <header>
     <nav class="Home">
 <a href="/index.html" style="font-size: 40px; text-decoration: none;">&#8617;</a>
     </nav>
-
+<div class="lang-dropdown">
+  <button class="lang-btn">🌐</button>
+  <div class="lang-menu">
+    <a href="/en/History.html">English</a>
+    <a href="/ar/History.html">العربية</a>
+  </div>
+</div>
     <h>Nothing here, Stay tunned for what's coming...</h>
 </header>
 <body>

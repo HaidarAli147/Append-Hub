@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>براك ستدي - اختبار</title>
+
+  <style>
+    * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+    }
+
+    body {
+        background-color: #8768ad;
+        font-family: Arial, sans-serif;
+        color: white;
+        padding: 20px 10px;
+    }
+
+    header {
+        background-color: #99689D;
+        padding: 15px 0;
+        text-align: center;
+        margin-bottom: 25px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+    }
+
+    .quiz-card {
+        background: #2b1b3d;
+        border: 2px solid rgba(255, 255, 255, 0.2);
+        border-radius: 16px;
+        padding: 25px;
+        max-width: 600px;
+        margin: 0 auto;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    }
+
+    .stats-row {
+        display: flex;
+        justify-content: space-between;
+        font-weight: bold;
+        font-size: 16px;
+        margin-bottom: 12px;
+    }
+
+    #streak-count { color: #ff9f43; }
+    #score-display { color: #ffd93d; }
+
+    .progress-bar-container {
+        width: 100%;
+        height: 8px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 10px;
+        overflow: hidden;
+        margin-bottom: 15px;
+    }
+
+    #progress-bar {
+        height: 100%;
+        width: 0%;
+        background: #3fda7a;
+        transition: width 0.3s ease;
+    }
+
+    #question-counter {
+        font-size: 13px;
+        color: #a29bfe;
+        text-transform: uppercase;
+    }
+
+    #question-title {
+        font-size: 22px;
+        margin: 10px 0 20px 0;
+        line-height: 1.4;
+    }
+
+    .btn-grid {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .quiz-btn {
+        background: #5e4f73;
+        color: white;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-radius: 10px;
+        padding: 14px 20px;
+        font-size: 16px;
+        cursor: pointer;
+        text-align: right;
+    }
+
+    .quiz-btn:hover:not(:disabled) {
+        background: #8768ad;
+        border-color: #ffffff;
+    }
+
+    .quiz-btn.correct {
+        background: #2ed573 !important;
+        color: #000 !important;
+        font-weight: bold;
+    }
+
+    .quiz-btn.wrong {
+        background: #ff4757 !important;
+        color: #fff !important;
+    }
+
+    .quiz-input {
+        width: 100%;
+        padding: 14px;
+        font-size: 18px;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-radius: 10px;
+        background: #3d2d54;
+        color: white;
+        outline: none;
+    }
+
+    .explanation-card {
+        margin-top: 20px;
+        padding: 15px;
+        background: rgba(255, 255, 255, 0.1);
+        border-right: 4px solid #ffd93d;
+        border-radius: 6px;
+    }
+
+    .explanation-card p {
+        margin-top: 5px;
+        font-size: 14px;
+        line-height: 1.4;
+    }
+
+    .next-action-btn {
+        width: 100%;
+        margin-top: 20px;
+        background-color: #ffd93d !important;
+        color: #333 !important;
+        font-weight: bold !important;
+        text-align: center !important;
+        font-size: 18px !important;
+        border: none !important;
+    }
+
+    .result-screen {
+        text-align: center;
+        padding: 20px 0;
+    }
+
+    .final-stats {
+        background: rgba(0, 0, 0, 0.2);
+        padding: 15px;
+        border-radius: 10px;
+        margin: 20px 0;
+        font-size: 18px;
+    }
+
+    #restart-btn {
+        background: #3fda7a;
+        color: #000;
+        border: none;
+        padding: 14px 30px;
+        font-size: 18px;
+        font-weight: bold;
+        border-radius: 30px;
+        cursor: pointer;
+    }
+
+    .hide { display: none !important; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>براك ستدي</h1>
+  </header>
+<nav class="Home">
+<a href="/ar/Coding.html" style="font-size: 40px; text-decoration: none;">&#8617;</a>
+    </nav>
+  <main>
+    <div class="quiz-card">
+      
+      <div id="quiz-header">
+        <div class="stats-row">
+          <span id="streak-count">🔥 0 سلسلة</span>
+          <span id="score-display">✨ 0 نقطة</span>
+        </div>
+        
+        <div class="progress-bar-container">
+          <div id="progress-bar"></div>
+        </div>
+
+        <span id="question-counter">السؤال 1 من 4</span>
+        <h2 id="question-title">جاري تحميل السؤال...</h2>
+      </div>
+
+      <div id="answer-buttons" class="btn-grid"></div>
+
+      <div id="explanation-box" class="explanation-card hide">
+        <strong id="explanation-title">الشرح:</strong>
+        <p id="explanation-text"></p>
+      </div>
+
+      <button id="next-btn" class="quiz-btn next-action-btn hide">السؤال التالي ⟵</button>
+
+      <div id="result-box" class="result-screen hide">
+        <div style="font-size: 50px; margin-bottom: 10px;">🏆</div>
+        <h2>اكتمل الاختبار!</h2>
+        <div class="final-stats">
+          <p id="final-score">النتيجة: 0 نقطة</p>
+          <p id="final-accuracy">الدقة: 0%</p>
+        </div>
+        <p id="feedback-message" style="color: #ffd93d; margin-bottom: 20px;"></p>
+        <button id="restart-btn" onclick="startQuiz()">العب مرة أخرى</button>
+      </div>
+
+    </div>
+  </main>
+
+  <script>
+    const questions = [
+      {
+        type: "multiple-choice",
+        question: "ماذا تفعل دالة 'print' في بايثون؟",
+        answers: [
+          { text: "A. تقرأ مدخلات من المستخدم", correct: false },
+          { text: "B. تعرض المخرجات على الشاشة", correct: true },
+          { text: "C. تحفظ البيانات في ملف", correct: false },
+          { text: "D. تُجري عمليات حسابية", correct: false }
+        ],
+        explanation: "B هي الصحيحة، لأن أمر print يعرض مخرجات على الشاشة"
+      },
+      {
+        type: "fill-in-blank",
+        question: "أكمل الفراغ: تُستخدم دالة _______ لمطالبة المستخدم بإدخال بيانات وقراءة إجابته",
+        correctAnswer: "input",
+        explanation: "يُستخدم أمر input لمطالبة المستخدم بالإدخال"
+      },
+      {
+        type: "fill-in-blank",
+        question: "إجابة قصيرة: اكتب أمر print يحتوي على الحرف x بداخله: ",
+        correctAnswer: ["print('x')", 'print("x")'],
+        explanation: "print('x') هي الإجابة الصحيحة"
+      },
+      {
+        type: "multiple-choice",
+        question: "اختر الأوامر الصحيحة:",
+        answers: [
+          { text: 'input("what is your name")', correct: true },
+          { text: 'print("Hello world")', correct: false },
+          { text: '("what is your name)input', correct: false },
+          { text: 'Hello world("print")', correct: false }
+        ],
+        explanation: 'input("what is your name") هي الصحيحة لأنها تستخدم صيغة برمجية سليمة.'
+      }
+    ];
+
+    let currentQuestionIndex = 0;
+    let score = 0;
+    let streak = 0;
+    let totalPoints = 0;
+
+    window.addEventListener("DOMContentLoaded", () => {
+      startQuiz();
+    });
+
+    function startQuiz() {
+      currentQuestionIndex = 0;
+      score = 0;
+      streak = 0;
+      totalPoints = 0;
+      
+      document.getElementById("result-box").classList.add("hide");
+      document.getElementById("quiz-header").classList.remove("hide");
+      document.getElementById("answer-buttons").classList.remove("hide");
+      
+      updateDashboard();
+      showQuestion();
+    }
+
+    function updateDashboard() {
+      document.getElementById("streak-count").textContent = `🔥 ${streak} سلسلة`;
+      document.getElementById("score-display").textContent = `✨ ${totalPoints} نقطة`;
+      
+      const progressPercent = (currentQuestionIndex / questions.length) * 100;
+      document.getElementById("progress-bar").style.width = `${progressPercent}%`;
+    }
+
+    function showQuestion() {
+      resetState();
+      const q = questions[currentQuestionIndex];
+      document.getElementById("question-title").textContent = q.question;
+      document.getElementById("question-counter").textContent = `السؤال ${currentQuestionIndex + 1} من ${questions.length}`;
+
+      const answerButtons = document.getElementById("answer-buttons");
+
+      if (q.type === "multiple-choice") {
+        q.answers.forEach(ans => {
+          const btn = document.createElement("button");
+          btn.textContent = ans.text;
+          btn.classList.add("quiz-btn");
+          if (ans.correct) btn.dataset.correct = "true";
+          btn.onclick = selectMultipleChoice;
+          answerButtons.appendChild(btn);
+        });
+      } else if (q.type === "fill-in-blank") {
+        const input = document.createElement("input");
+        input.type = "text";
+        input.id = "blank-input";
+        input.placeholder = "اكتب إجابتك...";
+        input.classList.add("quiz-input");
+
+        const submitBtn = document.createElement("button");
+        submitBtn.textContent = "إرسال الإجابة";
+        submitBtn.classList.add("quiz-btn");
+        submitBtn.style.marginTop = "10px";
+        submitBtn.style.textAlign = "center";
+        submitBtn.onclick = () => checkBlankAnswer(q.correctAnswer);
+
+        input.onkeypress = (e) => {
+          if (e.key === "Enter") checkBlankAnswer(q.correctAnswer);
+        };
+
+        answerButtons.appendChild(input);
+        answerButtons.appendChild(submitBtn);
+        input.focus();
+      }
+    }
+
+    function resetState() {
+      document.getElementById("explanation-box").classList.add("hide");
+      document.getElementById("next-btn").classList.add("hide");
+
+      const answerButtons = document.getElementById("answer-buttons");
+      while (answerButtons.firstChild) {
+        answerButtons.removeChild(answerButtons.firstChild);
+      }
+    }
+
+    function handleAnswerResult(isCorrect, explanation) {
+      if (isCorrect) {
+        score++;
+        streak++;
+        const multiplier = streak > 1 ? streak : 1;
+        totalPoints += 100 * multiplier;
+      } else {
+        streak = 0;
+      }
+
+      updateDashboard();
+
+      if (explanation) {
+        document.getElementById("explanation-text").textContent = explanation;
+        document.getElementById("explanation-box").classList.remove("hide");
+      }
+
+      const nextBtn = document.getElementById("next-btn");
+      nextBtn.textContent = currentQuestionIndex === questions.length - 1 ? "عرض النتائج النهائية 🏆" : "السؤال التالي ⟵";
+      nextBtn.classList.remove("hide");
+    }
+
+    document.getElementById("next-btn").onclick = () => {
+      currentQuestionIndex++;
+      if (currentQuestionIndex < questions.length) {
+        showQuestion();
+      } else {
+        showScore();
+      }
+    };
+
+    function selectMultipleChoice(e) {
+      const selectedBtn = e.target;
+      const isCorrect = selectedBtn.dataset.correct === "true";
+      const answerButtons = document.getElementById("answer-buttons");
+
+      Array.from(answerButtons.children).forEach(btn => {
+        if (btn.dataset.correct === "true") btn.classList.add("correct");
+        btn.disabled = true;
+      });
+
+      if (!isCorrect) selectedBtn.classList.add("wrong");
+
+      handleAnswerResult(isCorrect, questions[currentQuestionIndex].explanation);
+    }
+
+    function checkBlankAnswer(correctAnswer) {
+      const input = document.getElementById("blank-input");
+      if (!input || input.disabled) return;
+
+      const userVal = input.value.trim().toLowerCase();
+
+      const isCorrect = Array.isArray(correctAnswer)
+        ? correctAnswer.some(ans => ans.toLowerCase() === userVal)
+        : userVal === correctAnswer.trim().toLowerCase();
+
+      input.disabled = true;
+      input.style.border = isCorrect ? "2px solid #2ed573" : "2px solid #ff4757";
+
+      handleAnswerResult(isCorrect, questions[currentQuestionIndex].explanation);
+    }
+
+    function showScore() {
+      resetState();
+      document.getElementById("progress-bar").style.width = "100%";
+      document.getElementById("quiz-header").classList.add("hide");
+      document.getElementById("answer-buttons").classList.add("hide");
+      
+      const accuracy = Math.round((score / questions.length) * 100);
+      
+      document.getElementById("final-score").textContent = `النتيجة: ${totalPoints} نقطة (${score}/${questions.length})`;
+      document.getElementById("final-accuracy").textContent = `الدقة: ${accuracy}%`;
+      
+      const feedback = document.getElementById("feedback-message");
+      if (accuracy === 100) feedback.textContent = " نتيجة مثالية! أنت محترف!";
+      else if (accuracy >= 70) feedback.textContent = " عمل رائع! كدت تكون مثاليًا!";
+      else feedback.textContent = " واصل التدريب! ستنجح في المرة القادمة.";
+
+      document.getElementById("result-box").classList.remove("hide");
+    }
+  </script>
+</body>
+</html>
