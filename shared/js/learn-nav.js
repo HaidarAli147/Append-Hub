@@ -14,4 +14,37 @@
     nav.append(a);
   }
   document.body.prepend(nav);
+
+  // One social footer for every AppendHub product page using this shared script.
+  // Do not inject into independent apps or create a second footer.
+  const footer = document.querySelector('footer.footer');
+  if (footer && !footer.querySelector('.appendhub-social-links')) {
+    const section = document.createElement('div');
+    section.className = 'appendhub-social-links';
+    section.setAttribute('aria-label', ar ? 'حسابات أبند هَب الرسمية' : 'AppendHub social channels');
+
+    const heading = document.createElement('span');
+    heading.className = 'appendhub-social-heading';
+    heading.textContent = ar ? 'تابعنا' : 'Follow AppendHub';
+    section.append(heading);
+
+    const channels = [
+      ['Instagram', '@append_hub', 'https://www.instagram.com/append_hub/'],
+      ['Instagram', '@append_hub_arabic', 'https://www.instagram.com/append_hub_arabic/'],
+      ['YouTube', '@append_hub', 'https://www.youtube.com/@append_hub'],
+      ['YouTube', '@append_hub_arabic', 'https://www.youtube.com/@append_hub_arabic']
+    ];
+    for (const [platform, handle, url] of channels) {
+      const link = document.createElement('a');
+      link.href = url;
+      link.target = '_blank';
+      link.rel = 'noopener noreferrer';
+      link.textContent = platform + ' · ' + handle;
+      link.setAttribute('aria-label', platform + ' ' + handle + (ar ? ' (يفتح في تبويب جديد)' : ' (opens in a new tab)'));
+      section.append(link);
+    }
+    const copyright = footer.querySelector('small');
+    if (copyright) copyright.before(section);
+    else footer.append(section);
+  }
 })();
