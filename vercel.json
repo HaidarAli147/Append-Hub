@@ -1,11 +1,6 @@
 {
   "redirects": [
     {
-      "source": "/Brackstudy_Archive/:path*",
-      "destination": "/AppendHub_Archive/:path*",
-      "permanent": true
-    },
-    {
       "source": "/en",
       "destination": "/learn/",
       "permanent": true
@@ -22,7 +17,7 @@
     },
     {
       "source": "/ar/index.html",
-      "destination": "/learn/ar/",
+      "destination": "/ar/",
       "permanent": true
     },
     {
