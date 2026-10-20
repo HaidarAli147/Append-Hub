@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+set -euo pipefail
+# Keep BRACK in the desktop identifier for compatibility with existing tools.
+export XDG_CURRENT_DESKTOP=APPENDHUB:BRACK
+export XDG_SESSION_DESKTOP=brack-terminal
+export PATH="$HOME/.local/bin:$PATH"
+openbox --sm-disable &
+wm_pid=$!
+cleanup() { kill "$wm_pid" ${bar_pid:-} 2>/dev/null || true; }
+trap cleanup EXIT
+sleep 1
+"$HOME/.local/bin/brack-minibar" &
+bar_pid=$!
+kitty --title 'AppendHub Desktop' --override hide_window_decorations=yes \
+  --config "$HOME/.config/brack-terminal/kitty.conf" \
+  --start-as maximized -- bash --rcfile "$HOME/.config/brack-terminal/bashrc" -i &
+kitty_pid=$!
+for n in $(seq 1 40); do
+  if wmctrl -r 'AppendHub Desktop' -b add,below,skip_taskbar,skip_pager 2>/dev/null; then
+    break
+  fi
+  sleep 0.25
+done
+wait "$kitty_pid" || true

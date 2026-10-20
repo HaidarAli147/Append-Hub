@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HTML Page - AppendHub Learn</title>
+  <link rel="icon" type="image/png" href="/shared/assets/logos/learn-compact.png">
+<link rel="stylesheet" href="/shared/css/company.css">
+  <meta name="google-adsense-account" content="ca-pub-4397239596468716">
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4397239596468716" crossorigin="anonymous"></script>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bitcount+Grid+Double:wght@100..900&family=Story+Script&family=Coming+Soon&display=swap" rel="stylesheet">
+
+  <link rel="canonical" href="https://appendhub.com/learn/og-mode/en%20%20/html.html">
+  <meta property="og:site_name" content="AppendHub Learn OG Mode">
+  <meta property="og:title" content="HTML Page - AppendHub Learn">
+  <meta property="og:url" content="https://appendhub.com/learn/og-mode/en%20%20/html.html">
+  <meta name="twitter:card" content="summary">
+
+  <meta name="description" content="HTML Page - AppendHub Learn | AppendHub Learn, a bilingual learning platform.">
+  <meta property="og:description" content="HTML Page - AppendHub Learn | AppendHub Learn, a bilingual learning platform.">
+  <meta property="og:image" content="https://appendhub.com/shared/assets/logos/learn-full.png">
+  <meta property="og:image:alt" content="AppendHub">
+  <meta name="twitter:title" content="HTML Page - AppendHub Learn">
+  <meta name="twitter:description" content="HTML Page - AppendHub Learn | AppendHub Learn, a bilingual learning platform.">
+  <meta name="twitter:image" content="https://appendhub.com/shared/assets/logos/learn-full.png">
+<link rel="stylesheet" href="/shared/css/learn-nav.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+
+
+<body>
+<h1>Welcome to the HTML Section!</h1>
+<h2><svg class="ui-icon" aria-hidden="true"><use href="/assets/icons.svg#monitor"></use></svg> Understanding the Basics of HTML</h2>
+
+  <p><strong>HTML</strong>, which stands for <strong>HyperText Markup Language</strong>, is the fundamental building block of the web. It's not a programming language, but rather a <strong>markup language</strong> used to <strong>structure</strong> the content you see on the internet. Think of HTML as the <strong>skeleton</strong> of a webpage; it defines all the different parts—like the heading, paragraphs, images, and links—so your web browser knows how to display them. Every webpage you've ever visited uses HTML.</p>
+
+  <h3>The Core Concept: Elements and Tags</h3>
+
+  <p>At the heart of HTML are <strong>elements</strong>. An HTML element is everything from the start tag to the end tag, including the content in between.</p>
+
+  <p>Elements are created using <strong>tags</strong>, which are keywords enclosed in angle brackets, like &lt;p&gt;. Most elements have a <strong>start tag</strong> (or <strong>opening tag</strong>) and an <strong>end tag</strong> (or <strong>closing tag</strong>). The closing tag includes a forward slash: &lt;/p&gt;.</p>
+
+  <blockquote>
+    <strong>Example:</strong> &lt;p&gt;This is a paragraph.&lt;/p&gt;
+  </blockquote>
+
+  <p>Here, &lt;p&gt; is the opening tag, &lt;/p&gt; is the closing tag, and "This is a paragraph" is the content. Together, they form the <strong>paragraph element</strong>.</p>
+
+  <p>Some elements are <strong>self-closing</strong> (or <strong>void elements</strong>) and don't require a closing tag because they don't wrap around content. A common example is the image element: &lt;img src="image.jpg" alt="Description"&gt;.</p>
+
+  <h3>Structure of an HTML Document</h3>
+
+  <p>Every well-formed HTML document follows a basic structure. It always begins with a <strong>document type declaration</strong> and includes four essential elements:</p>
+
+  <ol>
+    <li><strong><code>&lt;!DOCTYPE html&gt;</code></strong>: This declaration defines that the document is an HTML5 document. It must be the very first thing in your code.</li>
+    <li><strong><code>&lt;html&gt;</code></strong>: This is the <strong>root element</strong> and wraps all the other content on the entire page. It often includes an attribute to declare the language of the document, such as <code>&lt;html lang="en"&gt;</code>.</li>
+    <li><strong><code>&lt;head&gt;</code></strong>: This section contains <strong>metadata</strong> about the HTML document. This is information <em>not</em> displayed directly on the webpage but is crucial for the browser and search engines. It includes things like the page title, character set, and links to external files (like CSS stylesheets).
+      <ul>
+        <li><strong><code>&lt;title&gt;</code></strong>: Sets the title that appears in the browser tab.</li>
+      </ul>
+    </li>
+    <li><strong><code>&lt;body&gt;</code></strong>: This is where all the <strong>visible content</strong> of your page goes. Everything a user sees—text, images, links, videos—is nested inside the <code>&lt;body&gt;</code> element.</li>
+  </ol>
+
+  
+
+  <h3>Key HTML Elements You'll Use</h3>
+
+  <p>To create compelling content, you'll need to use various HTML elements:</p>
+
+  <ul>
+    <li><strong>Headings:</strong> Used to structure your text, they range from <code>&lt;h1&gt;</code> (most important/largest) down to <code>&lt;h6&gt;</code> (least important/smallest).
+      <pre><code>&lt;h1&gt;Welcome to my site&lt;/h1&gt;</code></pre>
+    </li>
+    <li><strong>Paragraphs:</strong> Used for blocks of text.
+      <pre><code>&lt;p&gt;Here is some important information.&lt;/p&gt;</code></pre>
+    </li>
+    <li><strong>Links (Anchors):</strong> Used to connect to other pages or resources. They use the <strong><code>href</code> attribute</strong> to specify the destination URL.
+      <pre><code>&lt;a href="https://www.example.com"&gt;Visit Example&lt;/a&gt;</code></pre>
+    </li>
+    <li><strong>Images:</strong> Used to embed pictures. They use the <strong><code>src</code> attribute</strong> for the image file path and the <strong><code>alt</code> attribute</strong> for a text description (important for accessibility and SEO).
+      <pre><code>&lt;img src="photo.jpg" alt="A photo of a landscape"&gt;</code></pre>
+    </li>
+    <li><strong>Lists:</strong> Used to organize items, either unordered (bullet points, <code>&lt;ul&gt;</code> and <code>&lt;li&gt;</code>) or ordered (numbered, <code>&lt;ol&gt;</code> and <code>&lt;li&gt;</code>).</li>
+  </ul>
+
+  <h3>What's Next?</h3>
+
+  <p>While HTML provides the structure, it doesn't handle the design. That's where <strong>CSS (Cascading Style Sheets)</strong> comes in—to make your HTML look beautiful. And for interactivity and dynamic behavior, you'll need **JavaScript**. Mastering HTML is the essential first step on your web development journey!</p>
+<script src="/shared/js/learn-nav.js" defer></script>
+</body>
+</html>
+
+
+
+
+
+
+
+

@@ -1,0 +1,196 @@
+/* AppendHub Present styles. Global page and header styling comes from /learn/index.css. */
+.present-container {
+    width: min(1100px, 95%);
+    margin: 30px auto;
+    flex: 1;
+}
+
+.present-container h2 {
+    text-align: center;
+}
+
+#message {
+    text-align: center;
+}
+
+#message[data-state="error"] {
+    color: #9b2634;
+}
+
+.present-viewer {
+    position: relative;
+    width: 100%;
+    aspect-ratio: var(--slide-ratio, 16 / 9);
+    background: #171326;
+    border-radius: 14px;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 0;
+    max-height: min(68vh, 68dvh);
+    max-width: 100%;
+}
+
+.final-quiz-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    padding: 10px 18px;
+    border: 2px solid #fff;
+    border-radius: 10px;
+    background: #6738c7;
+    color: #fff;
+    font-weight: 800;
+    text-decoration: none;
+    box-shadow: 0 2px 8px rgb(44 23 81 / 20%);
+}
+
+.final-quiz-button:hover { background: #5125ad; }
+.final-quiz-button:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
+
+.present-viewer:focus-visible {
+    outline: 3px solid #6738c7;
+    outline-offset: 3px;
+}
+
+#slide-canvas {
+    display: block;
+    max-width: 100%;
+    max-height: 100%;
+    height: auto;
+    object-fit: contain;
+}
+
+.present-controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+    flex-wrap: wrap;
+    margin-top: 20px;
+}
+
+.present-controls button {
+    background: #6738c7;
+    color: white;
+    padding: 12px 18px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    min-height: 44px;
+    touch-action: manipulation;
+}
+
+.present-controls button:hover:not(:disabled) {
+    background: #5125ad;
+}
+
+.present-controls button:focus-visible,
+#back-button:focus-visible,
+#quiz-button:focus-visible,
+#language-button:focus-visible {
+    outline: 3px solid #6738c7;
+    outline-offset: 3px;
+}
+
+.present-controls button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+#slide-counter {
+    font-size: 18px;
+    font-weight: bold;
+    min-width: 76px;
+    text-align: center;
+    direction: ltr;
+    unicode-bidi: isolate;
+}
+
+.present-viewer:fullscreen {
+    border-radius: 0;
+    background: black;
+    padding: 15px;
+    width: 100vw;
+    height: 100vh;
+    height: 100dvh;
+    max-height: none;
+    aspect-ratio: auto;
+}
+
+.present-viewer:fullscreen canvas {
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
+    height: auto;
+}
+
+/* Lesson template styles; these keep duplicated lesson entry pages usable. */
+.lesson-card { max-width: 780px; padding: clamp(24px, 6vw, 56px); border-radius: 18px; background: #fff; box-shadow: 0 18px 55px rgb(44 23 81 / 12%); text-align: center; }
+.lesson-card h1 { margin: 8px 0; color: #28154d; font-size: clamp(1.7rem, 5vw, 2.5rem); }
+.lesson-card > p:not(.present-eyebrow) { color: #655a73; }
+.lesson-actions { display: flex; justify-content: center; flex-wrap: wrap; gap: 12px; margin: 28px 0; }
+.lesson-action { display: inline-block; padding: 13px 20px; border: 2px solid #6738c7; border-radius: 10px; color: #5125ad; font-weight: 700; text-decoration: none; }
+.lesson-action.primary { background: #6738c7; color: white; }
+.lesson-action:focus-visible { outline: 3px solid #d8c9f2; outline-offset: 3px; }
+.lesson-note { font-size: .9rem; }
+.present-eyebrow { color: #7658a9; font-size: .75rem; font-weight: 800; letter-spacing: .18em; }
+
+[hidden] {
+    display: none !important;
+}
+
+@media (max-width: 600px) {
+    .present-page > header {
+        flex-wrap: wrap;
+        gap: 8px;
+        padding: 8px 12px;
+    }
+
+    .present-page > header h1 {
+        flex: 1 0 100%;
+        margin: 4px 0;
+        font-size: 1.1rem;
+    }
+
+    .present-page > header a {
+        display: inline-flex;
+        min-height: 40px;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .present-container {
+        width: 95%;
+        margin: 20px auto;
+    }
+
+    .present-viewer {
+        max-height: min(62vh, 62dvh);
+        border-radius: 8px;
+    }
+
+    .present-controls {
+        gap: 8px;
+    }
+
+    .present-controls button {
+        padding: 10px 12px;
+    }
+}
+
+@media (max-height: 500px) and (orientation: landscape) {
+    .present-container { margin: 8px auto; }
+    .present-container h2 { margin: 4px 0; }
+    #message { margin: 4px 0; }
+    .present-viewer { max-height: 58dvh; }
+    .present-controls { margin-top: 8px; gap: 8px; }
+}
+
+html[lang="ar"], html[lang="ar"] body,
+html[lang="ar"] button, html[lang="ar"] a,
+html[lang="ar"] input, html[lang="ar"] select, html[lang="ar"] textarea {
+    font-family: Tahoma, "Noto Naskh Arabic", "Noto Sans Arabic", Arial, sans-serif;
+}

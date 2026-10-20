@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AppendHub Learn - Live</title>
+  <link rel="icon" type="image/png" href="/shared/assets/logos/learn-compact.png">
+<link rel="stylesheet" href="/shared/css/company.css">
+  <meta name="google-adsense-account" content="ca-pub-4397239596468716">
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4397239596468716" crossorigin="anonymous"></script>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bitcount+Grid+Double:wght@100..900&family=Story+Script&family=Coming+Soon&display=swap" rel="stylesheet">
+
+    
+
+
+    <style>
+        /* Only AppendHub Live-specific CSS */
+
+        .live-container {
+            width: min(1200px, 95%);
+            margin: 30px auto;
+            flex: 1;
+        }
+
+        .live-layout {
+            display: grid;
+            grid-template-columns: minmax(0, 2fr) minmax(250px, 1fr);
+            gap: 20px;
+            align-items: start;
+        }
+
+        .live-panel {
+            background: #ffffff;
+            color: #29213d;
+            border-radius: 14px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.12);
+        }
+
+        .live-panel-content {
+            padding: 20px;
+        }
+
+        .live-player-wrapper {
+            position: relative;
+            aspect-ratio: 16 / 9;
+            background: #171325;
+        }
+
+        .live-video { width: 100%; height: 100%; object-fit: contain; background: #000; }
+        .live-player-wrapper { overflow: hidden; }
+        .live-player-message { position: absolute; inset: 0; z-index: 2; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding: 20px; color: white; background: rgb(23 19 37 / 94%); text-align: center; }
+        .live-player-message[hidden] { display: none; }
+        .live-audio-button { padding: 10px 16px; margin: 8px; border: 0; border-radius: 8px; background: #6738c7; color: white; cursor: pointer; min-height: 44px; }
+        .live-player-wrapper audio { display: none; }
+
+        .live-offline-screen {
+            position: absolute;
+            inset: 0;
+            z-index: 3;
+            background: #171325;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .live-offline-screen[hidden] {
+            display: none;
+        }
+
+        .live-status {
+            display: inline-block;
+            padding: 7px 12px;
+            border-radius: 8px;
+            background: #ebe6f5;
+            color: #5b4484;
+            font-weight: bold;
+            font-size: 13px;
+        }
+
+        .live-status.active {
+            background: #d91535;
+            color: white;
+        }
+
+        .live-retry-button {
+            padding: 10px 16px;
+            border: none;
+            border-radius: 8px;
+            background: #6738c7;
+            color: white;
+            cursor: pointer;
+            font-weight: bold;
+            min-height: 44px;
+            touch-action: manipulation;
+        }
+
+        .live-retry-button:hover {
+            background: #4d249f;
+        }
+
+        .live-slide-preview {
+            padding: 30px 15px;
+            border-radius: 9px;
+            background: #f1ebfc;
+            text-align: center;
+        }
+
+        .live-sidebar {
+            display: grid;
+            gap: 20px;
+        }
+
+        @media (max-width: 750px) {
+            .live-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+
+
+    
+
+  <link rel="canonical" href="https://appendhub.com/learn/og-mode/en%20%20/live.html">
+  <meta property="og:site_name" content="AppendHub Live">
+  <meta property="og:title" content="AppendHub Learn - Live">
+  <meta property="og:url" content="https://appendhub.com/learn/og-mode/en%20%20/live.html">
+  <meta name="twitter:card" content="summary">
+
+  <meta name="description" content="AppendHub Learn - Live | AppendHub Learn, a bilingual learning platform.">
+  <meta property="og:description" content="AppendHub Learn - Live | AppendHub Learn, a bilingual learning platform.">
+  <meta property="og:image" content="https://appendhub.com/shared/assets/logos/learn-full.png">
+  <meta property="og:image:alt" content="AppendHub">
+  <meta name="twitter:title" content="AppendHub Learn - Live">
+  <meta name="twitter:description" content="AppendHub Learn - Live | AppendHub Learn, a bilingual learning platform.">
+  <meta name="twitter:image" content="https://appendhub.com/shared/assets/logos/learn-full.png">
+<link rel="stylesheet" href="/shared/css/learn-nav.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+
+ <body>
+
+   <!-- Navigation -->
+    <nav class="top-sidebar" aria-label="Primary navigation">
+    <a href="index.html" aria-label="Home">Home</a>
+    <a href="subjects.html">Subjects</a>
+    <a href="live.html">AppendHub Live</a>
+  </nav>
+  <div class="og-floating-controls" aria-label="Mode and language">
+    <a class="lang" href="/learn/og-mode/en%20%20/live.html?lang=ar" aria-label="Switch to Arabic">العربية</a>
+    <a class="og-mode-toggle" href="/learn/live.html" aria-label="Switch to Normal Mode"><span>Normal Mode</span><span class="og-mode-track" aria-hidden="true"><i></i></span></a>
+  </div>
+
+  <!-- Language Toggle Button -->
+  <div class="content">
+        <h1>Welcome to the Live Learning Page</h1>
+      <h2>We are live every Friday at 3:00 PM</h2>
+      <p>Join us for interactive coding sessions and Q&A!</p>
+</div>
+  <main class="live-container">
+
+        <h2>Friday Live Classroom</h2>
+        <p>Learn together every Friday!</p>
+
+        <div class="live-layout">
+
+            <!-- Main live player -->
+            <section class="live-panel">
+
+                <div class="live-player-wrapper">
+
+                    <video id="live-player" class="live-video" controls playsinline muted autoplay></video>
+                    <div id="connecting-screen" class="live-player-message" role="status" aria-live="polite" hidden><p>Connecting to AppendHub Live…</p></div>
+
+                    <div id="offline-screen"
+                         class="live-offline-screen">
+                        <h2>AppendHub Live</h2>
+                        <p>The stream is currently offline.</p>
+                        <p>Join us for our next Friday lesson!</p>
+                    </div>
+
+                </div>
+
+                <div class="live-panel-content">
+
+                    <span id="live-status"
+                          class="live-status">
+                        OFFLINE
+                    </span>
+
+                    <h2>Friday Live Lesson</h2>
+
+                    <p>Welcome to our live classroom.</p>
+
+                    <button id="retry-button" class="live-retry-button">Check Stream</button>
+                    <button id="enable-audio-button" class="live-audio-button" type="button" hidden>Enable Audio</button>
+
+                </div>
+            </section>
+
+            <!-- Sidebar -->
+            <aside class="live-sidebar">
+
+                <section class="live-panel">
+                    <div class="live-panel-content">
+                        <h3>Upcoming Lesson</h3>
+                        <p>Every Friday</p>
+                        <p>Topic and time coming soon.</p>
+                    </div>
+                </section>
+
+                <section class="live-panel">
+                    <div class="live-panel-content">
+
+                        <h3>AppendHub Present</h3>
+
+                        <div class="live-slide-preview">
+                            <h3>Presentation</h3>
+                            <p>Slides will appear here.</p>
+                        </div>
+
+                    </div>
+                </section>
+
+            </aside>
+
+        </div>
+    </main>
+
+    <script>
+      if (new URLSearchParams(location.search).get('lang') === 'ar') {
+        document.documentElement.lang = 'ar';
+        document.documentElement.dir = 'rtl';
+        document.title = 'أبند هَب لايف';
+        const translations = [
+          ['.top-sidebar a:nth-child(1)', 'الرئيسية'], ['.top-sidebar a:nth-child(2)', 'المواد'], ['.top-sidebar a:nth-child(3)', 'أبند هَب لايف'],
+          ['.content h1', 'مرحباً بكم في صفحة التعلم المباشر'], ['.content h2', 'نبث كل يوم جمعة الساعة 3:00 مساءً'], ['.content p', 'انضموا إلينا في جلسات البرمجة والأسئلة والأجوبة!'],
+          ['.live-container > h2', 'الفصل المباشر يوم الجمعة'], ['.live-container > p', 'نتعلم معاً كل يوم جمعة!'], ['.live-panel-content h2', 'درس الجمعة المباشر'], ['.live-panel-content > p', 'مرحباً بكم في صفنا المباشر.'],
+          ['.live-sidebar section:first-child h3', 'الدرس القادم'], ['.live-sidebar section:first-child p:nth-of-type(1)', 'كل يوم جمعة'], ['.live-sidebar section:first-child p:nth-of-type(2)', 'سيُعلن عن الموضوع والوقت قريباً.'],
+          ['.live-sidebar section:nth-child(2) h3', 'أبند هَب بريزنت'], ['.live-slide-preview h3', 'العرض التقديمي'], ['.live-slide-preview p', 'ستظهر الشرائح هنا.'],
+          ['#offline-screen p:first-of-type', 'البث غير متصل حالياً.'], ['#offline-screen p:last-of-type', 'انضم إلينا في درس الجمعة القادم!']
+        ];
+        for (const [selector, value] of translations) { const element = document.querySelector(selector); if (element) element.textContent = value; }
+        document.querySelector('.top-sidebar a:nth-child(1)').href = '/learn/og-mode/ar/index.html';
+        document.querySelector('.top-sidebar a:nth-child(2)').href = '/learn/og-mode/ar/Coding.html';
+        document.querySelector('.top-sidebar a:nth-child(3)').href = '/learn/og-mode/en%20%20/live.html?lang=ar';
+        document.querySelector('.lang').href = '/learn/og-mode/en%20%20/live.html';
+        document.querySelector('.lang').textContent = 'English';
+        document.querySelector('.lang').setAttribute('aria-label', 'Switch to English');
+        document.querySelector('.og-mode-toggle').href = '/learn/live.html?lang=ar';
+        document.querySelector('.og-mode-toggle span:first-child').textContent = 'الوضع العادي';
+      }
+    </script>
+    <script src="/learn/live.bundle.js" defer></script>
+<script src="/shared/js/learn-nav.js" defer></script>
+</body>
+</html>

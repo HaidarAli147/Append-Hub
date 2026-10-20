@@ -1,0 +1,35 @@
+# AppendHub Desktop (Public Beta), normal Bash plus a terminal-first app desktop.
+if [ -f "$HOME/.bashrc" ]; then
+  . "$HOME/.bashrc"
+fi
+export PATH="$HOME/.local/bin:$PATH"
+unalias ls 2>/dev/null || true
+ls() {
+  if [ "$#" -eq 1 ] && [ "$1" = '-rr' ]; then
+    "$HOME/.local/bin/-rr" --list
+  else
+    command ls "$@"
+  fi
+}
+brack-help() {
+  printf '\n\033[1;35mAPPENDHUB DESKTOP · PUBLIC BETA\033[0m\n'
+  printf '  ls -rr             List installed GUI apps\n'
+  printf '  -rr APP NAME       Open a graphical application\n'
+  printf '  u -rr APP NAME     Preview and confirm app uninstall\n'
+  printf '  brack-tabs         List open app windows\n'
+  printf '  brack-switch 1     Raise app number 1 to front\n'
+  printf '  brack-color royal  Choose the terminal color\n'
+  printf '  brack-update       Check GitHub and install verified updates\n'
+  printf '  Alt+Tab            Switch app windows normally\n'
+  printf '  cd, git, python3, sudo, etc. work normally\n'
+  printf '  exit               End AppendHub Desktop session\n\n'
+}
+brack-tabs() { "$HOME/.local/bin/brack-windows" list; }
+brack-switch() { "$HOME/.local/bin/brack-windows" switch "$@"; }
+brack_prompt() {
+  "$HOME/.local/bin/brack-windows" compact 2>/dev/null || true
+}
+PROMPT_COMMAND="brack_prompt${PROMPT_COMMAND:+; $PROMPT_COMMAND}"
+export PS1='\[\e[1;35m\]appendhub\[\e[0m\]:\[\e[1;37m\]\w\[\e[0m\] $ '
+clear
+brack-help

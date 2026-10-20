@@ -1,0 +1,74 @@
+{
+  "redirects": [
+    {
+      "source": "/Brackstudy_Archive/:path*",
+      "destination": "/AppendHub_Archive/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/en",
+      "destination": "/learn/",
+      "permanent": true
+    },
+    {
+      "source": "/en/",
+      "destination": "/learn/",
+      "permanent": true
+    },
+    {
+      "source": "/en/:path*",
+      "destination": "/learn/en/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/ar/index.html",
+      "destination": "/learn/ar/",
+      "permanent": true
+    },
+    {
+      "source": "/ar/quiz/:path*",
+      "destination": "/learn/ar/quiz/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/ar/Coding.html",
+      "destination": "/learn/ar/Coding.html",
+      "permanent": true
+    },
+    {
+      "source": "/ar/Geography.html",
+      "destination": "/learn/ar/Geography.html",
+      "permanent": true
+    },
+    {
+      "source": "/ar/History.html",
+      "destination": "/learn/ar/History.html",
+      "permanent": true
+    },
+    {
+      "source": "/ar/Math.html",
+      "destination": "/learn/ar/Math.html",
+      "permanent": true
+    },
+    {
+      "source": "/ar/Science.html",
+      "destination": "/learn/ar/Science.html",
+      "permanent": true
+    },
+    {
+      "source": "/og-mode/:path*",
+      "destination": "/learn/og-mode/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/present/:path*",
+      "destination": "/learn/present/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/live.html",
+      "destination": "/learn/live.html",
+      "permanent": true
+    }
+  ]
+}

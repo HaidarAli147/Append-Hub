@@ -1,21 +1,9 @@
 # Security Policy
 
-## Supported Versions
+## Supported versions
 
-Use this section to tell people about which versions of your project are
-currently being supported with security updates.
+AppendHub is a multi-product repository and does not define a shared version support matrix. Product versions and supported environments are documented with each product. AppendHub Desktop 0.6.0 is a public beta for Debian 13 with X11; it is not a stable release.
 
-| Version | Supported          |
-| ------- | ------------------ |
-| 5.1.x   | :white_check_mark: |
-| 5.0.x   | :x:                |
-| 4.0.x   | :white_check_mark: |
-| < 4.0   | :x:                |
+## Reporting a vulnerability
 
-## Reporting a Vulnerability
-
-Use this section to tell people how to report a vulnerability.
-
-Tell them where to go, how often they can expect to get an update on a
-reported vulnerability, what to expect if the vulnerability is accepted or
-declined, etc.
+Please report security issues privately through [GitHub Security Advisories](https://github.com/HaidarAli147/BrackStudyTemp/security/advisories/new). Include the affected product or route, steps to reproduce, and the potential impact. Do not include credentials or private user data in a public issue. If private reporting is unavailable for this repository, contact the maintainer through GitHub before sharing exploit details.

@@ -1,0 +1,19 @@
+{
+  "name": "جو وول — Go-Wall",
+  "short_name": "Go-Wall",
+  "description": "Go Wall — لوحة نتائج لكرة القدم وكرة اليد والتنس · Scoreboard for football, handball and tennis",
+  "lang": "ar",
+  "dir": "rtl",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#8768ad",
+  "theme_color": "#8768ad",
+  "icons": [
+    {
+      "src": "../../shared/assets/logos/go-wall-compact.png",
+      "sizes": "2000x2000",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

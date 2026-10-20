@@ -1,0 +1,110 @@
+#!/usr/bin/env python3
+"""Conservative application uninstaller: u -rr APP NAME."""
+import importlib.machinery
+import importlib.util
+import os
+from pathlib import Path
+import re
+import shutil
+import subprocess
+import sys
+
+LAUNCHER = Path(__file__).with_name('-rr')
+loader = importlib.machinery.SourceFileLoader('brack_rr_registry', str(LAUNCHER))
+spec = importlib.util.spec_from_loader(loader.name, loader)
+registry = importlib.util.module_from_spec(spec)
+loader.exec_module(registry)
+
+def resolve(query):
+    apps = registry.applications()
+    q = query.casefold()
+    match = [app for app in apps if app['label'].casefold() == q or app['id'].casefold() == q]
+    if not match:
+        match = [app for app in apps if app['name'].casefold() == q]
+    if not match:
+        match = [app for app in apps if app['name'].casefold().startswith(q)]
+    if len(match) != 1:
+        if not match:
+            print('App not found. Use ls -rr to see available names.', file=sys.stderr)
+        else:
+            print('Ambiguous name. Use an exact name from ls -rr:', file=sys.stderr)
+            for app in match:
+                print('  ' + app['label'], file=sys.stderr)
+        raise SystemExit(1)
+    return match[0]
+
+def desktop_files(desktop_id):
+    home = Path.home()
+    bases = [home / '.local/share/applications']
+    bases += [Path(root) / 'applications' for root in os.environ.get('XDG_DATA_DIRS', '/usr/local/share:/usr/share').split(':') if root]
+    bases += [Path('/var/lib/flatpak/exports/share/applications'), home / '.local/share/flatpak/exports/share/applications', Path('/var/lib/snapd/desktop/applications')]
+    for root in bases:
+        if root.is_dir():
+            for path in root.rglob('*.desktop'):
+                if str(path.relative_to(root)).replace('/', '-') == desktop_id:
+                    yield path
+
+def execute(cmd):
+    return subprocess.run(cmd, capture_output=True, text=True, check=False)
+
+def main():
+    if len(sys.argv) < 3 or sys.argv[1] != '-rr':
+        print('Usage: u -rr APP NAME   (use ls -rr for names)')
+        return 2
+    app = resolve(' '.join(sys.argv[2:]).strip())
+    files = list(desktop_files(app['id']))
+    if not files:
+        print('Cannot identify an installed desktop file. Nothing removed.')
+        return 1
+    path = files[0]
+    print(f'Application: {app["label"]}\nLauncher:    {path}')
+    if '/flatpak/exports/share/applications/' in str(path):
+        if not shutil.which('flatpak'):
+            print('Flatpak not available. Nothing removed.')
+            return 1
+        appid = path.stem
+        is_user = str(path).startswith(str(Path.home()))
+        scope = '--user' if is_user else '--system'
+        command = ['flatpak', 'uninstall', scope, '--', appid]
+        print('Proposed action:', ' '.join(command))
+    elif str(path).startswith(('/usr/share/applications/', '/usr/local/share/applications/')):
+        result = execute(['dpkg-query', '-S', str(path)])
+        candidates = set()
+        for line in result.stdout.splitlines():
+            if ': ' in line:
+                owners = line.split(': ', 1)[0]
+                for name in owners.split(', '):
+                    if re.fullmatch(r'[a-z0-9][a-z0-9+.-]*(?::[a-z0-9-]+)?', name.strip()):
+                        candidates.add(name.strip())
+        if result.returncode != 0 or len(candidates) != 1:
+            print('Unable to safely identify one Debian package. Nothing removed.')
+            return 1
+        package = next(iter(candidates))
+        simulation = execute(['apt-get', '-s', 'remove', '--', package])
+        if simulation.returncode != 0:
+            print('APT simulation failed:\n' + simulation.stdout + simulation.stderr)
+            return 1
+        removing = [line.split()[1] for line in simulation.stdout.splitlines() if line.startswith('Remv ')]
+        if removing != [package]:
+            print('Removal would affect other packages or cannot be verified. Aborting.\n' + simulation.stdout)
+            return 1
+        command = ['sudo', 'apt', 'remove', '--', package]
+        print('Package:    ' + package)
+        print('Proposed action:', ' '.join(command))
+    else:
+        print('Unknown or per-user application install type. Nothing removed.')
+        print('Please uninstall it using the original installer or package manager.')
+        return 1
+    print('\nWARNING: This will uninstall the application. User settings may remain.')
+    try:
+        choice = input(f'Type UNINSTALL to remove {app["label"]}: ').strip()
+    except (EOFError, KeyboardInterrupt):
+        print('\nCancelled.')
+        return 1
+    if choice != 'UNINSTALL':
+        print('Cancelled. Nothing removed.')
+        return 0
+    return subprocess.call(command)
+
+if __name__ == '__main__':
+    raise SystemExit(main())

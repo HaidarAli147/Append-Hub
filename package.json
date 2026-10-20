@@ -1,0 +1,19 @@
+{
+  "name": "appendhub-platform",
+  "private": true,
+  "scripts": {
+    "build:present": "esbuild learn/present/js/app.js --bundle --minify --format=iife --platform=browser --outfile=learn/present/js/bundle.js",
+    "build:live": "esbuild learn/live.js --bundle --minify --format=iife --platform=browser --outfile=learn/live.bundle.js",
+    "vercel-build": "npm run build:present && npm run build:live",
+    "dev": "node present/dev-server.js",
+    "postinstall": "node scripts/patch-pptx-browser.cjs"
+  },
+  "dependencies": {
+    "livekit-client": "^2.23.0",
+    "livekit-server-sdk": "^2.19.1",
+    "pptx-browser": "^4.1.5"
+  },
+  "devDependencies": {
+    "esbuild": "^0.28.2"
+  }
+}

@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>AppendHub Desktop — النسخة التجريبية العامة</title>
+  <meta name="description" content="أبند هَب ديسكتوب جلسة سطح مكتب تجريبية تعتمد على الطرفية لنظام Debian 13.">
+  <link rel="canonical" href="https://appendhub.com/ar/desktop/">
+  <meta property="og:site_name" content="AppendHub"><meta property="og:title" content="AppendHub Desktop — النسخة التجريبية العامة">
+  <meta property="og:description" content="جلسة سطح مكتب تجريبية تعتمد على الطرفية لنظام Debian 13."><meta property="og:url" content="https://appendhub.com/ar/desktop/">
+  <meta property="og:image" content="https://appendhub.com/shared/assets/logos/desktop-full.png"><meta name="twitter:card" content="summary">
+  <link rel="icon" type="image/png" href="/shared/assets/logos/desktop-compact.png"><link rel="apple-touch-icon" href="/shared/assets/logos/desktop-compact.png"><link rel="stylesheet" href="/shared/css/company.css"><link rel="stylesheet" href="/shared/css/learn-nav.css"><link rel="stylesheet" href="/shared/css/product-details.css">
+</head>
+<body dir="rtl">
+
+<main class="product-page">
+  <section class="product-hero"><img class="product-wordmark" src="/shared/assets/logos/desktop-full.png" alt="AppendHub Desktop" fetchpriority="high"><p class="eyebrow">منتج من أبند هَب</p><h1>AppendHub Desktop</h1><p class="lead">جلسة سطح مكتب تجريبية تعتمد على الطرفية لنظام Debian 13، مبنية باستخدام Bash وKitty وOpenbox وGTK 3 وأدوات X11.</p><span class="status beta-status">النسخة التجريبية العامة · v0.6.0</span></section>
+  <section class="detail-card">
+    <h2>تنبيه النسخة التجريبية العامة</h2><p><strong>أبند هَب ديسكتوب ما زال قيد التطوير.</strong> قد تظهر أخطاء أو سلوكيات غير متوقعة أو مشكلات توافق. توثيق المشروع يستهدف Debian 13 مع جلسة X11؛ هذا ليس ضماناً مستقلاً للتوافق ولم نختبر تثبيتاً كاملاً في هذه المراجعة. لم يتم التحقق من توزيعات أو أجهزة أخرى. احتفظ بنسخة احتياطية من ملفاتك المهمة، وراجع المتطلبات والمثبت قبل التثبيت.</p>
+    <h2>الميزات</h2><ul><li>تشغيل أوامر Bash العادية وتشغيل التطبيقات الرسومية المثبتة من جلسة تعتمد على الطرفية.</li><li>استعراض نوافذ التطبيقات والتنقل بينها وعرض النوافذ المصغّرة في شريط GTK.</li><li>معاينة إزالة التطبيق قبل التأكيد على تشغيل apt remove.</li><li>اختيار سمات ألوان Kitty، ومنها اللون الملكي لأبند هَب.</li><li>التحقق من إصدارات GitHub وفحص SHA-256 قبل تأكيد التحديث يدوياً.</li></ul>
+    <h2>المتطلبات</h2><p>الهدف المذكور في التوثيق هو Debian 13 مع جلسة X11، ولم يتم التحقق منه هنا بتثبيت فعلي. يتحقق المثبت من البرامج المطلوبة وربط Python مع GTK. لم يتم التحقق من توزيعات أو أجهزة أو معماريات أخرى.</p>
+    <h2>التثبيت</h2><p>راجع أرشيف المصدر والملف <code>install.sh</code> قبل تشغيله. يستخدم المثبت sudo لتسجيل الجلسة في مدير الدخول وتثبيت المشغّل. لا يحذف سطح المكتب الحالي ويحافظ على إعداد Bash الموجود. لا يوجد حالياً برنامج لإلغاء التثبيت. بعد التثبيت، سجّل الخروج واختر <strong>AppendHub Desktop (Public Beta)</strong> من قائمة الجلسات، واحتفظ بسطح المكتب الحالي كخيار بديل.</p>
+    <p>تثبيت المتطلبات الموثقة على Debian 13:</p><pre><code>sudo apt update
+sudo apt install --no-install-recommends git kitty openbox libgtk-3-bin python3 python3-gi gir1.2-gtk-3.0 wmctrl x11-utils unzip</code></pre>
+    <h2>التنزيل</h2><p>v0.6.0 · النسخة التجريبية العامة · Debian 13 · أرشيف مصدر ZIP قابل للتعديل، وليس صورة نظام جاهزة.</p>
+    <a class="button primary" href="/desktop/downloads/brack-terminal-desktop-v0.6.0.zip" download>تنزيل أرشيف المصدر</a>
+    <p>SHA-256: <code>06dbce1958a0aca0213c24e053673e6c80d14cf20bbc67689786bccbdbcea817</code> · <a href="/desktop/downloads/brack-terminal-desktop-v0.6.0.zip.sha256">ملف التحقق</a></p>
+    <p class="beta-note">لم تُختبر النسخة على أجهزة متعددة ولم تخضع لتدقيق أمني. لا يحتوي المصدر الأصلي على ملف ترخيص؛ يجب مراجعة الترخيص وإشعارات الجهات الأخرى قبل أي إصدار مستقر.</p>
+  </section>
+</main>
+<footer class="footer"><a class="brand" href="/ar/"><img src="/shared/assets/logos/appendhub-compact.png" alt=""><span>أبند هَب</span></a><nav aria-label="تنقل التذييل"><a href="/ar/">الرئيسية</a><a href="/learn/ar/">ليرن</a><a href="/ar/desktop/">ديسكتوب</a><a href="/ar/browser/">المتصفح</a><a href="/ar/go-wall/">Go-Wall</a></nav><small>© AppendHub</small></footer>
+<script src="/shared/js/learn-nav.js" defer></script></body>
+</html>
