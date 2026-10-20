@@ -1,0 +1,6 @@
+.detail-card li{color:var(--muted);margin:.45rem 0}
+.detail-card code{font:.92em ui-monospace,SFMono-Regular,Consolas,monospace;overflow-wrap:anywhere}
+.detail-card pre{overflow:auto;padding:16px;background:#f5f1f9;border-radius:10px;color:var(--purple-deep)}
+.detail-card a:not(.button){color:var(--purple)}
+.beta-note{padding:15px 18px;border:1px solid #d9c8eb;border-left:5px solid var(--purple);border-radius:8px;background:#f7f2fb;color:var(--purple-deep)!important}
+.beta-status{background:#efe8f7;color:#67458c}

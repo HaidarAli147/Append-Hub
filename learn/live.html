@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AppendHub Live - AppendHub Learn</title>
+  <link rel="icon" type="image/png" href="/shared/assets/logos/live-compact.png">
+    <link rel="apple-touch-icon" href="/shared/assets/logos/live-compact.png">
+  <link rel="stylesheet" href="/shared/css/company.css">
+  <meta name="google-adsense-account" content="ca-pub-4397239596468716">
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4397239596468716" crossorigin="anonymous"></script>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Edu+VIC+WA+NT+Hand:wght@400..700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/learn/live.css">
+
+
+
+
+
+
+
+  <link rel="canonical" href="https://appendhub.com/learn/live.html">
+  <meta property="og:site_name" content="AppendHub Live">
+  <meta property="og:title" content="AppendHub Live - AppendHub Learn">
+  <meta property="og:url" content="https://appendhub.com/learn/live.html">
+  <meta name="twitter:card" content="summary">
+
+  <meta name="description" content="AppendHub Live - AppendHub Learn | AppendHub Learn, a bilingual learning platform.">
+  <meta property="og:description" content="AppendHub Live - AppendHub Learn | AppendHub Learn, a bilingual learning platform.">
+  <meta property="og:image" content="https://appendhub.com/shared/assets/logos/live-full.png">
+  <meta property="og:image:alt" content="AppendHub">
+  <meta name="twitter:title" content="AppendHub Live - AppendHub Learn">
+  <meta name="twitter:description" content="AppendHub Live - AppendHub Learn | AppendHub Learn, a bilingual learning platform.">
+  <meta name="twitter:image" content="https://appendhub.com/shared/assets/logos/live-full.png">
+<link rel="stylesheet" href="/shared/css/learn-nav.css">
+</head>
+
+ <body class="live-page">
+  <header class="live-header">
+    <nav class="Home" aria-label="Back to AppendHub Learn">
+      <a href="/learn/" aria-label="Back to AppendHub Learn"><svg class="ui-icon back-arrow" aria-hidden="true"><use href="/assets/icons.svg#arrow-right"></use></svg><span class="live-home-label">AppendHub Learn</span></a>
+    </nav>
+    <h1><img class="live-wordmark" src="/shared/assets/logos/live-full.png" alt="AppendHub Live"></h1>
+    <div class="live-header-actions">
+    <div class="lang-dropdown">
+      <button class="lang-btn" type="button" aria-label="Change language"><svg class="ui-icon" aria-hidden="true"><use href="/assets/icons.svg#globe"></use></svg></button>
+      <div class="lang-menu">
+        <a href="/learn/live.html" lang="en" hreflang="en">English</a>
+        <a href="/learn/live.html?lang=ar" lang="ar" hreflang="ar">العربية</a>
+      </div>
+    </div>
+    <a class="mode-switch" href="/learn/og-mode/en%20%20/live.html" aria-label="Switch to AppendHub Learn OG Mode"><span>AppendHub Learn OG Mode</span><span class="mode-switch-track" aria-hidden="true"><i></i></span></a>
+    </div>
+  </header>
+  <main class="live-container">
+    <div class="live-intro">
+        <h1>Welcome to the Live Learning Page</h1>
+      <h2>We are live every Friday at 3:00 PM</h2>
+      <p>Join us for interactive coding sessions and Q&A!</p>
+</div>
+
+        <h2>Friday Live Classroom</h2>
+        <p>Learn together every Friday!</p>
+
+        <div class="live-layout">
+
+            <!-- Main live player -->
+            <section class="live-panel">
+
+                <div class="live-player-wrapper">
+
+                    <video id="live-player" class="live-video" controls playsinline muted autoplay></video>
+
+                    <div id="connecting-screen" class="live-player-message" role="status" aria-live="polite">
+                        <span class="live-spinner" aria-hidden="true"></span>
+                        <p>Connecting to AppendHub Live…</p>
+                    </div>
+
+                    <div id="offline-screen"
+                         class="live-offline-screen" hidden>
+                        <h2>AppendHub Live</h2>
+                        <p>The stream is currently offline.</p>
+                        <p>Join us for our next Friday lesson!</p>
+                    </div>
+
+                </div>
+
+                <div class="live-panel-content">
+
+                    <span id="live-status"
+                          class="live-status">
+                        OFFLINE
+                    </span>
+
+                    <h2>Friday Live Lesson</h2>
+
+                    <p>Welcome to our live classroom.</p>
+
+                    <button id="retry-button"
+                            class="live-retry-button" hidden>
+                        Check Stream
+                    </button>
+                    <button id="enable-audio-button" class="live-retry-button" type="button" hidden>
+                        Enable Audio
+                    </button>
+
+                </div>
+            </section>
+
+            <!-- Sidebar -->
+            <aside class="live-sidebar">
+
+                <section class="live-panel">
+                    <div class="live-panel-content">
+                        <h3>Upcoming Lesson</h3>
+                        <p>Every Friday</p>
+                        <p>Topic and time coming soon.</p>
+                    </div>
+                </section>
+
+                <section class="live-panel">
+                    <div class="live-panel-content">
+
+                        <h3>AppendHub Present</h3>
+
+                        <div class="live-slide-preview">
+                            <h3>Presentation</h3>
+                            <p>Slides will appear here.</p>
+                        </div>
+
+                    </div>
+                </section>
+
+            </aside>
+
+        </div>
+    </main>
+
+    <script>
+      if (new URLSearchParams(location.search).get("lang") === "ar") {
+        document.documentElement.lang = "ar";
+        document.documentElement.dir = "rtl";
+        document.title = "أبند هَب لايف - أبند هَب ليرن";
+        document.querySelector(".lang-btn").setAttribute("aria-label", "تغيير اللغة");
+        const labels = [
+          [".Home a", "العودة إلى أبند هَب ليرن", "aria-label"],
+          [".live-home-label", "أبند هَب ليرن"],
+          [".live-header h1", "أبند هَب لايف"],
+          [".live-intro h1", "مرحباً بكم في صفحة التعلم المباشر"],
+          [".live-intro h2", "نبث كل يوم جمعة الساعة 3:00 مساءً"],
+          [".live-intro p", "انضموا إلينا في جلسات البرمجة والأسئلة والأجوبة!"],
+          [".live-container > h2", "الفصل المباشر يوم الجمعة"],
+          [".live-container > p", "نتعلم معاً كل يوم جمعة!"],
+          [".live-panel-content h2", "درس الجمعة المباشر"],
+          [".live-panel-content > p", "مرحباً بكم في صفنا المباشر."],
+          [".live-sidebar section:first-child h3", "الدرس القادم"],
+          [".live-sidebar section:first-child p:nth-of-type(1)", "كل يوم جمعة"],
+          [".live-sidebar section:first-child p:nth-of-type(2)", "سيُعلن عن الموضوع والوقت قريباً."],
+          [".live-sidebar section:nth-child(2) h3", "أبند هَب بريزنت"],
+          [".live-slide-preview h3", "العرض التقديمي"],
+          [".live-slide-preview p", "ستظهر الشرائح هنا."]
+        ];
+        for (const [selector, value, attribute] of labels) {
+          const element = document.querySelector(selector);
+          if (element) attribute ? element.setAttribute(attribute, value) : element.textContent = value;
+        }
+        document.querySelector(".mode-switch").href = "/learn/og-mode/en%20%20/live.html?lang=ar";
+        document.querySelector(".mode-switch").setAttribute("aria-label", "التبديل إلى الوضع القديم");
+        document.querySelector(".mode-switch span:first-child").textContent = "وضع أبند هَب ليرن الأصلي";
+        document.querySelector(".Home a").href = "/learn/ar/index.html";
+      }
+    </script>
+    <script src="/learn/language-nav.js" defer></script>
+    <script src="/learn/live.bundle.js" defer></script>
+
+
+    <script src="/shared/js/learn-nav.js" defer></script>
+  </body>
+</html>

@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AppendHub Present | AppendHub Learn</title>
+  <link rel="stylesheet" href="/shared/css/company.css">
+  <link rel="icon" type="image/png" href="/shared/assets/logos/present-compact.png"><link rel="apple-touch-icon" href="/shared/assets/logos/present-compact.png">
+  <link rel="stylesheet" href="/learn/present/present.css">
+
+  <link rel="canonical" href="https://appendhub.com/learn/present/">
+  <meta property="og:site_name" content="AppendHub Present">
+  <meta property="og:title" content="AppendHub Present | AppendHub Learn">
+  <meta property="og:url" content="https://appendhub.com/learn/present/">
+  <meta name="twitter:card" content="summary">
+
+  <meta name="description" content="AppendHub Present | AppendHub Learn | AppendHub Learn, a bilingual learning platform.">
+  <meta property="og:description" content="AppendHub Present | AppendHub Learn | AppendHub Learn, a bilingual learning platform.">
+  <meta property="og:image" content="https://appendhub.com/shared/assets/logos/present-full.png">
+  <meta property="og:image:alt" content="AppendHub">
+  <meta name="twitter:title" content="AppendHub Present | AppendHub Learn">
+  <meta name="twitter:description" content="AppendHub Present | AppendHub Learn | AppendHub Learn, a bilingual learning platform.">
+  <meta name="twitter:image" content="https://appendhub.com/shared/assets/logos/present-full.png">
+<link rel="stylesheet" href="/shared/css/learn-nav.css">
+</head>
+<body class="present-page">
+  <header>
+    <h1><img class="present-wordmark" src="/shared/assets/logos/present-full.png" alt="AppendHub Present"></h1>
+    <a id="back-button" href="/learn/"><svg class="ui-icon back-arrow" aria-hidden="true"><use href="/assets/icons.svg#arrow-right"></use></svg> <span data-i18n="back">Back to Lesson</span></a>
+    <a id="quiz-button" href="/learn/" hidden><span data-i18n="quiz">Start Quiz</span> <svg class="ui-icon forward-arrow" aria-hidden="true"><use href="/assets/icons.svg#arrow-right"></use></svg></a>
+    <a id="language-button" href="#" lang="ar">العربية</a>
+  </header>
+
+  <main class="present-container">
+    <h2 id="presentation-title">AppendHub Present</h2>
+    <p id="message" role="status" aria-live="polite" data-state="loading">Loading presentation...</p>
+    <section class="present-viewer" id="presentation-viewer" aria-label="Presentation" tabindex="0">
+      <canvas id="slide-canvas" role="img" aria-label="Presentation slide"></canvas>
+    </section>
+    <nav class="present-controls" aria-label="Presentation controls">
+      <button id="previous" type="button" disabled aria-label="Previous slide"><svg class="ui-icon back-arrow" aria-hidden="true"><use href="/assets/icons.svg#arrow-right"></use></svg> <span data-i18n="previous">Previous</span></button>
+      <span id="slide-counter" aria-live="polite">0 / 0</span>
+      <button id="next" type="button" disabled aria-label="Next slide"><span data-i18n="next">Next</span> <svg class="ui-icon forward-arrow" aria-hidden="true"><use href="/assets/icons.svg#arrow-right"></use></svg></button>
+      <button id="fullscreen" type="button" disabled aria-label="Enter fullscreen"><span data-i18n="fullscreen">Fullscreen</span></button>
+      <a id="final-quiz-button" class="final-quiz-button" href="/learn/" hidden>Quiz time!</a>
+    </nav>
+  </main>
+  <script src="/learn/present/js/bundle.js" defer></script>
+<script src="/shared/js/learn-nav.js" defer></script>
+</body>
+</html>

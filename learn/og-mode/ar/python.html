@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="أبند هَب ليرن (AppendHub Learn) – تعلّم بايثون من خلال أمثلة بسيطة وعملية ورؤى في الإلكترونيات.">
+    <title>أبند هَب ليرن – مشاريع بايثون</title>
+    <link rel="stylesheet" href="/shared/css/company.css">
+    <link rel="icon" type="image/png" href="/shared/assets/logos/learn-compact.png">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com/">
+    <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="">
+    <link href="https://fonts.googleapis.com/css2?family=Bitcount+Grid+Double:wght@100..900&family=Story+Script&family=Coming+Soon&display=swap" rel="stylesheet">
+    
+  <link rel="canonical" href="https://appendhub.com/learn/og-mode/ar/python.html">
+  <meta property="og:site_name" content="AppendHub Learn OG Mode">
+  <meta property="og:title" content="أبند هَب ليرن – مشاريع بايثون">
+  <meta property="og:url" content="https://appendhub.com/learn/og-mode/ar/python.html">
+  <meta name="twitter:card" content="summary">
+
+  <meta property="og:description" content="أبند هَب ليرن (AppendHub Learn) – تعلّم بايثون من خلال أمثلة بسيطة وعملية ورؤى في الإلكترونيات.">
+  <meta property="og:image" content="https://appendhub.com/shared/assets/logos/learn-full.png">
+  <meta property="og:image:alt" content="AppendHub">
+  <meta name="twitter:title" content="أبند هَب ليرن – مشاريع بايثون">
+  <meta name="twitter:description" content="أبند هَب ليرن (AppendHub Learn) – تعلّم بايثون من خلال أمثلة بسيطة وعملية ورؤى في الإلكترونيات.">
+  <meta name="twitter:image" content="https://appendhub.com/shared/assets/logos/learn-full.png">
+<link rel="stylesheet" href="/shared/css/learn-nav.css">
+  <link rel="stylesheet" href="/learn/og-mode/en%20%20/style.css">
+</head>
+
+<body>
+<nav class="top-sidebar" aria-label="Primary navigation">
+    <a href="index.html" aria-label="الرئيسية">الرئيسية</a>
+    <a href="subjects.html">المواد</a>
+    <a href="/learn/og-mode/en%20%20/live.html">أبند هَب لايف</a>
+  </nav>
+  <div class="og-floating-controls" aria-label="Mode and language">
+    <a class="lang" href="/learn/og-mode/en%20%20/Coding.html" aria-label="التبديل إلى الإنجليزية">English</a>
+    <a class="og-mode-toggle" href="/learn/ar/Coding.html" aria-label="التبديل إلى الوضع العادي"><span>الوضع العادي</span><span class="og-mode-track" aria-hidden="true"><i></i></span></a>
+  </div>
+
+
+    <div class="content"> 
+        <h1>مرحباً بك في صفحة مشاريع بايثون</h1>
+        <p>نحن نُنشئ محتوى للبرمجة لإظهار ما يحدث وراء الكواليس في الإلكترونيات...</p>
+
+        <section class="code-section">
+            <p>بايثون هي لغة برمجة تستخدم لإنشاء <b>برامج (تطبيقات)</b>. للطباعة (الكتابة):</p>
+            <code>print('hello')</code>
+
+            <p><br>لإنشاء إدخال (طلب)، هناك طريقتان:</p>
+            <p><b>الطريقة الأولى:</b></p>
+            <code>input("What is your name?")</code>
+            <p><b>لا يمكن استخدام هذه الطريقة في عبارة الشرط (if statement)</b></p>
+
+            <p><b>الطريقة الثانية:</b></p>
+            <code>i = input("What is your name?")</code>
+            <p><b>يمكن استخدام هذه الطريقة في عبارة الشرط (if statement)</b></p>
+
+            <p>بالحديث عن عبارات الشرط، إليك كيفية كتابة واحدة:</p>
+            <pre>i = int(input("How old are you? "))
+if i >= 18:
+    print("You fit in our company terms and conditions!")
+else:
+    print("You don't fit in our company's terms and conditions, so you can't create an account!")
+            </pre>
+        </section>
+
+        <h2>أنواع البيانات (Data types)</h2>
+        <span>
+            <b>لكتابة السلسلة النصية (string - str) والتي تعني قيم نصية:</b><br>
+            name = "Ali"<br>
+            age = "15"<br>
+            print(name)<br>
+            print(age)<br>
+            (الاسم الذي تضعه قبل علامة التساوي يسمى "متغير" (variable)، ويمكنك جعله أي شيء ما لم تكن قد استخدمته من قبل في نفس الملف.)<br>
+            is_student = True 
+            <b>لكتابة الأعداد الصحيحة (Integers - الأرقام السالبة والموجبة) اكتب:<br>
+            number_of_students = 10<br>
+            speed = -120<br>
+            print(number_of_students)<br>
+            print(speed)<br>
+            <b>كيفية كتابة العدد العشري (float - رقم يحتوي على فواصل عشرية)</b><br>
+            GPA = 3.5<br>
+            bill = round(15.329, 2)<br>
+            print(bill)<br>
+            print(GPA)<br>
+            <b>إذا كنت تريد كتابة قيمة منطقية (Boolean - والتي تعني صواب (True) أو خطأ (False)) اكتب:</b><br>
+            is_player = True <br>#or is_footballer = False<br>
+            print(is_player)<br>
+            print(is_footballer)<br>
+            (رمز الهاش (#) يعني أن الكود لا يمكن قراءته، لذا لن يظهر في تطبيقك)
+            <b>إذا كنت لا تريد تغيير قيمتها (صواب أو خطأ) فاكتب:</b><br>
+            is_player = True <br>
+            #or is_footballer = False<br>
+            print(not is_player)
+            print(not is_footballer)
+        </span> 
+        
+        <h2>المعادلات الرياضية (Math Equations)</h2>
+        <p>
+            <b>لإجراء الجمع (addition)، اكتب:</b><br>
+            print(2+2)<br>
+            #تحذير: لا تضف علامة التساوي!<br>
+            <b>لإجراء الطرح (subtraction)، اكتب:</b><br>
+            print(10-6)<br>
+            <b>لإجراء الضرب (multiplication)، اكتب:</b><br>
+            print(9*9) #تحذير: إذا استخدمت الح
+            </p>
+
+
+    </div>
+<script src="/learn/language-nav.js" defer></script><script src="/shared/js/learn-nav.js" defer></script>
+</body>
+</html>

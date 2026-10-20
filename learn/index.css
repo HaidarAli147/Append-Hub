@@ -1,0 +1,303 @@
+* {
+    box-sizing: border-box;
+}
+.ui-icon { width: 1.15em; height: 1.15em; display: inline-block; vertical-align: -0.2em; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; flex: 0 0 auto; }
+.ui-icon.back-arrow { transform: scaleX(-1); }
+html[dir="rtl"] .ui-icon.back-arrow { transform: none; }
+html[dir="rtl"] .ui-icon.forward-arrow { transform: scaleX(-1); }
+        /* Container positioning */
+        .lang-dropdown {
+          position: relative;
+          display: inline-block;
+        }
+
+
+
+        /* Style your main language button */
+        .lang-btn {
+          background-color: #333;
+          color: #fff;
+          padding: 10px 15px;
+          font-size: 14px;
+          cursor: pointer;
+          border-radius: 4px;
+          border: none;
+  min-height: 44px;
+  touch-action: manipulation;
+        }
+
+        /* Hide the menu file list by default */
+        .lang-menu {
+          display: none;
+          position: absolute;
+          left: 0; /* Aligns menu to the left edge of the button in RTL */
+          background-color: #ffffff;
+          min-width: 150px;
+          box-shadow: 0px 8px 16px rgba(0,0,0,0.15);
+          border: 1px solid #ccc;
+          border-radius: 4px;
+          z-index: 100;
+        }
+
+        /* Style the file links inside the menu */
+        .lang-menu a {
+          color: #333;
+          padding: 12px 16px;
+          text-decoration: none;
+          display: block;
+          font-family: sans-serif;
+          font-size: 14px;
+        }
+
+        /* Visual feedback when hovering over a language option */
+        .lang-menu a:hover {
+          background-color: #f1f1f1;
+        }
+
+        /* Pure CSS Magic: Show the menu when hovering over the container */
+        .lang-dropdown:hover .lang-menu {
+          display: block;
+        }
+        .go-wall {
+          background-color: #f9f9f9;
+          padding: 20px;
+          border-radius: 8px;
+          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+          margin-bottom: 20px;
+        }
+html, body {
+    height: 100%;
+    margin: 0;
+}
+html[lang="ar"], html[lang="ar"] body,
+html[lang="ar"] button, html[lang="ar"] a,
+html[lang="ar"] input, html[lang="ar"] select, html[lang="ar"] textarea {
+    font-family: Tahoma, "Noto Naskh Arabic", "Noto Sans Arabic", Arial, sans-serif;
+    font-synthesis: none;
+}
+html[lang="ar"] { direction: rtl; }
+html[lang="ar"] body { text-align: start; }
+body {
+    background-color: #7851A9;
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-attachment: fixed;
+    font-family: 'Edu VIC WA NT Hand', cursive;
+    color: black;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+body > header:not(.live-header) {
+    background-color: #ffffff;
+    padding: 12px clamp(16px, 4vw, 48px);
+    position: sticky;
+    top: 0;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: #29213d;
+    z-index: 100;
+    text-align: start;
+    gap: clamp(12px, 2.5vw, 32px);
+    background: #ffffff;
+    box-shadow: 0 2px 12px rgb(35 16 61 / 15%);
+}
+body > header:not(.live-header) h1 {
+    font-size: clamp(1rem, 2vw, 1.3rem);
+    margin: 0;
+}
+body > header:not(.site-header):not(.live-header) { justify-content: space-between; text-align: start; gap: clamp(10px, 2vw, 24px); }
+body > header:not(.site-header):not(.live-header) h1 { flex: 1; text-align: center; }
+body > header .Home a { display:inline-flex; align-items:center; justify-content:center; min-width:40px; min-height:40px; color:inherit; }
+.site-brand { display:flex; align-items:center; gap:10px; color:inherit; text-decoration:none; white-space:nowrap; }
+.brand-mark { display:block; width:36px; height:36px; flex:0 0 auto; overflow:hidden; }
+.brand-mark img { display:block; width:240%; height:240%; max-width:none; object-fit:contain; transform:translate(-29.2%,-29.2%); }
+.parent-brand-wordmark { display:block; width:150px; height:40px; object-fit:cover; object-position:center; margin:0 0 12px; }
+.site-nav { display:flex; align-items:center; gap:4px; flex:1; justify-content:center; }
+.site-nav a, .site-actions a, .site-actions button { color:inherit; text-decoration:none; font:600 14px Arial,sans-serif; border:0; background:transparent; border-radius:8px; padding:10px 12px; min-height:40px; display:inline-flex; align-items:center; justify-content:center; cursor:pointer; }
+.site-nav a:hover, .site-nav a:focus-visible, .site-actions a:hover, .site-actions a:focus-visible, .site-actions button:hover, .site-actions button:focus-visible { background:rgb(103 56 160 / 10%); outline:2px solid transparent; }
+.site-actions { display:flex; align-items:center; gap:8px; white-space:nowrap; }
+.site-actions .lang-btn { padding:8px 10px; min-width:40px; }
+.site-actions .lang-menu { left:auto; right:0; }
+.site-heading { display:none; }
+.Subjectsf {
+    padding: 10px 0;
+    position: sticky;
+    top: 70px;
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-around;
+    align-items: center;
+    z-index: 90;
+    gap: 8px;
+    background-color: #7851A9;
+}
+.Subjectst {
+    padding: 10px 0;
+    position: sticky;
+    top: 128px;
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-around;
+    align-items: center;
+    z-index: 90;
+    gap: 8px;
+    background-color: #7851A9;
+}
+.Subjectsf a, .Subjectst a {
+    color: white;
+    text-decoration: none;
+    padding: 10px 16px;
+    transition: background-color 0.3s;
+    border: 2px solid transparent;
+    font-size: 1rem;
+}
+.Subjectsf a:hover, .Subjectst a:hover {
+    background-color: #5e4f73;
+    border-radius: 4px;
+}
+.Subjectsf a:nth-child(1) { background-color: #ff6b6b; }
+.Subjectsf a:nth-child(2) { background-color: #4ecdc4; }
+.Subjectsf a:nth-child(3) { background-color: #ffd93d; }
+.Subjectst a:nth-child(1) { background-color: #3fda7a; }
+.Subjectst a:nth-child(2) { background-color: #f12345; }
+.Subjectst a:nth-child(3) { background-color: blue; font-size: 20px; }
+.content {
+    flex: 1;
+}
+.Intro {
+    margin-top: 50px;
+    color: white;
+    font-family: 'Edu VIC WA NT Hand', cursive;
+}
+footer {
+
+    width: 100%;
+    padding: 30px 20px 20px;
+    margin-top: auto;
+    text-align: center;
+    box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.25);
+}
+.Footer-Intro {
+    max-width: 700px;
+    margin: 0 auto 20px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.25);
+
+}
+.Footer-Intro h2 {
+    margin: 0 0 10px;
+    font-size: 1.4rem;
+}
+.Footer-Intro p {
+    margin: 8px 0;
+    line-height: 1.5;
+    font-size: 1rem;
+    opacity: 0.95;
+}
+
+@media (max-width: 600px) {
+    body > header:not(.live-header) { padding:8px 12px; flex-wrap:wrap; gap:6px 10px; }
+    .site-brand { gap:6px; }
+    .brand-mark { width:30px; height:30px; }
+    .site-nav { order:3; flex:1 0 100%; justify-content:space-between; overflow:visible; }
+    .site-nav a { padding:8px 7px; min-height:38px; font-size:12px; }
+    .site-actions { gap:2px; }
+    .site-actions a, .site-actions button { padding:8px; font-size:12px; min-height:38px; }
+    body > header:not(.live-header) h1 { font-size:1rem; }
+    body > header:not(.site-header):not(.live-header) { gap:6px; }
+    body > header:not(.site-header):not(.live-header) h1 { font-size:.95rem; }
+    .Subjectsf {
+        top: 60px;
+    }
+    .Subjectst {
+        top: 118px;
+    }
+    .Subjectsf a, .Subjectst a {
+        padding: 8px 12px;
+        font-size: 0.9rem;
+    }
+    .Footer-Intro h2 {
+        font-size: 1.2rem;
+    }
+    .Footer-Intro p {
+        font-size: 0.9rem;
+    }
+}
+@media (min-width: 601px) and (max-width: 900px) { .site-nav a { padding-inline:8px; font-size:13px; } .site-brand h1 { display:block; font-size:.9rem; } }
+.lang-dropdown:focus-within .lang-menu, .lang-dropdown.is-open .lang-menu { display:block; }
+.lang-btn:focus-visible, .lang-menu a:focus-visible { outline:2px solid #6738a0; outline-offset:2px; }
+.site-header .lang-btn, body > header:not(.live-header) .lang-btn { color:#29213d; background:transparent; }
+.site-header .lang-btn:hover, body > header:not(.live-header) .lang-btn:hover { background:rgb(103 56 160 / 10%); }
+.lang-menu { right:0; left:auto; }
+html[dir="rtl"] .lang-menu { right:auto; left:0; }
+.live {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background-color: #ff4c4c;
+    color: white;
+    padding: 10px 15px;
+    border-radius: 50%;
+    font-size: 1rem;
+    text-align: center;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    transition: transform 0.2s, background-color 0.3s;
+}
+
+/* Compact mode control beside the existing page controls. */
+.mode-switch {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: inherit;
+    text-decoration: none;
+    font: 600 13px Arial, sans-serif;
+    vertical-align: middle;
+}
+.mode-switch-track {
+    width: 36px;
+    height: 20px;
+    padding: 2px;
+    box-sizing: border-box;
+    border-radius: 12px;
+    background: #7851A9;
+    display: inline-flex;
+    align-items: center;
+}
+.mode-switch-track i {
+    display: block;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #fff;
+    transition: transform .18s ease;
+}
+.mode-switch:hover .mode-switch-track i, .mode-switch:focus-visible .mode-switch-track i {
+    transform: translateX(16px);
+}
+.mode-switch:focus-visible { outline: 2px solid #7851A9; outline-offset: 3px; }
+
+.LiveSection {
+    display: flex;
+    justify-content: center;
+    padding: 10px 0;
+    background-color: #7851A9;
+}
+.LiveSection a {
+    color: white;
+    background-color: blue;
+    text-decoration: none;
+    padding: 10px 16px;
+    font-size: 1rem;
+}
+.LiveSection a:hover, .LiveSection a:focus-visible {
+    background-color: #5e4f73;
+    border-radius: 4px;
+    outline: 2px solid white;
+    outline-offset: 2px;
+}

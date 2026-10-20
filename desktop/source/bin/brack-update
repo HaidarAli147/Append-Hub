@@ -1,0 +1,140 @@
+#!/usr/bin/env python3
+"""Safely update AppendHub Desktop from a configured public GitHub Release."""
+import argparse
+import hashlib
+import json
+import os
+from pathlib import Path
+import re
+import subprocess
+import sys
+import tempfile
+import urllib.error
+import urllib.request
+import zipfile
+
+CONFIG = Path.home() / '.config/brack-terminal/updater.json'
+LOCAL_VERSION = Path.home() / '.config/brack-terminal/version'
+REPO_RE = re.compile(r'^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$')
+VERSION_RE = re.compile(r'^v?(\d+)\.(\d+)(?:\.(\d+))?$')
+ZIP_RE = re.compile(r'^brack-terminal-desktop-v\d+\.\d+(?:\.\d+)?\.zip$')
+AGENT = 'AppendHubDesktopUpdater/0.6 (GitHub Releases)'
+MAX_ZIP = 30*1024*1024
+
+def die(message):
+    print('AppendHub Desktop updater (brack-update compatibility command):', message, file=sys.stderr)
+    sys.exit(1)
+
+def get(url, limit=MAX_ZIP):
+    req=urllib.request.Request(url,headers={'User-Agent':AGENT,'Accept':'application/vnd.github+json'})
+    with urllib.request.urlopen(req,timeout=25) as response:
+        if not response.url.startswith('https://'):
+            die('Non-HTTPS download refused')
+        data=response.read(limit+1)
+        if len(data)>limit: die('Download exceeds size limit')
+        return data
+
+def parsed_version(value):
+    m=VERSION_RE.fullmatch(value.strip())
+    return tuple(map(int,m.groups(default='0'))) if m else None
+
+def current_version():
+    try: return LOCAL_VERSION.read_text().strip()
+    except OSError: return '0.6.0'
+
+def find_assets(release):
+    assets=release.get('assets',[])
+    zips=[a for a in assets if ZIP_RE.fullmatch(a.get('name',''))]
+    if len(zips)!=1: die('Release must contain exactly one brack-terminal-desktop-vX.Y.Z.zip asset')
+    asset=zips[0]
+    checksum=next((a for a in assets if a.get('name')==asset['name']+'.sha256'),None)
+    if checksum is None: die('Missing required '+asset['name']+'.sha256 asset')
+    for a in (asset,checksum):
+        if not a.get('browser_download_url','').startswith('https://'):
+            die('Invalid GitHub release asset URL')
+    return asset,checksum
+
+def verify_zip(content):
+    import io
+    try:
+        z=zipfile.ZipFile(io.BytesIO(content))
+        if z.testzip() is not None: die('Corrupt ZIP file')
+        for info in z.infolist():
+            path=Path(info.filename)
+            if path.is_absolute() or '..' in path.parts or not path.parts or path.parts[0]!='brack-terminal-desktop':
+                die('Unexpected or unsafe ZIP path: '+info.filename)
+            if info.file_size>20*1024*1024: die('Unexpectedly large file in archive')
+            mode=(info.external_attr>>16)&0o170000
+            if mode==0o120000: die('Symlinks in release archive are not allowed')
+        return z
+    except zipfile.BadZipFile:
+        die('Invalid release ZIP')
+
+def main():
+    p=argparse.ArgumentParser(description='Update AppendHub Desktop from verified GitHub Releases')
+    p.add_argument('--repo',metavar='OWNER/REPOSITORY',help='Configure the public GitHub repository')
+    p.add_argument('--check',action='store_true',help='Check for updates without installing')
+    args=p.parse_args()
+    CONFIG.parent.mkdir(parents=True,exist_ok=True)
+    repo=None
+    if CONFIG.exists():
+        try: repo=json.loads(CONFIG.read_text()).get('repo')
+        except (ValueError,OSError): pass
+    if args.repo:
+        if not REPO_RE.fullmatch(args.repo): die('Use a GitHub repo like OWNER/brack-terminal-desktop')
+        repo=args.repo
+        CONFIG.write_text(json.dumps({'repo':repo},indent=2)+'\n')
+        os.chmod(CONFIG,0o600)
+        print('GitHub update source configured:',repo)
+    if not repo or not REPO_RE.fullmatch(repo):
+        die('First configure your GitHub repo with: brack-update --repo OWNER/REPOSITORY')
+    print('Checking https://github.com/'+repo+'/releases ...')
+    try:
+        releases=json.loads(get('https://api.github.com/repos/'+repo+'/releases?per_page=100',1024*1024))
+        candidates=[r for r in releases if not r.get('draft') and parsed_version(r.get('tag_name',''))]
+        if not candidates: die('No published GitHub Releases found (including beta releases).')
+        release=max(candidates,key=lambda r:parsed_version(r['tag_name']))
+    except (urllib.error.URLError,TimeoutError,ValueError,TypeError) as exc: die('Could not read published GitHub Releases: '+str(exc))
+    tag=release.get('tag_name','')
+    newest=parsed_version(tag)
+    installed=parsed_version(current_version())
+    if newest is None or installed is None: die('Unsupported version tag (use v0.6.1, v0.7.0, etc.)')
+    print('Installed:',current_version(),'| Latest:',tag)
+    if newest<=installed:
+        print('Already up to date.')
+        return
+    asset,checksum=find_assets(release)
+    expected_zip_name = 'brack-terminal-desktop-'+tag+'.zip'
+    if asset['name'] != expected_zip_name:
+        die('Release ZIP name does not match version tag: expected '+expected_zip_name)
+    print('Update available:',tag)
+    if args.check: return
+    answer=input('Download, verify and install this update? Type UPDATE: ').strip()
+    if answer!='UPDATE': print('Cancelled.'); return
+    print('Downloading ZIP and checksum...')
+    try:
+        content=get(asset['browser_download_url'])
+        checksum_text=get(checksum['browser_download_url'],4096).decode('utf-8').strip()
+    except (urllib.error.URLError,UnicodeError,TimeoutError) as exc: die('Download failed: '+str(exc))
+    expected=checksum_text.split()[0] if checksum_text else ''
+    if not re.fullmatch(r'[a-fA-F0-9]{64}',expected): die('Invalid SHA256 checksum file')
+    actual=hashlib.sha256(content).hexdigest()
+    if actual.lower()!=expected.lower(): die('SHA256 mismatch, update rejected')
+    print('SHA256 verified.')
+    z=verify_zip(content)
+    with tempfile.TemporaryDirectory(prefix='appendhub-update-') as temp:
+        z.extractall(temp)
+        root=Path(temp)/'brack-terminal-desktop'
+        installer=root/'install.sh'
+        versionfile=root/'VERSION'
+        if not installer.is_file() or not versionfile.is_file(): die('Missing installer or VERSION in release')
+        if parsed_version(versionfile.read_text().strip())!=newest:
+            die('Version in archive does not match GitHub release tag')
+        print('Running verified release installer. It may request sudo for session registration.')
+        result=subprocess.run(['bash',str(installer)],cwd=root)
+        if result.returncode: die('Installer failed; version not changed')
+    print('Update installed. Log out and log back in to load the new desktop session.')
+
+if __name__=='__main__':
+    try: main()
+    except KeyboardInterrupt: die('Cancelled')
