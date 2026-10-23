@@ -5,7 +5,7 @@ const pair=()=>window.GoWallPair;
 const params=new URLSearchParams(location.search);
 const camCode=params.get('var-camera');
 const requestedCam=camCode!==null;
-const validCam=/^\d{6}$/.test(camCode||'');
+const validCam=/^\d{8}$/.test(camCode||'');
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const css=document.createElement('style');css.textContent='#gw-var{border:2px solid white;padding:16px;margin:16px var(--gutter)}#gw-var button,#gw-var input{padding:10px;margin:5px;background:white;color:#30213f;border:0;font:inherit}#gw-var video{max-width:100%;background:#160e1d;min-height:120px}#gw-var-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}#gw-var-grid article{border:1px solid white;padding:10px}#gw-var-status{overflow-wrap:anywhere}body.gw-controller #gw-var{display:block}body.gw-controller #gw-var video{max-height:260px}body.gw-var-camera header,body.gw-var-camera main,body.gw-var-camera footer,body.gw-var-camera #gowall-remote,body.gw-var-camera .notes{display:none!important}body.gw-var-camera #gw-var{margin:12px;min-height:85vh}#gw-var[hidden]{display:none!important}';document.head.append(css);
 const section=document.createElement('section');section.id='gw-var';section.hidden=true;
@@ -14,7 +14,7 @@ document.body.append(section);
 const $=id=>document.getElementById(id),status=t=>$('gw-var-status').textContent=t;
 let hubPeer=null,camPeer=null,cameraStream=null,cameraFacing='environment',micStream=null,micCall=null;
 const roleBox=document.querySelector('#gowall-remote .gw-actions');
-if(roleBox){const button=document.createElement('button');button.id='gw-var-role';button.textContent='📹 VAR Camera';roleBox.append(button);button.onclick=()=>{const entered=prompt('Enter the 6-digit VAR camera code shown on the controller:');if(entered===null)return;if(!/^\d{6}$/.test(entered.trim())){status('Enter a valid 6-digit VAR camera code.');section.hidden=false;return}location.href=location.pathname+'?var-camera='+encodeURIComponent(entered.trim())};}
+if(roleBox){const button=document.createElement('button');button.id='gw-var-role';button.textContent='📹 VAR Camera';roleBox.append(button);button.onclick=()=>{const entered=prompt('Enter the 8-digit display pairing code:');if(entered===null)return;if(!/^\d{8}$/.test(entered.trim())){status('Enter the same 8-digit code shown on the display.');section.hidden=false;return}location.href=location.pathname+'?var-camera='+encodeURIComponent(entered.trim())};}
 const feeds=new Map();let cameraCounter=0;
 function stopFeed(id){
  const f=feeds.get(id);if(!f)return;
@@ -80,11 +80,12 @@ function attachCamera(call){
  });
  call.on('close',()=>stopFeed(id));call.on('error',()=>stopFeed(id));
 }
-function setupHub(){
- if(hubPeer)return;section.hidden=false;$('gw-var-hub').hidden=false;const code=String(Math.floor(100000+Math.random()*900000));
+function setupHub(code){
+ if(hubPeer)return;section.hidden=false;$('gw-var-hub').hidden=false;
+ if(!/^\d{8}$/.test(code||''))return status('Connect the controller to the display to share its pairing code.');
  if(!window.Peer)return status('PeerJS is unavailable. Internet is required for pairing.');
  hubPeer=new Peer('gowall-var-'+code,{config:{iceServers:[{urls:'stun:stun.l.google.com:19302'}]}});
- hubPeer.on('open',()=>{const link=location.origin+location.pathname+'?var-camera='+code;$('gw-var-link').innerHTML='<p>Camera code: <b>'+code+'</b></p><p><a href="'+esc(link)+'" target="_blank" rel="noopener">'+esc(link)+'</a></p>';status('Share the link or code with camera devices.')});
+ hubPeer.on('open',()=>{const link=location.origin+location.pathname+'?var-camera='+code;$('gw-var-link').innerHTML='<p>Display and camera code: <b>'+code+'</b></p><p><a href="'+esc(link)+'" target="_blank" rel="noopener">'+esc(link)+'</a></p>';status('Share the link or code with camera devices.')});
  hubPeer.on('call',attachCamera);hubPeer.on('error',e=>status('Camera connection error: '+e.type));
 }
 async function startCamera(){
@@ -110,5 +111,5 @@ async function startMic(){
 function stopMic(){micCall?.close();micCall=null;micStream?.getTracks().forEach(t=>t.stop());micStream=null;$('gw-var-mic').disabled=false;$('gw-var-stop').disabled=true;status('Announcement stopped.')}
 $('gw-var-mic').onclick=startMic;$('gw-var-stop').onclick=stopMic;
 if(requestedCam){document.body.classList.add('gw-var-camera');section.hidden=false;$('gw-var-cam').hidden=false;status(validCam?'Camera mode. Connect to controller code '+camCode+'.':'Invalid camera code. Open a new link from the controller.');$('gw-var-start').disabled=!validCam}
-else document.addEventListener('gowall-role',e=>{if(e.detail.role==='controller')setupHub();if(e.detail.role==='display'){section.hidden=true;const wait=setInterval(()=>{const p=pair()?.peer;if(!p)return;clearInterval(wait);p.on('call',call=>{if(call.peer!==pair()?.remotePeerId){call.close();return}call.answer();call.on('stream',stream=>{const audio=document.createElement('audio');audio.autoplay=true;audio.srcObject=stream;audio.setAttribute('playsinline','');document.body.append(audio);audio.play().catch(()=>{});const cleanup=()=>{audio.pause();audio.srcObject=null;audio.remove()};call.on('close',cleanup);call.on('error',cleanup)})})},100)}});
+else {document.addEventListener('gowall-paired',e=>{if(pair()?.role==='controller')setupHub(e.detail.code)});document.addEventListener('gowall-role',e=>{if(e.detail.role==='controller'){section.hidden=false;$('gw-var-hub').hidden=false;status('Connect to the display to use its pairing code for all cameras.')}if(e.detail.role==='display'){section.hidden=true;const wait=setInterval(()=>{const p=pair()?.peer;if(!p)return;clearInterval(wait);p.on('call',call=>{if(call.peer!==pair()?.remotePeerId){call.close();return}call.answer();call.on('stream',stream=>{const audio=document.createElement('audio');audio.autoplay=true;audio.srcObject=stream;audio.setAttribute('playsinline','');document.body.append(audio);audio.play().catch(()=>{});const cleanup=()=>{audio.pause();audio.srcObject=null;audio.remove()};call.on('close',cleanup);call.on('error',cleanup)})})},100)}});}
 })();
