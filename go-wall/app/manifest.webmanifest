@@ -1,7 +1,7 @@
 {
-  "name": "جو وول — Go-Wall",
-  "short_name": "Go-Wall",
-  "description": "Go Wall — لوحة نتائج لكرة القدم وكرة اليد والتنس · Scoreboard for football, handball and tennis",
+  "name": "جووول — Goaaal",
+  "short_name": "Goaaal",
+  "description": "Goaaal — لوحة نتائج لكرة القدم وكرة اليد والتنس · Scoreboard for football, handball and tennis",
   "lang": "ar",
   "dir": "rtl",
   "start_url": "./",
