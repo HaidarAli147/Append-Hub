@@ -234,25 +234,43 @@ function clip(id) {
 }
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 
+/* Mixed recorded commentary and spoken custom team names. */
+async function sayCustomName(name, gen) {
+ if (!('speechSynthesis' in window) || !name) return;
+ await new Promise(resolve => {
+  const u=new SpeechSynthesisUtterance(name);
+  u.lang=/[\u0600-\u06ff]/.test(name)?'ar-SA':state.lang==='ar'?'ar-SA':'en-US';
+  u.rate=0.95;u.volume=1;
+  const voices=speechSynthesis.getVoices();
+  const chosen=voices.find(v=>v.lang.toLowerCase().startsWith(u.lang.slice(0,2).toLowerCase()));
+  if(chosen)u.voice=chosen;
+  u.onend=resolve;u.onerror=resolve;
+  if(gen!==speechGen)return resolve();
+  speechSynthesis.speak(u);
+ });
+}
 async function playSequence(ids, gen) {
-  const parts = await Promise.all(ids.map(clip));
-  if (gen !== speechGen) return;
-  const ctx = voiceCtx();
-  let t = ctx.currentTime + 0.04;
-  activeSources = [];
-  for (const c of parts) {
-    if (!c) continue;
-    const src = ctx.createBufferSource();
-    src.buffer = c.buf; src.connect(vgain);
-    src.start(t, c.from, c.dur);
-    activeSources.push(src);
-    t += c.dur + 0.035;                       // a natural breath between phrases
+ const ctx=voiceCtx();
+ activeSources=[];
+ for (const id of ids) {
+  if(gen!==speechGen)return;
+  if(typeof id==='string'&&id.startsWith('name:')){
+   await sayCustomName(id.slice(5),gen);
+   continue;
   }
-  await sleep(Math.max(0, (t - ctx.currentTime) * 1000));
-  if (gen === speechGen) { speaking = false; if (pending) { const n = pending; pending = null; startSpeech(n); } }
+  const c=await clip(id);
+  if(gen!==speechGen)return;
+  if(!c)continue;
+  await new Promise(resolve=>{
+   const src=ctx.createBufferSource();src.buffer=c.buf;src.connect(vgain);
+   activeSources.push(src);src.onended=resolve;
+   try{src.start(0,c.from,c.dur)}catch{resolve()}
+  });
+ }
+ if(gen===speechGen){speaking=false;if(pending){const n=pending;pending=null;startSpeech(n)}}
 }
 function startSpeech(ids) { speaking = true; playSequence(ids, ++speechGen); }
-function cutSpeech() { activeSources.forEach(s => { try { s.stop(); } catch { /* already ended */ } }); activeSources = []; }
+function cutSpeech() { if('speechSynthesis' in window)speechSynthesis.cancel(); activeSources.forEach(s => { try { s.stop(); } catch { /* already ended */ } }); activeSources = []; }
 /* urgent: cut off whatever is being said. Otherwise wait for the current line; only the newest waiting line is kept. */
 function speak(ids, urgent = false) {
   if (!state.sound || !state.voice) return;
@@ -261,8 +279,8 @@ function speak(ids, urgent = false) {
 }
 function stopSpeech() { speechGen++; pending = null; speaking = false; cutSpeech(); }
 const NUM = n => 'n' + Math.max(0, Math.min(120, n | 0));
-const TEAM = i => 't' + (i + 1);
-const scoreSeq = sp => { const [a, b] = state[sp].teams; return ['t1', NUM(a.score), 't2', NUM(b.score)]; };
+const TEAM = (i,sp) => sp && state[sp]?.teams?.[i]?.name ? 'name:' + state[sp].teams[i].name : 't' + (i + 1);
+const scoreSeq = sp => { const [a, b] = state[sp].teams; return [TEAM(0,sp), NUM(a.score), TEAM(1,sp), NUM(b.score)]; };
 // Warm the cache after the first tap (browsers block audio until then anyway).
 const PRELOAD = ['goal_1', 'goal_2', 'goal_3', 'goal_4', 'goal_for', 'score_is', 't1', 't2', 'vs', 'in_min', 'kick_off', 'yellow', 'red',
   'first_goal', 'equalizer', 'comeback', 'takes_lead', 'extends', 'pulls_back', 'late_goal', 'cheer_1', 'cheer_2', 'cheer_3', 'cheer_4', 'cheer_conceded',
@@ -424,30 +442,15 @@ function setScore(sp, team, delta) {
   else speak(['score_fixed', ...scoreSeq(sp)]);
 }
 
-/* Commentator: ask for the scorer, then shout it on screen and out loud. */
-function askScorer(teamName) {
-  return new Promise(resolve => {
-    const dlg = modal(`<form method="dialog"><h2>${L('جووول!')}</h2><p>${L('هدف لفريق')} <b>${esc(teamName)}</b> — ${L('من سجّل الهدف؟')}</p>
-      <input type="text" id="scorer-in" maxlength="30" placeholder="${L('اسم اللاعب (اختياري)')}" dir="auto" autofocus autocomplete="off"
-        style="font:700 20px Cairo,sans-serif;letter-spacing:0">
-      <div class="actions"><button class="btn" value="skip" formnovalidate>${L('تخطي')}</button><button class="btn go" value="ok">${L('إعلان الهدف')}</button></div></form>`);
-    dlg.onclose = () => resolve(dlg.returnValue === 'ok' ? $('#scorer-in', dlg).value.trim() : '');
-  });
-}
-async function goalFlow(sp, team) {
-  sound('goal');
-  const T = state[sp].teams[team];
-  const who = await askScorer(T.name);
-  if (sp === 'fb' && who) {
-    const entry = state.fb.log.find(e => e.icon === '⚽' && e.team === team && !e.who);
-    if (entry) { entry.who = who; commit(); }
-  }
-  announceGoal(sp, team, who);
+/* Goals announce immediately without a player-name dialog. */
+function goalFlow(sp,team){
+ sound('goal');
+ announceGoal(sp,team,'');
 }
 let goalTimer = 0;
 function announceGoal(sp, team, who) {
   const T = state[sp].teams[team];
-  const line = `${L('هدف سجله')} ${who || '----------'}`;
+  const line = L('هدف لفريق');
   let el = $('#goal-banner');
   if (!el) { el = document.createElement('div'); el.id = 'goal-banner'; el.setAttribute('role', 'alert'); document.body.append(el); }
   el.dataset.side = team;
@@ -467,7 +470,7 @@ function announceGoal(sp, team, who) {
   else if (me < them) ctx = 'pulls_back';
   else if (me - them >= 2) ctx = 'extends';
   if (late && ctx !== 'first_goal') ctx = 'late_goal';
-  speak([pickOne(['goal_1', 'goal_2', 'goal_3', 'goal_4']), 'goal_for', TEAM(team),
+  speak([pickOne(['goal_1', 'goal_2', 'goal_3', 'goal_4']), 'goal_for', TEAM(team,sp),
     ...(sp === 'fb' ? ['in_min', NUM(minute)] : []),
     'score_is', ...scoreSeq(sp),
     ...(ctx ? [ctx] : [pickOne(['cheer_1', 'cheer_2', 'cheer_3', 'cheer_4'])]),
@@ -487,9 +490,9 @@ function setStat(sp, team, key, delta) {
   });
   sound('beep');
   if (delta > 0 && sp === 'fb') {
-    if (key === 'fouls') speak([pickOne(['foul_on', 'foul_ref']), TEAM(team), ...(Math.random() < 0.5 ? ['foul_c'] : [])]);
-    else if (key === 'yellow') speak(['yellow', TEAM(team)], true);
-    else if (key === 'red') speak(['red', TEAM(team), 'red_after'], true);
+    if (key === 'fouls') speak([pickOne(['foul_on', 'foul_ref']), TEAM(team,sp), ...(Math.random() < 0.5 ? ['foul_c'] : [])]);
+    else if (key === 'yellow') speak(['yellow', TEAM(team,sp)], true);
+    else if (key === 'red') speak(['red', TEAM(team,sp), 'red_after'], true);
   }
 }
 
