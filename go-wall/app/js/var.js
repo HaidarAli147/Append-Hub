@@ -16,22 +16,67 @@ let hubPeer=null,camPeer=null,cameraStream=null,cameraFacing='environment',micSt
 const roleBox=document.querySelector('#gowall-remote .gw-actions');
 if(roleBox){const button=document.createElement('button');button.id='gw-var-role';button.textContent='📹 VAR Camera';roleBox.append(button);button.onclick=()=>{const entered=prompt('Enter the 6-digit VAR camera code shown on the controller:');if(entered===null)return;if(!/^\d{6}$/.test(entered.trim())){status('Enter a valid 6-digit VAR camera code.');section.hidden=false;return}location.href=location.pathname+'?var-camera='+encodeURIComponent(entered.trim())};}
 const feeds=new Map();let cameraCounter=0;
-function stopFeed(id){const f=feeds.get(id);if(!f)return;f.call.close();if(f.rec&&f.rec.state!=='inactive')f.rec.stop();f.chunks.forEach(x=>URL.revokeObjectURL(x.url));f.element.remove();feeds.delete(id)}
+function stopFeed(id){
+ const f=feeds.get(id);if(!f)return;
+ feeds.delete(id);
+ f.active=false;
+ if(f.timer)clearTimeout(f.timer);
+ if(f.rec&&f.rec.state!=='inactive')try{f.rec.stop()}catch{}
+ f.call.close();
+ f.chunks.forEach(x=>URL.revokeObjectURL(x.url));
+ const replay=f.element.querySelector('.gw-replay-video');if(replay){replay.pause();replay.removeAttribute('src');replay.load()}
+ f.element.remove();
+}
 function attachCamera(call){
  const id=String(++cameraCounter);
- call.answer();call.on('stream',stream=>{
-  const card=document.createElement('article');card.innerHTML='<strong>Camera '+id+'</strong><video autoplay playsinline muted></video><div><button class="gw-replay">▶ Replay last clip</button><button class="gw-live">● Live</button></div><video class="gw-replay-video" controls playsinline hidden></video>';
-  $('gw-var-grid').append(card);const live=card.querySelector('video');live.srcObject=stream;live.play().catch(()=>{});
-  const f={call,element:card,chunks:[],rec:null};feeds.set(id,f);
+ call.answer();
+ call.on('stream',stream=>{
+  const card=document.createElement('article');
+  card.innerHTML='<strong>Camera '+id+'</strong><video autoplay playsinline muted></video><div><button class="gw-replay" disabled>▶ Replay last clip</button><button class="gw-live">● Live</button></div><video class="gw-replay-video" controls playsinline hidden></video>';
+  $('gw-var-grid').append(card);
+  const live=card.querySelector('video'),replay=card.querySelector('.gw-replay-video'),replayButton=card.querySelector('.gw-replay');
+  live.srcObject=stream;live.play().catch(()=>{});
+  const f={call,element:card,chunks:[],rec:null,timer:null,active:true};
+  feeds.set(id,f);
+  // MediaRecorder timeslice blobs may not be independently playable. Finalize each
+  // recording before offering it for replay; retain the most recent three clips.
+  const mime=window.MediaRecorder&&['video/mp4','video/webm;codecs=vp8','video/webm'].find(t=>MediaRecorder.isTypeSupported(t));
   if(window.MediaRecorder){
-   try{const mime=['video/webm;codecs=vp8,opus','video/webm','video/mp4'].find(t=>MediaRecorder.isTypeSupported(t));const rec=new MediaRecorder(stream,mime?{mimeType:mime}:undefined);f.rec=rec;
-    rec.ondataavailable=e=>{if(e.data.size){const url=URL.createObjectURL(e.data);f.chunks.push({url,type:e.data.type});while(f.chunks.length>6){const old=f.chunks.shift();URL.revokeObjectURL(old.url)}}};
-    rec.start(2500);
-   }catch(e){console.warn('VAR recording unavailable',e)}
-  }
-  card.querySelector('.gw-replay').onclick=()=>{const clip=f.chunks.at(-1);if(!clip)return status('Replay is not ready yet. Wait a few seconds.');const replay=card.querySelector('.gw-replay-video');replay.src=clip.url;replay.hidden=false;live.hidden=true;replay.play().catch(()=>{})};
-  card.querySelector('.gw-live').onclick=()=>{const replay=card.querySelector('.gw-replay-video');replay.pause();replay.hidden=true;live.hidden=false;live.play().catch(()=>{})};
-  status('Camera '+id+' connected. '+feeds.size+' camera(s) online.');
+   const recordNext=()=>{
+    if(!f.active||!stream.getVideoTracks().some(t=>t.readyState==='live'))return;
+    try{
+     const rec=new MediaRecorder(stream,mime?{mimeType:mime}:undefined);
+     f.rec=rec;
+     const parts=[];
+     rec.ondataavailable=e=>{if(e.data.size)parts.push(e.data)};
+     rec.onstop=()=>{
+      if(!f.active)return;
+      if(parts.length){
+       const blob=new Blob(parts,{type:rec.mimeType||parts[0].type||'video/webm'});
+       const url=URL.createObjectURL(blob);
+       f.chunks.push({url,type:blob.type});
+       while(f.chunks.length>3)URL.revokeObjectURL(f.chunks.shift().url);
+       replayButton.disabled=false;
+      }
+      recordNext();
+     };
+     rec.onerror=()=>{status('Camera '+id+': replay recording failed. Live video is still available.');f.active=false};
+     rec.start();
+     f.timer=setTimeout(()=>{if(rec.state==='recording')rec.stop()},8000);
+    }catch(e){status('Camera '+id+': recording not supported on this device.');console.warn('VAR recording unavailable',e)}
+   };
+   recordNext();
+  }else status('Camera '+id+': this browser does not support video recording.');
+  replayButton.onclick=()=>{
+   const clip=f.chunks.at(-1);
+   if(!clip)return status('Replay is not ready yet. The first clip takes about 8 seconds.');
+   replay.pause();replay.src=clip.url;replay.hidden=false;live.hidden=true;
+   replay.load();replay.play().catch(()=>status('Playback blocked or unsupported on this browser. Use Live to return to the camera.'));
+  };
+  card.querySelector('.gw-live').onclick=()=>{
+   replay.pause();replay.hidden=true;live.hidden=false;live.play().catch(()=>{});
+  };
+  status('Camera '+id+' connected. Replay will be ready after the first 8-second clip.');
  });
  call.on('close',()=>stopFeed(id));call.on('error',()=>stopFeed(id));
 }
