@@ -18,6 +18,7 @@ const roleBox=document.querySelector('#gowall-remote .gw-actions');
 if(roleBox){const button=document.createElement('button');button.id='gw-var-role';button.textContent='📹 VAR Camera';roleBox.append(button);button.onclick=()=>{const entered=prompt('Enter the 8-digit display pairing code:');if(entered===null)return;if(!/^\d{8}$/.test(entered.trim())){status('Enter the same 8-digit code shown on the display.');section.hidden=false;return}location.href=location.pathname+'?var-camera='+encodeURIComponent(entered.trim())};}
 const feeds=new Map();let cameraCounter=0;
 const blockedCameras=new Set();
+const cameraChannels=new Map();
 function setCameraName(peerId,name){
  const safe=String(name||'').trim().slice(0,40)||'Unnamed camera';
  cameraNames.set(peerId,safe);
@@ -72,7 +73,7 @@ function attachCamera(call){
   feeds.set(id,f);
   setCameraName(call.peer,cameraNames.get(call.peer)||'Camera '+id);
   card.querySelector('.gw-broadcast').onclick=()=>broadcastCamera(f);
-  card.querySelector('.gw-remove').onclick=()=>{const name=card.querySelector('.gw-camera-name').textContent;if(!confirm('Remove '+name+' from VAR?'))return;blockedCameras.add(call.peer);stopFeed(id);status(name+' removed. The camera must rejoin with a new connection.');};
+  card.querySelector('.gw-remove').onclick=()=>{const name=card.querySelector('.gw-camera-name').textContent;if(!confirm('Remove '+name+' from VAR?'))return;blockedCameras.add(call.peer);const channel=cameraChannels.get(call.peer);if(channel?.open)channel.send({type:'camera-removed'});stopFeed(id);cameraChannels.delete(call.peer);status(name+' removed from VAR.');};
   // MediaRecorder timeslice blobs may not be independently playable. Finalize each
   // recording before offering it for replay; retain the most recent three clips.
   const mime=window.MediaRecorder&&['video/mp4','video/webm;codecs=vp8','video/webm'].find(t=>MediaRecorder.isTypeSupported(t));
@@ -121,12 +122,12 @@ function setupHub(code){
  if(!window.Peer)return status('PeerJS is unavailable. Internet is required for pairing.');
  hubPeer=new Peer('gowall-var-'+code,{config:{iceServers:[{urls:'stun:stun.l.google.com:19302'}]}});
  hubPeer.on('open',()=>{const link=location.origin+location.pathname+'?var-camera='+code;$('gw-var-link').innerHTML='<p>Display and camera code: <b>'+code+'</b></p><p><a href="'+esc(link)+'" target="_blank" rel="noopener">'+esc(link)+'</a></p>';status('Share the link or code with camera devices.')});
- hubPeer.on('call',attachCamera);hubPeer.on('connection',c=>{if(blockedCameras.has(c.peer)){c.close();return}c.on('data',m=>{if(m?.type==='camera-name')setCameraName(c.peer,m.name)});});hubPeer.on('error',e=>status('Camera connection error: '+e.type));
+ hubPeer.on('call',attachCamera);hubPeer.on('connection',c=>{if(blockedCameras.has(c.peer)){c.close();return}cameraChannels.set(c.peer,c);c.on('close',()=>{if(cameraChannels.get(c.peer)===c)cameraChannels.delete(c.peer)});c.on('data',m=>{if(m?.type==='camera-name')setCameraName(c.peer,m.name)});});hubPeer.on('error',e=>status('Camera connection error: '+e.type));
 }
 async function startCamera(){
  try{cameraStream?.getTracks().forEach(t=>t.stop());cameraStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:cameraFacing}},audio:false});
  $('gw-var-self').srcObject=cameraStream;$('gw-var-self').play().catch(()=>{});
- if(!camPeer){camPeer=new Peer(undefined,{config:{iceServers:[{urls:'stun:stun.l.google.com:19302'}]}});camPeer.on('open',()=>{camData=camPeer.connect('gowall-var-'+camCode,{reliable:true});camData.on('open',sendCameraName);const call=camPeer.call('gowall-var-'+camCode,cameraStream);call.on('error',()=>status('Could not connect to controller.'));status('Streaming camera to controller.');});camPeer.on('error',e=>status('Camera error: '+e.type));}
+ if(!camPeer){camPeer=new Peer(undefined,{config:{iceServers:[{urls:'stun:stun.l.google.com:19302'}]}});camPeer.on('open',()=>{camData=camPeer.connect('gowall-var-'+camCode,{reliable:true});camData.on('open',sendCameraName);camData.on('data',m=>{if(m?.type==='camera-removed'){cameraStream?.getTracks().forEach(t=>t.stop());cameraStream=null;camPeer?.destroy();camPeer=null;camData=null;$('gw-var-self').srcObject=null;$('gw-var-switch').disabled=true;status('This camera was removed by the controller. Select Start Camera to reconnect.');}});const call=camPeer.call('gowall-var-'+camCode,cameraStream);call.on('error',()=>status('Could not connect to controller.'));status('Streaming camera to controller.');});camPeer.on('error',e=>status('Camera error: '+e.type));}
  else{camPeer.destroy();camPeer=null;startCamera();return}
  $('gw-var-switch').disabled=false;
  }catch(e){status('Camera permission or connection failed: '+e.message)}
