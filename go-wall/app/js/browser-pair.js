@@ -4,10 +4,14 @@
 const $=id=>document.getElementById(id);
 const box=document.createElement('section');
 box.id='gowall-remote';box.className='no-tv';
-box.innerHTML='<h2>📱 Go-Wall · Two devices</h2><p>Open this same page on both devices, connected to the same Wi-Fi. Choose a role below.</p><div class="gw-actions"><button id="gw-display">🖥️ Display</button><button id="gw-control">📱 Controller</button></div><div id="gw-details" role="status"></div><div id="gw-controls" hidden><div id="gw-score">0 : 0</div><div id="gw-names"></div><div class="gw-actions"><button data-gw="toggle">▶ / ⏸ Clock</button><button data-gw="undo">↶ Undo</button><button data-gw="one">+1 Team 1</button><button data-gw="two">+1 Team 2</button><button data-gw="minusone">−1 Team 1</button><button data-gw="minustwo">−1 Team 2</button><button data-gw="voice">🎙 Commentator ON/OFF</button><button data-gw="testvoice">🔈 Test commentator</button><button data-gw="sound">🔊 Sound</button></div><div class="gw-actions"><button data-gw="football">Football</button><button data-gw="handball">Handball</button><button data-gw="tennis">Tennis</button><button data-gw="thirty">Thirty</button></div><div id="gw-thirty-controls" class="gw-actions"></div><div class="gw-actions"></div></div>';
+box.innerHTML='<h2>📱 Go-Wall · Two devices</h2><p>Open this same page on both devices, connected to the same Wi-Fi. Choose a role below.</p><div class="gw-actions"><button id="gw-display">🖥️ Display</button><button id="gw-control">📱 Controller</button></div><div id="gw-details" role="status"></div><div id="gw-controls" hidden><div id="gw-score">0 : 0</div><div id="gw-names"></div><div class="gw-actions"><button data-gw="toggle">▶ / ⏸ Clock</button><button data-gw="undo">↶ Undo</button><button data-gw="one">+1 Team 1</button><button data-gw="two">+1 Team 2</button><button data-gw="minusone">−1 Team 1</button><button data-gw="minustwo">−1 Team 2</button><button data-gw="voice">🎙 Commentator ON/OFF</button><button data-gw="testvoice">🔈 Test commentator</button><button data-gw="sound">🔊 Sound</button></div><div class="gw-actions"><button data-gw="football">Football</button><button data-gw="handball">Handball</button><button data-gw="tennis">Tennis</button><button data-gw="thirty">Thirty</button></div><div id="gw-thirty-controls"></div><div class="gw-actions"></div></div>';
 document.querySelector('.mast')?.after(box);
-const style=document.createElement('style');style.textContent='#gowall-remote{margin:16px var(--gutter);padding:20px;border:2px solid white}#gowall-remote h2{margin:0 0 8px}.gw-actions{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}.gw-actions button{padding:10px;background:#fff;color:#352246;border:0;font-weight:700}#gw-score{font-size:42px;font-weight:bold}#gw-details{overflow-wrap:anywhere}body.gw-controller .mast,body.gw-controller main,body.gw-controller .notes,body.gw-controller footer{display:none!important}body.gw-controller #gowall-remote{min-height:80vh}body.gw-controller #gw-controls:not([hidden]){display:block}';document.head.append(style);
+const style=document.createElement('style');style.textContent='#gowall-remote{margin:16px var(--gutter);padding:20px;border:2px solid white}#gowall-remote h2{margin:0 0 8px}.gw-actions{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}.gw-actions button{padding:10px;background:#fff;color:#352246;border:0;font-weight:700}#gw-score{font-size:42px;font-weight:bold}#gw-details{overflow-wrap:anywhere}body.gw-controller .mast,body.gw-controller main,body.gw-controller .notes,body.gw-controller footer{display:none!important}body.gw-controller #gowall-remote{min-height:80vh}body.gw-controller #gw-controls:not([hidden]){display:block}';style.textContent+='#gw-thirty-controls{display:grid;gap:12px;margin-top:14px}.gw-thirty-toolbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center}.gw-thirty-player{border:2px solid #fff;padding:12px}.gw-thirty-player strong{display:block;font-size:28px}.gw-thirty-player input,.gw-thirty-toolbar input{background:#fff;color:#2a1a3d;padding:9px;max-width:180px}.gw-thirty-player button:disabled{opacity:.35}';document.head.append(style);
 let peer=null,connection=null,role=null,connected=false;
+const escGw=v=>String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let thirtySnapshot=null;
+function renderThirtyRemote(){const area=$('gw-thirty-controls');if(!thirtySnapshot||box.dataset.sport!=='thirty'){area.innerHTML='';return;}const s=thirtySnapshot;area.innerHTML='<div class="gw-thirty-toolbar"><label>Players <input id="gw-thirty-count" type="number" min="4" max="24" value="'+s.players.length+'"></label><button data-gw-thirty="count">Set players</button><button data-gw-thirty="undo">↶ Undo</button><button data-gw-thirty="clear">Clear touch</button><button data-gw-thirty="reset">New game</button></div><p>Last touch: '+escGw(s.players.find(p=>p.id===s.last)?.name||'None')+'</p>'+s.players.map(p=>{const out=p.score>=30,repeat=s.last===p.id;return '<section class="gw-thirty-player"><input aria-label="Player name" data-gw-thirty-name="'+p.id+'" value="'+escGw(p.name)+'" maxlength="30"><strong>'+p.score+' / 30</strong><div class="gw-actions"><button data-gw-thirty="touch" data-id="'+p.id+'" '+(out||repeat?'disabled':'')+'>Touch</button>'+[['normal','Goal +1'],['volley','Volley +5'],['double','Double kick +30'],['bicycle','Bicycle +30']].map(([kind,name])=>'<button data-gw-thirty="award" data-id="'+p.id+'" data-kind="'+kind+'" '+(out||s.last!==p.id?'disabled':'')+'>'+name+'</button>').join('')+'</div>'+(out?'<b>Eliminated</b>':'')+'</section>'}).join('');}
+
 const details=$('gw-details');
 function message(t){details.textContent=t}
 function initPeer(id,cb){
@@ -35,13 +39,13 @@ function handle(c){
    const names=s.sport==='football'?s.fb?.teams:s.sport==='handball'?s.hb?.teams:null;
    $('gw-score').textContent=s.sport==='thirty'?(s.thirty?.players||[]).map(p=>p.score).join(' · '):names?names.map(t=>t.score).join(' : '):(s.tn?.pts||[0,0]).join(' : ');
    $('gw-names').textContent=s.sport==='thirty'?(s.thirty?.players||[]).map(p=>p.name).join(' · '):names?names.map(t=>t.name).join(' · '):(s.tn?.names||[]).join(' · ');
-   $('gw-thirty-controls').innerHTML=s.sport==='thirty'?(s.thirty?.players||[]).map(p=>'<div><b>'+p.name.replace(/[&<>]/g,'')+' ('+p.score+'/30)</b><button data-gw-thirty="touch" data-id="'+p.id+'">Touch</button><button data-gw-thirty="award" data-kind="normal" data-id="'+p.id+'">+1</button><button data-gw-thirty="award" data-kind="volley" data-id="'+p.id+'">+5</button><button data-gw-thirty="award" data-kind="double" data-id="'+p.id+'">+30</button></div>').join(''):'';
+   thirtySnapshot=s.thirty;
    box.dataset.sport=s.sport;
-  }
+   if(s.sport==='thirty'&&!$('gw-thirty-controls').contains(document.activeElement))renderThirtyRemote();else if(s.sport!=='thirty')$('gw-thirty-controls').innerHTML='';  }
   if(role==='display'&&m.type==='command'){
    if(m.action==='testvoice'){try{voiceCtx().resume().then(()=>speak(['voice_on'],true)).catch(()=>{});}catch{}return;}
    const a=m.action,d=m.data||{};
-   if(a==='thirty'){if(['touch','award','undo','clear'].includes(d.action))Thirty.perform(d.action,d);sync();return;}
+   if(a==='thirty'){if(state.sport!=='thirty')return;if(['touch','award','undo','clear','count','name','reset'].includes(d.action))Thirty.perform(d.action,d);sync();return;}
    if(!['toggle','undo','voice','sound','sport','score','tn-point'].includes(a))return;
    if(a==='sport'&&!['football','handball','tennis','thirty'].includes(d.sport))return;
    if(a==='score'&&(!['fb','hb'].includes(d.sport)||![0,1].includes(d.team)||![-1,1].includes(d.delta)))return;
@@ -58,7 +62,7 @@ function handle(c){
 }
 $('gw-display').onclick=()=>{
  if(peer)return;
- role='display';const code=String(Math.floor(10000000+Math.random()*90000000));
+ role='display';Thirty.setDisplayOnly(true);const code=String(Math.floor(10000000+Math.random()*90000000));
  message('Creating display session…');
  // This tap unlocks the display's Web Audio before remote events arrive.
  try{voiceCtx();vctx?.resume();actx?.resume?.();}catch{}
@@ -82,8 +86,9 @@ $('gw-control').onclick=()=>{
   message('Connecting…');const c=peer.connect('gowall-'+input.value,{reliable:true});handle(c);
  };});
 };
+box.addEventListener('change',e=>{const t=e.target;if(t.dataset.gwThirtyName&&connected)command('thirty',{action:'name',id:t.dataset.gwThirtyName,name:t.value});});
 box.addEventListener('click',e=>{
- const th=e.target.closest('[data-gw-thirty]');if(th){command('thirty',{action:th.dataset.gwThirty,id:th.dataset.id,kind:th.dataset.kind});return}
+ const th=e.target.closest('[data-gw-thirty]');if(th){if(!connected)return message('Connect to the display first.');const action=th.dataset.gwThirty;if(action==='reset'&&!confirm('Start a new Thirty game?'))return;command('thirty',{action,id:th.dataset.id,kind:th.dataset.kind,n:$('gw-thirty-count')?.value,confirmed:action==='reset'});return}
  const a=e.target.closest('[data-gw]')?.dataset.gw;if(!a)return;if(!connected){message('Not paired yet. Enter the display code and wait for “Paired!”');return}
  if(a==='testvoice'){command('testvoice');return}
  if(['football','handball','tennis','thirty'].includes(a)){command('sport',{sport:a});return}
