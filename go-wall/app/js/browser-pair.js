@@ -4,7 +4,7 @@
 const $=id=>document.getElementById(id);
 const box=document.createElement('section');
 box.id='gowall-remote';box.className='no-tv';
-box.innerHTML='<h2>📱 Go-Wall · Two devices</h2><p>Open this same page on both devices, connected to the same Wi-Fi. Choose a role below.</p><div class="gw-actions"><button id="gw-display">🖥️ Display</button><button id="gw-control">📱 Controller</button></div><div id="gw-details" role="status"></div><div id="gw-controls" hidden><div id="gw-score">0 : 0</div><div id="gw-names"></div><div class="gw-actions"><button data-gw="toggle">▶ / ⏸ Clock</button><button data-gw="undo">↶ Undo</button><button data-gw="one">+1 Team 1</button><button data-gw="two">+1 Team 2</button><button data-gw="minusone">−1 Team 1</button><button data-gw="minustwo">−1 Team 2</button><button data-gw="voice">🎙 Commentator</button><button data-gw="sound">🔊 Sound</button></div><div class="gw-actions"><button data-gw="football">Football</button><button data-gw="handball">Handball</button><button data-gw="tennis">Tennis</button></div></div>';
+box.innerHTML='<h2>📱 Go-Wall · Two devices</h2><p>Open this same page on both devices, connected to the same Wi-Fi. Choose a role below.</p><div class="gw-actions"><button id="gw-display">🖥️ Display</button><button id="gw-control">📱 Controller</button></div><div id="gw-details" role="status"></div><div id="gw-controls" hidden><div id="gw-score">0 : 0</div><div id="gw-names"></div><div class="gw-actions"><button data-gw="toggle">▶ / ⏸ Clock</button><button data-gw="undo">↶ Undo</button><button data-gw="one">+1 Team 1</button><button data-gw="two">+1 Team 2</button><button data-gw="minusone">−1 Team 1</button><button data-gw="minustwo">−1 Team 2</button><button data-gw="voice">🎙 Commentator ON/OFF</button><button data-gw="testvoice">🔈 Test commentator</button><button data-gw="sound">🔊 Sound</button></div><div class="gw-actions"><button data-gw="football">Football</button><button data-gw="handball">Handball</button><button data-gw="tennis">Tennis</button></div></div>';
 document.querySelector('.mast')?.after(box);
 const style=document.createElement('style');style.textContent='#gowall-remote{margin:16px var(--gutter);padding:20px;border:2px solid white}#gowall-remote h2{margin:0 0 8px}.gw-actions{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}.gw-actions button{padding:10px;background:#fff;color:#352246;border:0;font-weight:700}#gw-score{font-size:42px;font-weight:bold}#gw-details{overflow-wrap:anywhere}body.gw-controller .mast,body.gw-controller main,body.gw-controller .notes,body.gw-controller footer{display:none!important}body.gw-controller #gowall-remote{min-height:80vh}body.gw-controller #gw-controls:not([hidden]){display:block}';document.head.append(style);
 let peer=null,connection=null,role=null,connected=false;
@@ -38,11 +38,18 @@ function handle(c){
    box.dataset.sport=s.sport;
   }
   if(role==='display'&&m.type==='command'){
+   if(m.action==='testvoice'){try{voiceCtx().resume().then(()=>speak(['voice_on'],true)).catch(()=>{});}catch{}return;}
    const a=m.action,d=m.data||{};
    if(!['toggle','undo','voice','sound','sport','score','tn-point'].includes(a))return;
    if(a==='sport'&&!['football','handball','tennis'].includes(d.sport))return;
    if(a==='score'&&(!['fb','hb'].includes(d.sport)||![0,1].includes(d.team)||![-1,1].includes(d.delta)))return;
    if(a==='tn-point'&&![0,1].includes(d.p))return;
+   if(a==='score'&&d.delta===1){
+    // Remote goals cannot open the scorer dialog on the display: announce immediately.
+    const T=state[d.sport].teams[d.team];if(!T)return;
+    mutate(()=>{T.score+=1;if(d.sport==='fb')state.fb.log.unshift({icon:'⚽',team:d.team,label:fbLabel()});});
+    sound('goal');announceGoal(d.sport,d.team,'');sync();return;
+   }
    Promise.resolve(actions[a](d)).then(sync).catch(()=>{});
   }
  });
@@ -51,6 +58,8 @@ $('gw-display').onclick=()=>{
  if(peer)return;
  role='display';const code=String(Math.floor(10000000+Math.random()*90000000));
  message('Creating display session…');
+ // This tap unlocks the display's Web Audio before remote events arrive.
+ try{voiceCtx();vctx?.resume();actx?.resume?.();}catch{}
  initPeer('gowall-'+code,()=>{
   message('Pairing code: '+code+' · Open this page on your phone, select Controller, and enter the code.');
   peer.on('connection',handle);
@@ -73,6 +82,7 @@ $('gw-control').onclick=()=>{
 };
 box.addEventListener('click',e=>{
  const a=e.target.closest('[data-gw]')?.dataset.gw;if(!a)return;if(!connected){message('Not paired yet. Enter the display code and wait for “Paired!”');return}
+ if(a==='testvoice'){command('testvoice');return}
  if(['football','handball','tennis'].includes(a)){command('sport',{sport:a});return}
  if(['one','two','minusone','minustwo'].includes(a)){
   const team=a.endsWith('two')?1:0,delta=a.startsWith('minus')?-1:1;
