@@ -6,15 +6,15 @@ const box=document.createElement('section');
 box.id='gowall-remote';box.className='no-tv';
 box.innerHTML='<h2>📱 Go-Wall · Two devices</h2><p>Open this same page on both devices, connected to the same Wi-Fi. Choose a role below.</p><div class="gw-actions"><button id="gw-display">🖥️ Display</button><button id="gw-control">📱 Controller</button></div><div id="gw-details" role="status"></div><div id="gw-controls" hidden><div id="gw-score">0 : 0</div><div id="gw-names"></div><div class="gw-actions"><button data-gw="toggle">▶ / ⏸ Clock</button><button data-gw="undo">↶ Undo</button><button data-gw="one">+1 Team 1</button><button data-gw="two">+1 Team 2</button><button data-gw="minusone">−1 Team 1</button><button data-gw="minustwo">−1 Team 2</button><button data-gw="voice">🎙 Commentator</button><button data-gw="sound">🔊 Sound</button></div><div class="gw-actions"><button data-gw="football">Football</button><button data-gw="handball">Handball</button><button data-gw="tennis">Tennis</button></div></div>';
 document.querySelector('.mast')?.after(box);
-const style=document.createElement('style');style.textContent='#gowall-remote{margin:16px var(--gutter);padding:20px;border:2px solid white}#gowall-remote h2{margin:0 0 8px}.gw-actions{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}.gw-actions button{padding:10px;background:#fff;color:#352246;border:0;font-weight:700}#gw-score{font-size:42px;font-weight:bold}#gw-details{overflow-wrap:anywhere}body.gw-controller .mast,body.gw-controller main,body.gw-controller .notes,body.gw-controller footer{display:none!important}body.gw-controller #gowall-remote{min-height:80vh}body.gw-controller #gw-controls{display:block}';document.head.append(style);
+const style=document.createElement('style');style.textContent='#gowall-remote{margin:16px var(--gutter);padding:20px;border:2px solid white}#gowall-remote h2{margin:0 0 8px}.gw-actions{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}.gw-actions button{padding:10px;background:#fff;color:#352246;border:0;font-weight:700}#gw-score{font-size:42px;font-weight:bold}#gw-details{overflow-wrap:anywhere}body.gw-controller .mast,body.gw-controller main,body.gw-controller .notes,body.gw-controller footer{display:none!important}body.gw-controller #gowall-remote{min-height:80vh}body.gw-controller #gw-controls:not([hidden]){display:block}';document.head.append(style);
 let peer=null,connection=null,role=null,connected=false;
 const details=$('gw-details');
 function message(t){details.textContent=t}
 function initPeer(id,cb){
  if(!window.Peer){message('Pairing library unavailable. Check internet connection.');return}
- peer=new Peer(id,{config:{iceServers:[]},debug:0});
+ peer=new Peer(id,{config:{iceServers:[{urls:'stun:stun.l.google.com:19302'},{urls:'stun:stun1.l.google.com:19302'}]},debug:1});
  peer.on('open',cb);
- peer.on('error',err=>message('Connection error: '+err.type+'. Retry pairing.'));
+ peer.on('error',err=>{message('Pairing error: '+err.type+'. Refresh both devices and retry.');console.error('Go-Wall pairing',err)});
  peer.on('disconnected',()=>message('Signaling disconnected. Reopen the page to retry.'));
 }
 function snapshot(){return {sport:state.sport,fb:state.fb,hb:state.hb,tn:state.tn,lang:state.lang,run:{...run}}}
@@ -25,9 +25,9 @@ function command(action,data={}){
 function handle(c){
  if(connection?.open){c.close();return}
  connection=c;
- c.on('open',()=>{connected=true;message(role==='display'?'Controller connected. Keep this screen open.':'Paired! Control the scoreboard below.');if(role==='display')sync()});
- c.on('close',()=>{connected=false;message('Connection lost. Reload both devices to reconnect.')});
- c.on('error',()=>{connected=false;message('Connection error. Check that both devices are on the same Wi-Fi.')});
+ c.on('open',()=>{connected=true;message(role==='display'?'Controller connected. Keep this screen open.':'Paired! Control the scoreboard below.');if(role==='controller')$('gw-controls').hidden=false;if(role==='display')sync()});
+ c.on('close',()=>{connected=false;$('gw-controls').hidden=true;message('Connection lost. Reload both devices to reconnect.')});
+ c.on('error',err=>{connected=false;$('gw-controls').hidden=true;message('Connection error. Check that both devices are on the same Wi-Fi.');console.error('Go-Wall channel',err)});
  c.on('data',m=>{
   if(!m||typeof m!=='object')return;
   if(role==='controller'&&m.type==='state'){
@@ -65,14 +65,14 @@ $('gw-control').onclick=()=>{
  const label=document.createElement('label');label.textContent='Display pairing code: ';
  const input=document.createElement('input');input.inputMode='numeric';input.maxLength=8;input.placeholder='8 digits';input.style.cssText='font:inherit;color:#222;background:white;width:150px;padding:8px';
  const button=document.createElement('button');button.textContent='Connect';button.style.cssText='padding:8px;margin:8px;background:white;color:#222';
- label.append(input,button);details.replaceChildren(label);
- initPeer(undefined,()=>{button.onclick=()=>{
+ label.append(input,button);details.replaceChildren(label);button.disabled=true;button.title='Preparing connection';
+ initPeer(undefined,()=>{button.disabled=false;button.title='';button.onclick=()=>{
   if(!/^\d{8}$/.test(input.value)){message('Enter the 8-digit code shown on the display.');return}
-  message('Connecting…');handle(peer.connect('gowall-'+input.value,{reliable:true}));
+  message('Connecting…');const c=peer.connect('gowall-'+input.value,{reliable:true});handle(c);
  };});
 };
 box.addEventListener('click',e=>{
- const a=e.target.closest('[data-gw]')?.dataset.gw;if(!a||!connected)return;
+ const a=e.target.closest('[data-gw]')?.dataset.gw;if(!a)return;if(!connected){message('Not paired yet. Enter the display code and wait for “Paired!”');return}
  if(['football','handball','tennis'].includes(a)){command('sport',{sport:a});return}
  if(['one','two','minusone','minustwo'].includes(a)){
   const team=a.endsWith('two')?1:0,delta=a.startsWith('minus')?-1:1;
