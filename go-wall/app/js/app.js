@@ -653,6 +653,7 @@ async function resetCurrent() {
   const d = defaults();
   if (state.sport === 'football') { d.fb.teams.forEach((t, i) => { t.name = state.fb.teams[i].name; t.color = state.fb.teams[i].color; }); state.fb = d.fb; fbNotified.period = -1; }
   else if (state.sport === 'handball') { d.hb.teams.forEach((t, i) => { t.name = state.hb.teams[i].name; t.color = state.hb.teams[i].color; }); state.hb = d.hb; }
+  else if(state.sport==='thirty'){Thirty.perform('reset');}
   else state.tn = newTennis(state.tn);
   undoStack = [];
   sound('beep');
@@ -666,18 +667,19 @@ const prevBump = {};
 
 function render() {
   const sp = state.sport;
-  for (const s of ['football', 'handball', 'tennis']) {
+  for (const s of ['football', 'handball', 'tennis', 'thirty']) {
     const tab = $(`#tab-${s}`);
     tab.setAttribute('aria-selected', String(s === sp));
     $(`#panel-${s}`).hidden = s !== sp;
   }
   $('#voice-btn').classList.toggle('off', !state.voice);
   $('#sound-btn').classList.toggle('off', !state.sound);
-  document.title = `${L('جو وول')} | ${L(state.sport === 'tennis' ? 'التنس' : state.sport === 'football' ? 'كرة القدم' : 'كرة اليد')}`;
+  document.title = `${L('جو وول')} | ${L(state.sport === 'tennis' ? 'التنس' : state.sport === 'football' ? 'كرة القدم' : state.sport === 'thirty' ? 'ثلاثين' : 'كرة اليد')}`;
 
   if (sp === 'football') $('#panel-football').innerHTML = footballHTML();
   else if (sp === 'handball') $('#panel-handball').innerHTML = handballHTML();
-  else $('#panel-tennis').innerHTML = tennisHTML();
+  else if(sp==='tennis') $('#panel-tennis').innerHTML = tennisHTML();
+  else Thirty.render();
 
   $$('[data-bump]').forEach(el => {
     const k = el.dataset.bump, v = el.textContent;
@@ -935,8 +937,8 @@ document.addEventListener('change', e => {
 document.addEventListener('keydown', e => {
   if (e.target.matches('input, select, textarea') || $('#modal').open || e.ctrlKey || e.metaKey || e.altKey) return;
   const sp = state.sport, code = e.code;
-  if (code === 'Space') { e.preventDefault(); toggleClock(); }
-  else if (code === 'KeyZ') undo();
+  if (code === 'Space' && sp!=='thirty') { e.preventDefault(); toggleClock(); }
+  else if (code === 'KeyZ') (sp==='thirty'?Thirty.perform('undo'):undo());
   else if (code === 'KeyT') toggleTv();
   else if (code === 'KeyF') toggleFullscreen();
   else if (code === 'KeyM') actions.sound();
@@ -944,6 +946,7 @@ document.addEventListener('keydown', e => {
   else if (e.key === '?' || e.key === '؟' || code === 'Slash') showHelp();
   else if (code === 'Digit1' || code === 'Digit2') {
     const i = code === 'Digit1' ? 0 : 1;
+    if (sp === 'thirty') return;
     if (sp === 'tennis') tnPoint(i);
     else setScore(sp === 'football' ? 'fb' : 'hb', i, e.shiftKey ? -1 : 1);
   }
