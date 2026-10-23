@@ -69,7 +69,7 @@ function command(action,data={}){
 function handle(c){
  if(connection?.open){c.close();return}
  connection=c;
- c.on('open',()=>{connected=true;message(role==='display'?'Controller connected. Keep this screen open.':'Paired! Control the scoreboard below.');if(role==='controller')$('gw-controls').hidden=false;if(role==='display')sync()});
+ c.on('open',()=>{connected=true;message(role==='display'?'Controller connected. Keep this screen open.':'Paired! Control the scoreboard below.');if(role==='controller'){$('gw-controls').hidden=false;document.dispatchEvent(new CustomEvent('gowall-paired',{detail:{code:c.peer.replace(/^gowall-/,'')}}))}if(role==='display')sync()});
  c.on('close',()=>{connected=false;$('gw-controls').hidden=true;message('Connection lost. Reload both devices to reconnect.')});
  c.on('error',err=>{connected=false;$('gw-controls').hidden=true;message('Connection error. Check that both devices are on the same Wi-Fi.');console.error('Go-Wall channel',err)});
  c.on('data',m=>{
