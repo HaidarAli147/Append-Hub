@@ -79,7 +79,7 @@ function handle(c){
    $('gw-names').textContent=s.sport==='thirty'?(s.thirty?.players||[]).map(p=>p.name).join(' · '):names?names.map(t=>t.name).join(' · '):(s.tn?.names||[]).join(' · ');
    thirtySnapshot=s.thirty;fullSnapshot=s;
    box.dataset.sport=s.sport;
-   $('gw-standard-controls').hidden=s.sport==='thirty';
+   $('gw-standard-controls').hidden=true;
    if(s.sport==='thirty'&&!$('gw-thirty-controls').contains(document.activeElement))renderThirtyRemote();else if(s.sport!=='thirty')$('gw-thirty-controls').innerHTML='';
    if(!$('gw-full-controls').contains(document.activeElement))renderFullRemote();  }
   if(role==='display'&&m.type==='command'){
@@ -126,6 +126,7 @@ function handle(c){
    if(a==='hb-pen-del'&&!(Number.isInteger(d.idx)&&d.idx>=0&&d.idx<(state.hb.pens[d.team]?.length||0)))return;
    if(a.startsWith('tn-')&&!(state.sport==='tennis'&&[0,1].includes(d.p)))return;
    if(a==='toggle'&&!key)return;
+   if(a==='undo'&&state.sport==='thirty')return;
    if(a==='score'&&d.delta===1){
     const T=state[key].teams[d.team];mutate(()=>{T.score++;if(key==='fb')state.fb.log.unshift({icon:'⚽',team:d.team,label:fbLabel()});});
     sound('goal');announceGoal(key,d.team,'');sync();return;
@@ -170,7 +171,7 @@ box.addEventListener('change',e=>{const t=e.target;
  if(t.dataset.remoteNoad!==undefined){command('noad',{value:t.checked});return}
 const t=e.target;if(t.dataset.gwThirtyName&&connected)command('thirty',{action:'name',id:t.dataset.gwThirtyName,name:t.value});});
 box.addEventListener('click',e=>{
- const r=e.target.closest('[data-remote-action]');if(r){if(!connected)return message('Connect to the display first.');const a=r.dataset.remoteAction;if(['reset','tn-new'].includes(a)&&!confirm('Start a new match?'))return;if(a==='set-clock'){const raw=$('[data-remote-clock]')?.value||'';if(!/^\\d{1,3}:[0-5]\\d$/.test(raw))return message('Use mm:ss for the clock');const [m,sec]=raw.split(':').map(Number);command(a,{ms:(m*60+sec)*1000});return}command(a,{...Object.fromEntries(Object.entries(r.dataset).filter(([k])=>k!=='remoteAction').map(([k,v])=>[k,['team','delta','min','p','idx'].includes(k)?Number(v):v])),confirmed:true});return}
+ const r=e.target.closest('[data-remote-action]');if(r){if(!connected)return message('Connect to the display first.');const a=r.dataset.remoteAction;if(['reset','tn-new'].includes(a)&&!confirm('Start a new match?'))return;if(a==='set-clock'){const raw=box.querySelector('[data-remote-clock]')?.value||'';if(!/^\\d{1,3}:[0-5]\\d$/.test(raw))return message('Use mm:ss for the clock');const [m,sec]=raw.split(':').map(Number);command(a,{ms:(m*60+sec)*1000});return}command(a,{...Object.fromEntries(Object.entries(r.dataset).filter(([k])=>k!=='remoteAction').map(([k,v])=>[k,['team','delta','min','p','idx'].includes(k)?Number(v):v])),confirmed:true});return}
  const th=e.target.closest('[data-gw-thirty]');if(th){if(!connected)return message('Connect to the display first.');const action=th.dataset.gwThirty;if(action==='reset'&&!confirm('Start a new Thirty game?'))return;command('thirty',{action,id:th.dataset.id,kind:th.dataset.kind,n:$('gw-thirty-count')?.value,confirmed:action==='reset'});return}
  const a=e.target.closest('[data-gw]')?.dataset.gw;if(!a)return;if(!connected){message('Not paired yet. Enter the display code and wait for “Paired!”');return}
  if(a==='testvoice'){command('testvoice');return}
