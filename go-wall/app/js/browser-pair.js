@@ -138,7 +138,7 @@ function handle(c){
 }
 $('gw-display').onclick=()=>{
  if(peer)return;
- role='display';Thirty.setDisplayOnly(true);const code=String(Math.floor(10000000+Math.random()*90000000));
+ role='display';announcePairRole();Thirty.setDisplayOnly(true);const code=String(Math.floor(10000000+Math.random()*90000000));
  message('Creating display session…');
  // This tap unlocks the display's Web Audio before remote events arrive.
  try{voiceCtx();vctx?.resume();actx?.resume?.();}catch{}
@@ -152,7 +152,7 @@ $('gw-display').onclick=()=>{
 };
 $('gw-control').onclick=()=>{
  if(peer)return;
- role='controller';document.body.classList.add('gw-controller');
+ role='controller';announcePairRole();document.body.classList.add('gw-controller');
  const label=document.createElement('label');label.textContent='Display pairing code: ';
  const input=document.createElement('input');input.inputMode='numeric';input.maxLength=8;input.placeholder='8 digits';input.style.cssText='font:inherit;color:#222;background:white;width:150px;padding:8px';
  const button=document.createElement('button');button.textContent='Connect';button.style.cssText='padding:8px;margin:8px;background:white;color:#222';
