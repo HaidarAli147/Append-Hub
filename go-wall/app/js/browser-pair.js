@@ -1,10 +1,10 @@
-/* Go-Wall browser pairing. PeerJS signaling only; WebRTC host candidates restrict media/data to LAN. */
+/* Goaaal browser pairing. PeerJS signaling only; WebRTC host candidates restrict media/data to LAN. */
 (()=>{
 'use strict';
 const $=id=>document.getElementById(id);
 const box=document.createElement('section');
 box.id='gowall-remote';box.className='no-tv';
-box.innerHTML='<h2>📱 Go-Wall · Two devices</h2><p>Open this same page on both devices, connected to the same Wi-Fi. Choose a role below.</p><div class="gw-actions"><button id="gw-display">🖥️ Display</button><button id="gw-control">📱 Controller</button></div><div id="gw-details" role="status"></div><div id="gw-controls" hidden><div id="gw-score">0 : 0</div><div id="gw-names"></div><div id="gw-standard-controls" class="gw-actions"><button data-gw="toggle">▶ / ⏸ Clock</button><button data-gw="undo">↶ Undo</button><button data-gw="one">+1 Team 1</button><button data-gw="two">+1 Team 2</button><button data-gw="minusone">−1 Team 1</button><button data-gw="minustwo">−1 Team 2</button><button data-gw="voice">🎙 Commentator ON/OFF</button><button data-gw="testvoice">🔈 Test commentator</button><button data-gw="sound">🔊 Sound</button></div><div class="gw-actions"><button data-gw="football">Football</button><button data-gw="handball">Handball</button><button data-gw="tennis">Tennis</button><button data-gw="thirty">Thirty</button></div><div id="gw-thirty-controls"></div><div id="gw-full-controls"></div><div class="gw-actions"></div></div>';
+box.innerHTML='<h2>📱 Goaaal · Two devices</h2><p>Open this same page on both devices, connected to the same Wi-Fi. Choose a role below.</p><div class="gw-actions"><button id="gw-display">🖥️ Display</button><button id="gw-control">📱 Controller</button></div><div id="gw-details" role="status"></div><div id="gw-controls" hidden><div id="gw-score">0 : 0</div><div id="gw-names"></div><div id="gw-standard-controls" class="gw-actions"><button data-gw="toggle">▶ / ⏸ Clock</button><button data-gw="undo">↶ Undo</button><button data-gw="one">+1 Team 1</button><button data-gw="two">+1 Team 2</button><button data-gw="minusone">−1 Team 1</button><button data-gw="minustwo">−1 Team 2</button><button data-gw="voice">🎙 Commentator ON/OFF</button><button data-gw="testvoice">🔈 Test commentator</button><button data-gw="sound">🔊 Sound</button></div><div class="gw-actions"><button data-gw="football">Football</button><button data-gw="handball">Handball</button><button data-gw="tennis">Tennis</button><button data-gw="thirty">Thirty</button></div><div id="gw-thirty-controls"></div><div id="gw-full-controls"></div><div class="gw-actions"></div></div>';
 document.querySelector('.mast')?.after(box);
 const style=document.createElement('style');style.textContent='#gowall-remote{margin:16px var(--gutter);padding:20px;border:2px solid white}#gowall-remote h2{margin:0 0 8px}.gw-actions{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}.gw-actions button{padding:10px;background:#fff;color:#352246;border:0;font-weight:700}#gw-score{font-size:42px;font-weight:bold}#gw-details{overflow-wrap:anywhere}body.gw-controller .mast,body.gw-controller main,body.gw-controller .notes,body.gw-controller footer{display:none!important}body.gw-controller #gowall-remote{min-height:80vh}body.gw-controller #gw-controls:not([hidden]){display:block}';style.textContent+='.gw-remote-section{border:2px solid #fff;padding:12px;margin:12px 0}.gw-remote-section h3{margin:0 0 10px}.gw-remote-section label{display:inline-flex;gap:6px;align-items:center;margin:6px;flex-wrap:wrap}.gw-remote-section input,.gw-remote-section select{color:#222;background:white;padding:7px;max-width:180px}.gw-remote-section strong{display:block;margin:8px 0}.gw-stat{margin:8px 0}.gw-stat button{margin:3px}';style.textContent+='[hidden]{display:none!important}#gw-thirty-controls{display:grid;gap:12px;margin-top:14px}.gw-thirty-toolbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center}.gw-thirty-player{border:2px solid #fff;padding:12px}.gw-thirty-player strong{display:block;font-size:28px}.gw-thirty-player input,.gw-thirty-toolbar input{background:#fff;color:#2a1a3d;padding:9px;max-width:180px}.gw-thirty-player button:disabled{opacity:.35}';document.head.append(style);
 let peer=null,connection=null,role=null,connected=false;
@@ -58,7 +58,7 @@ function initPeer(id,cb){
  if(!window.Peer){message('Pairing library unavailable. Check internet connection.');return}
  peer=new Peer(id,{config:{iceServers:[{urls:'stun:stun.l.google.com:19302'},{urls:'stun:stun1.l.google.com:19302'}]},debug:1});
  peer.on('open',cb);
- peer.on('error',err=>{message('Pairing error: '+err.type+'. Refresh both devices and retry.');console.error('Go-Wall pairing',err)});
+ peer.on('error',err=>{message('Pairing error: '+err.type+'. Refresh both devices and retry.');console.error('Goaaal pairing',err)});
  peer.on('disconnected',()=>message('Signaling disconnected. Reopen the page to retry.'));
 }
 function snapshot(){return {sport:state.sport,fb:state.fb,hb:state.hb,tn:state.tn,thirty:Thirty.snapshot(),lang:state.lang,run:{...run}}}
@@ -71,7 +71,7 @@ function handle(c){
  connection=c;
  c.on('open',()=>{connected=true;message(role==='display'?'Controller connected. Keep this screen open.':'Paired! Control the scoreboard below.');if(role==='controller'){$('gw-controls').hidden=false;document.dispatchEvent(new CustomEvent('gowall-paired',{detail:{code:c.peer.replace(/^gowall-/,'')}}))}if(role==='display')sync()});
  c.on('close',()=>{connected=false;$('gw-controls').hidden=true;message('Connection lost. Reload both devices to reconnect.')});
- c.on('error',err=>{connected=false;$('gw-controls').hidden=true;message('Connection error. Check that both devices are on the same Wi-Fi.');console.error('Go-Wall channel',err)});
+ c.on('error',err=>{connected=false;$('gw-controls').hidden=true;message('Connection error. Check that both devices are on the same Wi-Fi.');console.error('Goaaal channel',err)});
  c.on('data',m=>{
   if(!m||typeof m!=='object')return;
   if(role==='display'&&['var-replay','var-stop'].includes(m.type)){document.dispatchEvent(new CustomEvent('gowall-var-message',{detail:m}));return}
@@ -149,7 +149,7 @@ $('gw-display').onclick=()=>{
   message('Pairing code: '+code+' · Open this page on your phone, select Controller, and enter the code.');
   peer.on('connection',handle);
   if(!document.body.classList.contains('tv'))toggleTv();
-  const badge=document.createElement('div');badge.textContent='Go-Wall code: '+code;badge.style.cssText='position:fixed;z-index:9999;top:8px;left:8px;background:#2a1a3d;color:white;padding:8px;font:18px sans-serif';document.body.append(badge);
+  const badge=document.createElement('div');badge.textContent='Goaaal code: '+code;badge.style.cssText='position:fixed;z-index:9999;top:8px;left:8px;background:#2a1a3d;color:white;padding:8px;font:18px sans-serif';document.body.append(badge);
   setInterval(sync,500);
  });
 };
