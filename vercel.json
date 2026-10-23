@@ -1,6 +1,50 @@
 {
   "redirects": [
     {
+      "source": "/",
+      "has": [
+        {
+          "type": "host",
+          "value": "gowall.appendhub.com"
+        }
+      ],
+      "destination": "/go-wall/app/",
+      "permanent": false
+    },
+    {
+      "source": "/",
+      "has": [
+        {
+          "type": "host",
+          "value": "learn.appendhub.com"
+        }
+      ],
+      "destination": "/learn/",
+      "permanent": false
+    },
+    {
+      "source": "/",
+      "has": [
+        {
+          "type": "host",
+          "value": "desktop.appendhub.com"
+        }
+      ],
+      "destination": "/desktop/",
+      "permanent": false
+    },
+    {
+      "source": "/",
+      "has": [
+        {
+          "type": "host",
+          "value": "browser.appendhub.com"
+        }
+      ],
+      "destination": "/browser/",
+      "permanent": false
+    },
+    {
       "source": "/Brackstudy_Archive/:path*",
       "destination": "/AppendHub_Archive/:path*",
       "permanent": true
@@ -71,56 +115,5 @@
       "permanent": true
     }
   ],
-  "rewrites": [
-    {
-      "source": "/",
-      "has": [
-        {
-          "type": "host",
-          "value": "browser.appendhub.com"
-        }
-      ],
-      "destination": "/browser/index.html"
-    },
-    {
-      "source": "/",
-      "has": [
-        {
-          "type": "host",
-          "value": "desktop.appendhub.com"
-        }
-      ],
-      "destination": "/desktop/index.html"
-    },
-    {
-      "source": "/",
-      "has": [
-        {
-          "type": "host",
-          "value": "learn.appendhub.com"
-        }
-      ],
-      "destination": "/learn/index.html"
-    },
-    {
-      "source": "/",
-      "has": [
-        {
-          "type": "host",
-          "value": "gowall.appendhub.com"
-        }
-      ],
-      "destination": "/go-wall/app/index.html"
-    },
-    {
-      "source": "/:path*",
-      "has": [
-        {
-          "type": "host",
-          "value": "gowall.appendhub.com"
-        }
-      ],
-      "destination": "/go-wall/app/:path*"
-    }
-  ]
+  "rewrites": []
 }
