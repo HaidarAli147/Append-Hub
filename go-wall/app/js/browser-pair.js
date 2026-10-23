@@ -1,0 +1,85 @@
+/* Go-Wall browser pairing. PeerJS signaling only; WebRTC host candidates restrict media/data to LAN. */
+(()=>{
+'use strict';
+const $=id=>document.getElementById(id);
+const box=document.createElement('section');
+box.id='gowall-remote';box.className='no-tv';
+box.innerHTML='<h2>📱 Go-Wall · Two devices</h2><p>Open this same page on both devices, connected to the same Wi-Fi. Choose a role below.</p><div class="gw-actions"><button id="gw-display">🖥️ Display</button><button id="gw-control">📱 Controller</button></div><div id="gw-details" role="status"></div><div id="gw-controls" hidden><div id="gw-score">0 : 0</div><div id="gw-names"></div><div class="gw-actions"><button data-gw="toggle">▶ / ⏸ Clock</button><button data-gw="undo">↶ Undo</button><button data-gw="one">+1 Team 1</button><button data-gw="two">+1 Team 2</button><button data-gw="minusone">−1 Team 1</button><button data-gw="minustwo">−1 Team 2</button><button data-gw="voice">🎙 Commentator</button><button data-gw="sound">🔊 Sound</button></div><div class="gw-actions"><button data-gw="football">Football</button><button data-gw="handball">Handball</button><button data-gw="tennis">Tennis</button></div></div>';
+document.querySelector('.mast')?.after(box);
+const style=document.createElement('style');style.textContent='#gowall-remote{margin:16px var(--gutter);padding:20px;border:2px solid white}#gowall-remote h2{margin:0 0 8px}.gw-actions{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}.gw-actions button{padding:10px;background:#fff;color:#352246;border:0;font-weight:700}#gw-score{font-size:42px;font-weight:bold}#gw-details{overflow-wrap:anywhere}body.gw-controller .mast,body.gw-controller main,body.gw-controller .notes,body.gw-controller footer{display:none!important}body.gw-controller #gowall-remote{min-height:80vh}body.gw-controller #gw-controls{display:block}';document.head.append(style);
+let peer=null,connection=null,role=null,connected=false;
+const details=$('gw-details');
+function message(t){details.textContent=t}
+function initPeer(id,cb){
+ if(!window.Peer){message('Pairing library unavailable. Check internet connection.');return}
+ peer=new Peer(id,{config:{iceServers:[]},debug:0});
+ peer.on('open',cb);
+ peer.on('error',err=>message('Connection error: '+err.type+'. Retry pairing.'));
+ peer.on('disconnected',()=>message('Signaling disconnected. Reopen the page to retry.'));
+}
+function snapshot(){return {sport:state.sport,fb:state.fb,hb:state.hb,tn:state.tn,lang:state.lang,run:{...run}}}
+function sync(){if(role==='display'&&connected&&connection?.open)connection.send({type:'state',data:snapshot()})}
+function command(action,data={}){
+ if(role==='controller'&&connection?.open)connection.send({type:'command',action,data});
+}
+function handle(c){
+ if(connection?.open){c.close();return}
+ connection=c;
+ c.on('open',()=>{connected=true;message(role==='display'?'Controller connected. Keep this screen open.':'Paired! Control the scoreboard below.');if(role==='display')sync()});
+ c.on('close',()=>{connected=false;message('Connection lost. Reload both devices to reconnect.')});
+ c.on('error',()=>{connected=false;message('Connection error. Check that both devices are on the same Wi-Fi.')});
+ c.on('data',m=>{
+  if(!m||typeof m!=='object')return;
+  if(role==='controller'&&m.type==='state'){
+   const s=m.data;if(!s||!['football','handball','tennis'].includes(s.sport))return;
+   const names=s.sport==='football'?s.fb?.teams:s.sport==='handball'?s.hb?.teams:null;
+   $('gw-score').textContent=names?names.map(t=>t.score).join(' : '):(s.tn?.pts||[0,0]).join(' : ');
+   $('gw-names').textContent=names?names.map(t=>t.name).join(' · '):(s.tn?.names||[]).join(' · ');
+   box.dataset.sport=s.sport;
+  }
+  if(role==='display'&&m.type==='command'){
+   const a=m.action,d=m.data||{};
+   if(!['toggle','undo','voice','sound','sport','score','tn-point'].includes(a))return;
+   if(a==='sport'&&!['football','handball','tennis'].includes(d.sport))return;
+   if(a==='score'&&(!['fb','hb'].includes(d.sport)||![0,1].includes(d.team)||![-1,1].includes(d.delta)))return;
+   if(a==='tn-point'&&![0,1].includes(d.p))return;
+   Promise.resolve(actions[a](d)).then(sync).catch(()=>{});
+  }
+ });
+}
+$('gw-display').onclick=()=>{
+ if(peer)return;
+ role='display';const code=String(Math.floor(10000000+Math.random()*90000000));
+ message('Creating display session…');
+ initPeer('gowall-'+code,()=>{
+  message('Pairing code: '+code+' · Open this page on your phone, select Controller, and enter the code.');
+  peer.on('connection',handle);
+  if(!document.body.classList.contains('tv'))toggleTv();
+  const badge=document.createElement('div');badge.textContent='Go-Wall code: '+code;badge.style.cssText='position:fixed;z-index:9999;top:8px;left:8px;background:#2a1a3d;color:white;padding:8px;font:18px sans-serif';document.body.append(badge);
+  setInterval(sync,500);
+ });
+};
+$('gw-control').onclick=()=>{
+ if(peer)return;
+ role='controller';document.body.classList.add('gw-controller');
+ const label=document.createElement('label');label.textContent='Display pairing code: ';
+ const input=document.createElement('input');input.inputMode='numeric';input.maxLength=8;input.placeholder='8 digits';input.style.cssText='font:inherit;color:#222;background:white;width:150px;padding:8px';
+ const button=document.createElement('button');button.textContent='Connect';button.style.cssText='padding:8px;margin:8px;background:white;color:#222';
+ label.append(input,button);details.replaceChildren(label);
+ initPeer(undefined,()=>{button.onclick=()=>{
+  if(!/^\d{8}$/.test(input.value)){message('Enter the 8-digit code shown on the display.');return}
+  message('Connecting…');handle(peer.connect('gowall-'+input.value,{reliable:true}));
+ };});
+};
+box.addEventListener('click',e=>{
+ const a=e.target.closest('[data-gw]')?.dataset.gw;if(!a||!connected)return;
+ if(['football','handball','tennis'].includes(a)){command('sport',{sport:a});return}
+ if(['one','two','minusone','minustwo'].includes(a)){
+  const team=a.endsWith('two')?1:0,delta=a.startsWith('minus')?-1:1;
+  const sp=box.dataset.sport||'football';
+  if(sp==='tennis'){if(delta>0)command('tn-point',{p:team})}
+  else command('score',{sport:sp==='football'?'fb':'hb',team,delta});return;
+ }
+ command(a);
+});
+})();
