@@ -9,7 +9,7 @@ document.querySelector('.mast')?.after(box);
 const style=document.createElement('style');style.textContent='#gowall-remote{margin:16px var(--gutter);padding:20px;border:2px solid white}#gowall-remote h2{margin:0 0 8px}.gw-actions{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}.gw-actions button{padding:10px;background:#fff;color:#352246;border:0;font-weight:700}#gw-score{font-size:42px;font-weight:bold}#gw-details{overflow-wrap:anywhere}body.gw-controller .mast,body.gw-controller main,body.gw-controller .notes,body.gw-controller footer{display:none!important}body.gw-controller #gowall-remote{min-height:80vh}body.gw-controller #gw-controls:not([hidden]){display:block}';style.textContent+='.gw-remote-section{border:2px solid #fff;padding:12px;margin:12px 0}.gw-remote-section h3{margin:0 0 10px}.gw-remote-section label{display:inline-flex;gap:6px;align-items:center;margin:6px;flex-wrap:wrap}.gw-remote-section input,.gw-remote-section select{color:#222;background:white;padding:7px;max-width:180px}.gw-remote-section strong{display:block;margin:8px 0}.gw-stat{margin:8px 0}.gw-stat button{margin:3px}';style.textContent+='[hidden]{display:none!important}#gw-thirty-controls{display:grid;gap:12px;margin-top:14px}.gw-thirty-toolbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center}.gw-thirty-player{border:2px solid #fff;padding:12px}.gw-thirty-player strong{display:block;font-size:28px}.gw-thirty-player input,.gw-thirty-toolbar input{background:#fff;color:#2a1a3d;padding:9px;max-width:180px}.gw-thirty-player button:disabled{opacity:.35}';document.head.append(style);
 let peer=null,connection=null,role=null,connected=false;
 function announcePairRole(){document.dispatchEvent(new CustomEvent('gowall-role',{detail:{role}}))}
-window.GoWallPair={get peer(){return peer},get connected(){return connected},get role(){return role},get displayPeerId(){return role==='controller'?connection?.peer:role==='display'?peer?.id:null},get remotePeerId(){return connection?.peer||null}};
+window.GoWallPair={get peer(){return peer},get connected(){return connected},get role(){return role},get displayPeerId(){return role==='controller'?connection?.peer:role==='display'?peer?.id:null},get remotePeerId(){return connection?.peer||null},sendVarMessage(m){if(role==='controller'&&connection?.open)connection.send(m)}};
 const escGw=v=>String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let fullSnapshot=null;
 const remoteButton=(label,action,attrs='')=>'<button data-remote-action="'+action+'" '+attrs+'>'+label+'</button>';
@@ -74,6 +74,7 @@ function handle(c){
  c.on('error',err=>{connected=false;$('gw-controls').hidden=true;message('Connection error. Check that both devices are on the same Wi-Fi.');console.error('Go-Wall channel',err)});
  c.on('data',m=>{
   if(!m||typeof m!=='object')return;
+  if(role==='display'&&['var-replay','var-stop'].includes(m.type)){document.dispatchEvent(new CustomEvent('gowall-var-message',{detail:m}));return}
   if(role==='controller'&&m.type==='state'){
    const s=m.data;if(!s||!['football','handball','tennis','thirty'].includes(s.sport))return;
    const names=s.sport==='football'?s.fb?.teams:s.sport==='handball'?s.hb?.teams:null;

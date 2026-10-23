@@ -12,7 +12,7 @@ const section=document.createElement('section');section.id='gw-var';section.hidd
 section.innerHTML='<h2>📹 VAR · Camera & microphone</h2><p id="gw-var-status" role="status">Choose Controller on the phone first.</p><div id="gw-var-hub" hidden><p>Connect extra phones as cameras. Camera feeds stay in the controller for review.</p><div id="gw-var-link"></div><div id="gw-var-grid"></div><div><button id="gw-var-mic">🎙 Start live announcement</button><button id="gw-var-stop" disabled>■ Stop announcement</button></div><p>Allow microphone access on the controller to speak through the display device.</p></div><div id="gw-var-cam" hidden><p>Camera device: choose Start Camera and allow access. Keep this page open.</p><label>Camera name <input id="gw-var-name" maxlength="40" placeholder="Goal line camera"></label><button id="gw-var-start">📷 Start camera</button><button id="gw-var-switch" disabled>↻ Switch camera</button><video id="gw-var-self" autoplay playsinline muted></video></div>';
 document.body.append(section);
 const $=id=>document.getElementById(id),status=t=>$('gw-var-status').textContent=t;
-let hubPeer=null,camPeer=null,cameraStream=null,cameraFacing='environment',micStream=null,micCall=null,camData=null,broadcastCall=null,broadcastFeed=null;
+let hubPeer=null,camPeer=null,cameraStream=null,cameraFacing='environment',micStream=null,micCall=null,camData=null,broadcastCall=null,broadcastFeed=null,broadcastMode=null;
 const cameraNames=new Map();
 const roleBox=document.querySelector('#gowall-remote .gw-actions');
 if(roleBox){const button=document.createElement('button');button.id='gw-var-role';button.textContent='📹 VAR Camera';roleBox.append(button);button.onclick=()=>{const entered=prompt('Enter the 8-digit display pairing code:');if(entered===null)return;if(!/^\d{8}$/.test(entered.trim())){status('Enter the same 8-digit code shown on the display.');section.hidden=false;return}location.href=location.pathname+'?var-camera='+encodeURIComponent(entered.trim())};}
@@ -25,25 +25,42 @@ function setCameraName(peerId,name){
  for(const f of feeds.values())if(f.call.peer===peerId)f.element.querySelector('.gw-camera-name').textContent=safe;
 }
 function stopBroadcast(){
- const call=broadcastCall;broadcastCall=null;broadcastFeed=null;
+ const call=broadcastCall;broadcastCall=null;broadcastFeed=null;broadcastMode=null;
+ if(pair()?.role==='controller')pair()?.sendVarMessage?.({type:'var-stop'});
  if(call)call.close();
  for(const f of feeds.values()){const btn=f.element.querySelector('.gw-broadcast');if(btn)btn.textContent='📺 Show on display'}
 }
-function broadcastCamera(f){
+async function broadcastCamera(f){
  if(broadcastFeed===f){stopBroadcast();status('Broadcast stopped.');return}
  if(!pair()?.connected||!pair()?.peer||!pair()?.displayPeerId)return status('Pair the controller with the display first.');
+ const replay=f.element.querySelector('.gw-replay-video');
+ const isReplay=!replay.hidden&&replay.src;
+ if(isReplay){
+  const clip=f.selectedClip||f.chunks.at(-1);
+  if(!clip)return status('Select a recorded replay first.');
+  stopBroadcast();
+  try{
+   const blob=await fetch(clip.url).then(r=>r.blob());
+   const bytes=await blob.arrayBuffer();
+   pair().sendVarMessage({type:'var-replay',bytes,mime:blob.type||clip.type});
+   broadcastFeed=f;broadcastMode='replay';
+   f.element.querySelector('.gw-broadcast').textContent='■ Stop display broadcast';
+   status('Showing replay on display.');
+  }catch(err){status('Could not send replay: '+err.message)}
+  return;
+ }
  const stream=f.element.querySelector('video')?.srcObject;
  if(!stream?.getVideoTracks().length)return status('Camera is not ready.');
  stopBroadcast();
  try{
   const call=pair().peer.call(pair().displayPeerId,stream,{metadata:{kind:'var-broadcast'}});
   if(!call)throw Error('Display connection not ready');
-  broadcastCall=call;broadcastFeed=f;
+  broadcastCall=call;broadcastFeed=f;broadcastMode='live';
   call.on('close',()=>{if(broadcastCall===call)stopBroadcast()});
   call.on('error',()=>{if(broadcastCall===call){stopBroadcast();status('Broadcast connection lost.')}});
   f.element.querySelector('.gw-broadcast').textContent='■ Stop display broadcast';
-  status('Camera sent to display.');
- }catch(e){status('Broadcast failed: '+e.message)}
+  status('Showing live camera on display.');
+ }catch(err){status('Broadcast failed: '+err.message)}
 }
 function stopFeed(id){
  const f=feeds.get(id);if(!f)return;
@@ -106,11 +123,13 @@ function attachCamera(call){
   replayButton.onclick=()=>{
    const clip=f.chunks.at(-1);
    if(!clip)return status('Replay is not ready yet. The first clip takes about 8 seconds.');
-   replay.pause();replay.src=clip.url;replay.hidden=false;live.hidden=true;
+   f.selectedClip=clip;replay.pause();replay.src=clip.url;replay.hidden=false;live.hidden=true;
+   if(broadcastFeed===f){stopBroadcast();broadcastCamera(f)}
    replay.load();replay.play().catch(()=>status('Playback blocked or unsupported on this browser. Use Live to return to the camera.'));
   };
   card.querySelector('.gw-live').onclick=()=>{
    replay.pause();replay.hidden=true;live.hidden=false;live.play().catch(()=>{});
+   if(broadcastFeed===f){stopBroadcast();broadcastCamera(f)}
   };
   status('Camera '+id+' connected. Replay will be ready after the first 8-second clip.');
  });
@@ -148,8 +167,28 @@ async function startMic(){
 }
 function stopMic(){micCall?.close();micCall=null;micStream?.getTracks().forEach(t=>t.stop());micStream=null;$('gw-var-mic').disabled=false;$('gw-var-stop').disabled=true;status('Announcement stopped.')}
 $('gw-var-mic').onclick=startMic;$('gw-var-stop').onclick=stopMic;
-if(requestedCam){$('gw-var-name').value=localStorage.getItem('gw-var-camera-name')||'';document.body.classList.add('gw-var-camera');section.hidden=false;$('gw-var-cam').hidden=false;status(validCam?'Camera mode. Connect to controller code '+camCode+'.':'Invalid camera code. Open a new link from the controller.');$('gw-var-start').disabled=!validCam}
-else {document.addEventListener('gowall-paired',e=>{if(pair()?.role==='controller')setupHub(e.detail.code)});document.addEventListener('gowall-role',e=>{if(e.detail.role==='controller'){section.hidden=false;$('gw-var-hub').hidden=false;status('Connect to the display to use its pairing code for all cameras.')}if(e.detail.role==='display'){section.hidden=true;const wait=setInterval(()=>{const p=pair()?.peer;if(!p)return;clearInterval(wait);p.on('call',call=>{if(call.peer!==pair()?.remotePeerId){call.close();return}
+if(requestedCam){$('gw-var-name').value=localStorage.getItem('gw-var-camera-name')||'';document.body.classList.add('gw-var-camera');section.hidden=false;$('gw-var-cam').hidden=false;status(validCam?'Camera mode. Connect to controller code '+camCode+'.':'Invalid camera code. Open a new link from the controller.');$('gw-var-start').disabled=!validCam;if(validCam){status('Connecting camera…');startCamera()}}
+else {let currentReplayUrl=null;
+document.addEventListener('gowall-var-message',e=>{
+ const m=e.detail;
+ if(m.type==='var-stop'){
+  const overlay=document.getElementById('gw-var-display-overlay');
+  if(overlay?.dataset.mode==='replay'){overlay.querySelector('video')?.pause();overlay.remove();if(currentReplayUrl)URL.revokeObjectURL(currentReplayUrl);currentReplayUrl=null}
+  return;
+ }
+ if(m.type!=='var-replay')return;
+ try{
+  document.getElementById('gw-var-display-overlay')?.remove();
+  if(currentReplayUrl)URL.revokeObjectURL(currentReplayUrl);
+  const buffer=m.bytes instanceof ArrayBuffer?m.bytes:m.bytes?.buffer;
+  if(!buffer)throw Error('Missing replay video');
+  currentReplayUrl=URL.createObjectURL(new Blob([buffer],{type:m.mime||'video/mp4'}));
+  const overlay=document.createElement('div');overlay.id='gw-var-display-overlay';overlay.dataset.mode='replay';overlay.style.cssText='position:fixed;inset:0;z-index:10000;background:#160e1d;display:flex;align-items:center;justify-content:center';
+  const video=document.createElement('video');video.src=currentReplayUrl;video.controls=true;video.autoplay=true;video.playsInline=true;video.style.cssText='width:100%;height:100%;object-fit:contain';
+  overlay.append(video);document.body.append(overlay);video.play().catch(()=>{});
+ }catch(err){status('Display replay error: '+err.message)}
+});
+document.addEventListener('gowall-paired',e=>{if(pair()?.role==='controller')setupHub(e.detail.code)});document.addEventListener('gowall-role',e=>{if(e.detail.role==='controller'){section.hidden=false;$('gw-var-hub').hidden=false;status('Connect to the display to use its pairing code for all cameras.')}if(e.detail.role==='display'){section.hidden=true;const wait=setInterval(()=>{const p=pair()?.peer;if(!p)return;clearInterval(wait);p.on('call',call=>{if(call.peer!==pair()?.remotePeerId){call.close();return}
 if(call.metadata?.kind==='var-broadcast'){
  call.answer();
  call.on('stream',stream=>{
