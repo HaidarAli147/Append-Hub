@@ -70,5 +70,27 @@
       "destination": "/learn/live.html",
       "permanent": true
     }
+  ],
+  "rewrites": [
+    {
+      "source": "/",
+      "has": [
+        {
+          "type": "host",
+          "value": "gowall.appendhub.com"
+        }
+      ],
+      "destination": "/go-wall/app/index.html"
+    },
+    {
+      "source": "/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "gowall.appendhub.com"
+        }
+      ],
+      "destination": "/go-wall/app/:path*"
+    }
   ]
 }
