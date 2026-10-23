@@ -77,6 +77,36 @@
       "has": [
         {
           "type": "host",
+          "value": "browser.appendhub.com"
+        }
+      ],
+      "destination": "/browser/index.html"
+    },
+    {
+      "source": "/",
+      "has": [
+        {
+          "type": "host",
+          "value": "desktop.appendhub.com"
+        }
+      ],
+      "destination": "/desktop/index.html"
+    },
+    {
+      "source": "/",
+      "has": [
+        {
+          "type": "host",
+          "value": "learn.appendhub.com"
+        }
+      ],
+      "destination": "/learn/index.html"
+    },
+    {
+      "source": "/",
+      "has": [
+        {
+          "type": "host",
           "value": "gowall.appendhub.com"
         }
       ],
