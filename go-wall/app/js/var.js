@@ -1,4 +1,4 @@
-/* Go-Wall VAR: multiple phone cameras, controller review and live announcements. */
+/* Goaaal VAR: multiple phone cameras, controller review and live announcements. */
 (()=>{
 'use strict';
 const pair=()=>window.GoWallPair;

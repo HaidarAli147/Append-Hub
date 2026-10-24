@@ -1,8 +1,8 @@
 <!doctype html>
-<html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#8768ad"><title>ثلاثين | Go-Wall</title>
+<html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#8768ad"><title>ثلاثين | Goaaal</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Cairo:wght@500;700&family=Edu+VIC+WA+NT+Hand:wght@400..700&family=Lalezar&display=swap" rel="stylesheet"><link rel="stylesheet" href="../css/style.css">
 <style>
-/* Thirty uses the original Go-Wall flat purple, white rules, bright tiles and handwritten type. */
+/* Thirty uses the original Goaaal flat purple, white rules, bright tiles and handwritten type. */
 body{display:block}main{max-width:1400px;margin:auto;padding:var(--gutter)}header{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;border-bottom:2px solid var(--ink);padding:12px 0}
 h1{font:700 clamp(68px,12vw,140px)/1 var(--sans);margin:28px 0 4px}h2{font:700 clamp(22px,3vw,32px)/1.2 var(--sans);margin:0 0 12px}
 p{line-height:1.7;color:var(--ink)}.panel{display:block;border:2px solid var(--ink);max-width:none;padding:20px;margin:18px 0;background:transparent}
@@ -19,7 +19,7 @@ input,select{background:var(--ink);color:var(--dark);border:2px solid var(--ink)
 .hide{display:none!important}body.controller #game-controls{display:block}body.controller #players .buttons{display:none}
 @media(max-width:500px){.panel{padding:12px}.player{padding:14px}}
 </style></head><body><main>
-<header><a href="../">← Go-Wall</a><div class="toolbar"><button id="language">English</button><button id="fullscreen" class="alt">⛶</button></div></header>
+<header><a href="../">← Goaaal</a><div class="toolbar"><button id="language">English</button><button id="fullscreen" class="alt">⛶</button></div></header>
 <h1 data-ar="ثلاثين" data-en="Thirty">ثلاثين</h1>
 <p data-ar="٤ لاعبين أو أكثر • اللاعب الذي يصل إلى ٣٠ نقطة يخسر • لا يلمس اللاعب الكرة مرتين متتاليتين حتى يلمسها لاعب آخر." data-en="4 or more players • Reach 30 points and you're eliminated • No consecutive touches by the same player.">٤ لاعبين أو أكثر • اللاعب الذي يصل إلى ٣٠ نقطة يخسر • لا يلمس اللاعب الكرة مرتين متتاليتين حتى يلمسها لاعب آخر.</p>
 <section class="panel" id="pairing"><h2 data-ar="التحكم من الهاتف" data-en="Phone controller">التحكم من الهاتف</h2><div class="toolbar"><button id="host" data-ar="🖥️ شاشة العرض" data-en="🖥️ Display">🖥️ شاشة العرض</button><button id="join" data-ar="📱 جهاز التحكم" data-en="📱 Controller">📱 جهاز التحكم</button><input id="code" inputmode="numeric" maxlength="8" placeholder="8-digit code" class="hide"><button id="connect" class="hide" data-ar="اتصال" data-en="Connect">اتصال</button></div><p id="connection-status" aria-live="polite"></p></section>

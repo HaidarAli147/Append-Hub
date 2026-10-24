@@ -1,8 +1,8 @@
 (() => {
   const ar = document.documentElement.lang.toLowerCase().startsWith('ar') || document.documentElement.dir === 'rtl';
   const links = ar
-    ? [['/ar/', 'الرئيسية', 'hub-home'], ['/learn/ar/', 'العودة إلى ليرن', 'learn-home'], ['/ar/desktop/', 'ديسكتوب', ''], ['/ar/browser/', 'المتصفح', ''], ['/ar/go-wall/', 'Go-Wall', '']]
-    : [['/', 'AppendHub Home', 'hub-home'], ['/learn/', 'Learn Home', 'learn-home'], ['/desktop/', 'Desktop', ''], ['/browser/', 'Browser', ''], ['/go-wall/', 'Go-Wall', '']];
+    ? [['/ar/', 'الرئيسية', 'hub-home'], ['/learn/ar/', 'العودة إلى ليرن', 'learn-home'], ['/ar/desktop/', 'ديسكتوب', ''], ['/ar/browser/', 'المتصفح', ''], ['/ar/go-wall/', 'Goaaal', '']]
+    : [['/', 'AppendHub Home', 'hub-home'], ['/learn/', 'Learn Home', 'learn-home'], ['/desktop/', 'Desktop', ''], ['/browser/', 'Browser', ''], ['/go-wall/', 'Goaaal', '']];
   const nav = document.createElement('nav');
   nav.className = 'appendhub-global-nav';
   nav.setAttribute('aria-label', ar ? 'منتجات أبند هَب' : 'AppendHub products');

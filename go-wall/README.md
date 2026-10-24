@@ -1,6 +1,6 @@
-# Go-Wall on AppendHub
+# Goaaal on AppendHub
 
-Go-Wall is integrated as a dedicated product at `/go-wall/`. Its original bilingual static PWA is preserved in `app/` and opens at `/go-wall/app/`.
+Goaaal is integrated as a dedicated product at `/go-wall/`. Its original bilingual static PWA is preserved in `app/` and opens at `/go-wall/app/`.
 
 The app provides scoreboards for football, handball, and tennis; local save and undo; display mode and keyboard controls; and pre-recorded Arabic/English commentary. It has no build dependencies. Serve the directory over HTTP or HTTPS to enable its service worker and installable PWA behavior.
 

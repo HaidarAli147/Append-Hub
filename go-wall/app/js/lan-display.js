@@ -7,7 +7,7 @@
  const send=()=>{if(ws.readyState===1)ws.send(JSON.stringify({type:'state',data:snapshot()}))};
  ws.onopen=()=>ws.send(JSON.stringify({type:'join-display'}));
  ws.onmessage=e=>{let m;try{m=JSON.parse(e.data)}catch{return}
- if(m.type==='paired'){status.textContent='Go-Wall pairing code: '+m.code+' · Open /go-wall/lan/ on your controller';if(!document.body.classList.contains('tv'))toggleTv();send()}
+ if(m.type==='paired'){status.textContent='Goaaal pairing code: '+m.code+' · Open /go-wall/lan/ on your controller';if(!document.body.classList.contains('tv'))toggleTv();send()}
  if(m.type==='sync-request'){send()}
  if(m.type==='command'){
   const allowed=['sport','undo','sound','voice','toggle','score','nudge','hb-timeout','hb-next-half','hb-reset-half','tn-point','tn-server','lang'];

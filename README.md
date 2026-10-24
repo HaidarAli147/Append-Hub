@@ -8,13 +8,13 @@ AppendHub is the parent technology brand. AppendHub Learn is its bilingual learn
 - learn/: AppendHub Learn homepages, subject pages, quizzes, presentation viewer and lessons, Live, and OG Mode.
 - desktop/: AppendHub Desktop Public Beta product page, copied source, local ZIP source archive, and SHA-256 checksum. Debian 13 with X11 is the documented target; see desktop/README.md.
 - browser/ and ar/browser/: English and Arabic AppendHub Browser Coming Soon pages.
-- go-wall/ and ar/go-wall/: English and Arabic Go-Wall product pages; the preserved bilingual scoreboard PWA is under go-wall/app/.
+- go-wall/ and ar/go-wall/: English and Arabic Goaaal product pages; the preserved bilingual scoreboard PWA is under go-wall/app/.
 - shared/: company site styles and Learn global navigation.
 - assets/: official brand marks and shared lesson and interface images.
 - api/live-token.js: serverless AppendHub Live token endpoint.
 - AppendHub_Archive/: preserved historical AI tutor pages and legacy media.
 
-Learn routes use /learn/, /learn/en/, /learn/ar/, /learn/og-mode/, /learn/present/, and /learn/live.html. The English OG Mode directory has two spaces in its name to preserve the original URL. Vercel redirects legacy English and Arabic subject routes, quizzes, OG Mode, Present, and Live URLs to their Learn locations. The local server and Vercel redirect existing Learn links to the canonical copies under learn/. The former root homepage is now the AppendHub company homepage. Arabic company pages use /ar/ and Arabic Learn uses /learn/ar/. Go-Wall has one bilingual app route at /go-wall/app/.
+Learn routes use /learn/, /learn/en/, /learn/ar/, /learn/og-mode/, /learn/present/, and /learn/live.html. The English OG Mode directory has two spaces in its name to preserve the original URL. Vercel redirects legacy English and Arabic subject routes, quizzes, OG Mode, Present, and Live URLs to their Learn locations. The local server and Vercel redirect existing Learn links to the canonical copies under learn/. The former root homepage is now the AppendHub company homepage. Arabic company pages use /ar/ and Arabic Learn uses /learn/ar/. Goaaal has one bilingual app route at /go-wall/app/.
 
 ## Presentation development
 
@@ -36,6 +36,6 @@ Do not prefix these variables with VITE_, NEXT_PUBLIC_, or another client-exposu
 
 For a live playback check, start the existing OBS broadcast through the configured LiveKit RTMP ingress, open /learn/live.html, wait for the LIVE status, and press Enable Audio if the browser blocks autoplay. Stop OBS and use Check Stream to verify the offline screen. No student camera or microphone permissions are requested.
 
-## Go-Wall and AppendHub Desktop
+## Goaaal and AppendHub Desktop
 
-Go-Wall is served from /go-wall/ with its original PWA under /go-wall/app/. The app supports Arabic and English, football, handball, tennis, and offline use; its source, MIT license, audio, and assets are kept intact. AppendHub Desktop is a Public Beta based on the latest available brack-tdx main commit. Its product page offers a locally prepared source ZIP and checksum, and documents the verified Debian 13 X11 target and installer behavior. The package has not been tested on multiple machines; the upstream source contains no license file. No GitHub release was uploaded.
+Goaaal is served from /go-wall/ with its original PWA under /go-wall/app/. The app supports Arabic and English, football, handball, tennis, and offline use; its source, MIT license, audio, and assets are kept intact. AppendHub Desktop is a Public Beta based on the latest available brack-tdx main commit. Its product page offers a locally prepared source ZIP and checksum, and documents the verified Debian 13 X11 target and installer behavior. The package has not been tested on multiple machines; the upstream source contains no license file. No GitHub release was uploaded.
