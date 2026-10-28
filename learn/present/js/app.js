@@ -41,14 +41,15 @@ function context() {
     } else if (ppt.pathname.startsWith("/present/lessons/")) {
       ppt.pathname = ppt.pathname.replace(/^\/present\//, "/learn/present/");
     }
-    if (!ppt.pathname.startsWith("/learn/present/lessons/")) throw new Error("Invalid presentation path.");
+    const projectPresentation = ppt.pathname.startsWith("/projects/retro-tv/presentations/");
+    if (!ppt.pathname.startsWith("/learn/present/lessons/") && !projectPresentation) throw new Error("Invalid presentation path.");
     lessonUrl = new URL("./", ppt);
     const quiz = params.get("quiz");
     const quizPath = quiz ? new URL(quiz, location.origin) : null;
     const back = params.get("back");
     const backPath = back ? new URL(back, location.origin) : null;
     if ((quizPath && quizPath.origin !== location.origin) || (backPath && backPath.origin !== location.origin)) throw new Error("Invalid lesson link.");
-    return { ppt: ppt.pathname, lesson: lessonUrl.pathname, quiz: quizPath?.pathname, back: backPath?.pathname };
+    return { ppt: ppt.pathname, lesson: lessonUrl.pathname, quiz: quizPath?.pathname, back: backPath?.pathname, projectPresentation };
   }
   const ref = document.referrer ? new URL(document.referrer) : null;
   if (ref && ref.origin === location.origin && ref.pathname.startsWith("/learn/present/lessons/")) {
@@ -64,6 +65,7 @@ let count = 0;
 let busy = false;
 let startX = null;
 let lessonPath = "";
+let hasQuiz = false;
 let resizeFrame = 0;
 let resizePending = false;
 
@@ -84,7 +86,7 @@ function controls() {
   previous.disabled = busy || !count || current === 0;
   next.disabled = busy || !count || current === count - 1;
   fullscreen.disabled = !count;
-  finalQuizButton.hidden = !count || current !== count - 1;
+  finalQuizButton.hidden = !hasQuiz || !count || current !== count - 1;
 }
 async function showSlide(index) {
   if (!count || busy || index < 0 || index >= count) return;
@@ -125,6 +127,7 @@ async function load() {
   try {
     const lesson = context();
     lessonPath = lesson.lesson;
+    hasQuiz = !lesson.projectPresentation;
     const folder = decodeURIComponent(lessonPath.split("/").filter(Boolean).at(-1) || "Presentation").replace(/[-_]+/g, " ");
     const arabicTitles = {
       "python part 1": "بايثون، الجزء الأول",
@@ -139,9 +142,10 @@ async function load() {
     const languageFolder = arabic
       ? lessonPath.replace("/lessons/ar/", "/lessons/en/")
       : lessonPath.replace("/lessons/en/", "/lessons/ar/");
-    languageButton.href = `/present/?ppt=${encodeURIComponent(`${languageFolder}presentation.pptx`)}&lang=${arabic ? "en" : "ar"}`;
+    languageButton.hidden = Boolean(lesson.projectPresentation);
+    if (!lesson.projectPresentation) languageButton.href = `/present/?ppt=${encodeURIComponent(`${languageFolder}presentation.pptx`)}&lang=${arabic ? "en" : "ar"}`;
     languageButton.textContent = arabic ? "English" : "العربية";
-    quizButton.hidden = false;
+    quizButton.hidden = !hasQuiz;
     const response = await fetch(lesson.ppt, { cache: "no-cache" });
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     const data = await response.arrayBuffer();

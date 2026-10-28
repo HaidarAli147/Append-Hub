@@ -9,6 +9,7 @@ AppendHub is the parent technology brand. AppendHub Learn is its bilingual learn
 - desktop/: AppendHub Desktop Public Beta product page, copied source, local ZIP source archive, and SHA-256 checksum. Debian 13 with X11 is the documented target; see desktop/README.md.
 - browser/ and ar/browser/: English and Arabic AppendHub Browser Coming Soon pages.
 - go-wall/ and ar/go-wall/: English and Arabic Goaaal product pages; the preserved bilingual scoreboard PWA is under go-wall/app/.
+- projects/: English AppendHub projects index and project pages. Retro TV PowerPoint files go in projects/retro-tv/presentations/; see that folder's README for the public URL pattern and linking instructions.
 - shared/: company site styles and Learn global navigation.
 - assets/: official brand marks and shared lesson and interface images.
 - api/live-token.js: serverless AppendHub Live token endpoint.

@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Retro TV | AppendHub Projects</title>
+  <meta name="description" content="Retro TV combines a Raspberry Pi television interface, Arduino controls, and enclosure design work.">
+  <link rel="canonical" href="https://appendhub.com/projects/retro-tv/">
+  <meta property="og:site_name" content="AppendHub">
+  <meta property="og:title" content="Retro TV | AppendHub Projects">
+  <meta property="og:description" content="A Raspberry Pi television interface with Arduino controls and enclosure design work.">
+  <meta property="og:url" content="https://appendhub.com/projects/retro-tv/">
+  <meta property="og:image" content="https://appendhub.com/projects/png/retro-tv.png">
+  <meta property="og:image:alt" content="Decorative illustration of a retro television">
+  <link rel="icon" type="image/png" href="/shared/assets/logos/appendhub-compact.png">
+  <link rel="stylesheet" href="/shared/css/company.css">
+  <link rel="stylesheet" href="/shared/css/product-details.css">
+  <link rel="stylesheet" href="/shared/css/learn-nav.css">
+  <style>
+    .retro-tv-image { display:block; width:min(100%, 760px); height:auto; margin:24px auto 0; border-radius:18px; }
+    .image-caption { margin:8px auto 0; color:var(--muted); font-size:.84rem; }
+    .retro-tv-gallery { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px; margin:16px 0; }
+    .retro-tv-gallery figure { min-width:0; margin:0; }
+    .retro-tv-gallery img { display:block; width:100%; height:auto; border:1px solid #e3d8ef; border-radius:14px; }
+    .retro-tv-gallery figcaption { margin-top:8px; color:var(--muted); font-size:.88rem; line-height:1.5; }
+    .empty-state { padding:16px 18px; border:1px dashed #cbb8df; border-radius:14px; background:#faf7fc; color:#51485d; }
+    .status-note { margin-top:18px; }
+    @media(max-width:640px) { .retro-tv-gallery { grid-template-columns:1fr; } }
+  </style>
+</head>
+<body>
+  <main class="product-page">
+    <section class="product-hero" aria-labelledby="retro-tv-title">
+      <p class="eyebrow">APPENDHUB PROJECT</p>
+      <h1 id="retro-tv-title">Retro TV</h1>
+      <p class="lead">A DIY television project built around a Raspberry Pi, Arduino controls, and a reused HDMI display. The current repository includes the TV app, controller firmware, enclosure design files, setup notes, and a project log.</p>
+      <img class="retro-tv-image" src="/projects/png/retro-tv.png" alt="Decorative illustration of a retro television; this is not a project photograph" width="1536" height="1024">
+      <p class="image-caption">Decorative illustration, not a photograph of the build.</p>
+      <p class="status-note"><a class="button" href="https://github.com/HaidarAli147/retro-tv">View the Retro TV GitHub repository <span aria-hidden="true">↗</span></a></p>
+    </section>
+
+    <section class="detail-card" aria-labelledby="about-heading">
+      <h2 id="about-heading">About the project</h2>
+      <p>Retro TV uses a Python/GTK interface with mpv for IPTV playback. Its home screen includes Live TV, TOD, and web-app tiles; the channel list is loaded from an M3U playlist. An Arduino Uno supplies joystick navigation and volume-knob input. A separate button connected to Raspberry Pi GPIO3 is documented for safe shutdown.</p>
+
+      <h2 id="features-heading">Features in the current source</h2>
+      <ul>
+        <li>Play M3U channels with mpv in the TV application window.</li>
+        <li>Navigate the home tiles and channel list with the Uno joystick.</li>
+        <li>Add web apps to the home screen by name and URL; entering the details requires a keyboard.</li>
+        <li>Use a separate GPIO3 shutdown button. It connects to Pi GPIO3 (physical pin 5) and GND, not to Arduino D4.</li>
+      </ul>
+      <p>The repository also documents a Windows launcher. On Windows it uses keyboard controls and opens web apps in the normal browser; the Arduino bridge is not used there.</p>
+
+      <h2 id="build-heading">Build and project status</h2>
+      <ul>
+        <li>The README describes a Raspberry Pi 4 and a reused 22-inch HDMI monitor. The frame is reported complete, but its as-built measurements are not recorded in the design review.</li>
+        <li>The 22-inch enclosure files are a provisional CAD configuration. The design review says the monitor dimensions are placeholders and the drawings are not ready for cutting or drilling.</li>
+        <li>The Pi setup guide installs the TV app and Arduino bridge. The separate GPIO3 shutdown service is not installed by that setup script; its physical operation still needs checking on the Pi.</li>
+        <li>The latest project log says playback testing on the replacement Pi remains pending.</li>
+      </ul>
+      <p>For setup and implementation details, see the <a href="https://github.com/HaidarAli147/retro-tv/blob/main/raspberry_pi/README.md">Raspberry Pi setup guide</a>, <a href="https://github.com/HaidarAli147/retro-tv/blob/main/raspberry_pi/tv.py">TV app source</a>, <a href="https://github.com/HaidarAli147/retro-tv/blob/main/arduino/rpi_controller_final/rpi_controller_final.ino">current Arduino firmware</a>, and <a href="https://github.com/HaidarAli147/retro-tv/blob/main/enclosure_work/DESIGN_REVIEW_22IN.md">22-inch enclosure design review</a>.</p>
+
+      <h2 id="photos-heading">Photos and enclosure images</h2>
+      <p class="empty-state">No physical build photographs were found in the current repository. The images below are CAD renders of the provisional 22-inch enclosure model, not photographs or manufacturing-ready drawings.</p>
+      <div class="retro-tv-gallery">
+        <figure>
+          <img src="/projects/png/retro-tv-enclosure-front-concept.png" alt="Front view CAD render of the provisional 22-inch Retro TV enclosure model" width="1800" height="1200" loading="lazy">
+          <figcaption>Front view · provisional 22-inch CAD model from the repository’s final22 render exports.</figcaption>
+        </figure>
+        <figure>
+          <img src="/projects/png/retro-tv-enclosure-back-concept.png" alt="Rear view CAD render of the provisional 22-inch Retro TV enclosure model" width="1800" height="1200" loading="lazy">
+          <figcaption>Rear view · the design review notes unresolved measurements and fit checks.</figcaption>
+        </figure>
+      </div>
+      <p>See the <a href="https://github.com/HaidarAli147/retro-tv/blob/main/enclosure_work/enclosure_22in.scad">22-inch enclosure source</a> and <a href="https://github.com/HaidarAli147/retro-tv/blob/main/PROJECT_LOG.md">project log</a> for the current design history.</p>
+
+      <h2 id="presentations-heading">Presentations</h2>
+      <p><a class="button" href="/learn/present/?ppt=%2Fprojects%2Fretro-tv%2Fpresentations%2Fretro-tv-project-fair-deck.pptx&amp;title=Retro%20TV%20Project%20Fair%20Deck&amp;back=%2Fprojects%2Fretro-tv%2F">Open the Retro TV Project Fair deck</a></p>
+      <p><a href="/projects/retro-tv/presentations/retro-tv-project-fair-deck.pptx" download>Download the PowerPoint file</a></p>
+      <p>More `.pptx` files can go in <code>/projects/retro-tv/presentations/</code>. Add a matching “Open in AppendHub Present” link here, passing the file path in the <code>ppt</code> parameter and a title and return path in <code>title</code> and <code>back</code>.</p>
+
+      <h2 id="source-heading">Source code</h2>
+      <p><a class="button" href="https://github.com/HaidarAli147/retro-tv">Open Retro TV on GitHub <span aria-hidden="true">↗</span></a></p>
+      <p><a href="/projects/">← Back to Projects</a></p>
+    </section>
+  </main>
+  <footer class="footer">
+    <a class="brand" href="/"><img src="/shared/assets/logos/appendhub-compact.png" alt=""><span>AppendHub</span></a>
+    <nav aria-label="Footer navigation"><a href="/">Home</a><a href="/learn/">Learn</a><a href="/desktop/">Desktop</a><a href="/browser/">Browser</a><a href="/go-wall/">Goaaal</a><a href="/projects/">Projects</a></nav>
+    <small>© AppendHub</small>
+  </footer>
+  <script src="/shared/js/learn-nav.js" defer></script>
+</body>
+</html>
