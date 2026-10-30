@@ -39,7 +39,7 @@ const EN = {
   'صاحب الأرض': 'Home', 'الضيف': 'Away', 'هدف': 'Goal', 'إنذار': 'Booking', 'طرد': 'Red card',
   'أخطاء': 'Fouls', 'إنذارات': 'Bookings', 'لا توجد أحداث بعد': 'No events yet',
   'اضغط لتعديل الوقت': 'Click to edit the time', 'الوقت المنقضي': 'Elapsed time', 'الوقت المتبقي': 'Time remaining',
-  'إيقاف': 'Stop', 'بدء': 'Start', 'د': 'min', 'الشوط': 'Half', 'مدة الشوط': 'Half duration', 'تعديل مدة الشوط': 'Edit half duration', 'مدة غير صالحة': 'Invalid duration', 'أحداث المباراة': 'Match events',
+  'إيقاف': 'Stop', 'بدء': 'Start', 'د': 'min', 'الشوط': 'Half', 'مدة الشوط': 'Half duration', 'تعديل مدة الشوط': 'Edit half duration', 'مدة غير صالحة': 'Invalid duration', 'حد المباراة': 'Match limit', 'دقائق لكل شوط': 'Minutes per half', 'مجموعات': 'Sets', 'أحداث المباراة': 'Match events',
   'وقت مستقطع:': 'Timeouts:', 'وقت مستقطع': 'Timeout', 'إيقاف دقيقتين': '2-min suspension',
   'إعادة 30د': 'Reset 30 min', 'الشوط التالي': 'Next half',
   'المجموعات': 'Sets', 'المُرسِل': 'Server', 'تحديد المرسل': 'Set the server', 'إرسال': 'Serve',
@@ -110,7 +110,7 @@ function defaults() {
     voice: true,
     lang: 'ar',
     fb: { teams: [newTeam('الفريق الأول', '#00f0ff'), newTeam('الفريق الثاني', '#ff2d6f')], period: 0, elapsed: 0, halfMinutes: FB_DEFAULT_HALF, log: [] },
-    hb: { teams: [newTeam('فريق اليد أ', '#ff6a00'), newTeam('فريق اليد ب', '#00c2ff')], half: 1, remaining: HB_HALF, pens: [[], []] },
+    hb: { teams: [newTeam('فريق اليد أ', '#ff6a00'), newTeam('فريق اليد ب', '#00c2ff')], half: 1, remaining: HB_HALF, halfMinutes: 30, pens: [[], []] },
     tn: newTennis(),
   };
 }
@@ -140,6 +140,7 @@ function load() {
     for (const k of ['sport', 'sound', 'voice', 'lang']) if (k in saved) base[k] = saved[k];
     for (const k of ['fb', 'hb', 'tn']) if (saved[k]) base[k] = { ...base[k], ...saved[k] };
     if (!Number.isInteger(base.fb.halfMinutes) || base.fb.halfMinutes < 1 || base.fb.halfMinutes > 180) base.fb.halfMinutes = FB_DEFAULT_HALF;
+    if (!Number.isInteger(base.hb.halfMinutes) || base.hb.halfMinutes < 1 || base.hb.halfMinutes > 180) base.hb.halfMinutes = 30;
   } catch { /* corrupted or unavailable storage: start fresh */ }
   return base;
 }
@@ -163,9 +164,9 @@ function undo() {
   if (!snap) return toast(L('لا يوجد ما يمكن التراجع عنه'));
   const s = JSON.parse(snap);
   const { elapsed, period, halfMinutes } = state.fb;
-  const { remaining, half } = state.hb;
+  const { remaining, half, halfMinutes } = state.hb;
   state.fb = { ...s.fb, elapsed, period, halfMinutes };
-  state.hb = { ...s.hb, remaining, half };
+  state.hb = { ...s.hb, remaining, half, halfMinutes };
   state.tn = s.tn;
   sound('beep');
   toast(L('تم التراجع'));
@@ -432,7 +433,7 @@ function toggleClock() {
   lastTick = performance.now();
   sound(run[sp] ? 'whistle' : 'beep');
   if (run[sp]) {
-    const fresh = sp === 'fb' ? state.fb.elapsed === fbPeriods(state.fb)[state.fb.period].start * 60000 : state.hb.remaining === HB_HALF;
+    const fresh = sp === 'fb' ? state.fb.elapsed === fbPeriods(state.fb)[state.fb.period].start * 60000 : state.hb.remaining === state.hb.halfMinutes * 60000;
     speak(fresh ? ['kick_off', sp === 'fb' ? `period_${state.fb.period}` : `period_${state.hb.half - 1}`, 'kick_extra'] : [pickOne(['resume', 'resume_2'])], true);
   } else speak(['paused']);
   render();
@@ -551,7 +552,7 @@ async function editClock() {
     if (ms != null) { state.fb.elapsed = ms; fbNotified.period = -1; commit(); }
   } else if (sp === 'handball') {
     const ms = await promptTime(L('تعديل الوقت المتبقي'), fmt(state.hb.remaining));
-    if (ms != null) { setHbRemaining(Math.min(ms, HB_HALF)); commit(); }
+    if (ms != null) { setHbRemaining(Math.min(ms, state.hb.halfMinutes * 60000)); commit(); }
   }
 }
 
@@ -577,16 +578,16 @@ function hbNextHalf() {
   if (h.half >= 2) return toast(L('هذا هو الشوط الأخير'));
   run.hb = false;
   // Carry active suspensions across the break with their remaining time intact.
-  h.pens = h.pens.map(list => list.map(e => HB_HALF - (h.remaining - e)).filter(e => e < HB_HALF));
+  h.pens = h.pens.map(list => list.map(e => h.halfMinutes * 60000 - (h.remaining - e)).filter(e => e < h.halfMinutes * 60000));
   h.half = 2;
-  h.remaining = HB_HALF;
+  h.remaining = h.halfMinutes * 60000;
   sound('beep');
   speak(['break']);
   commit();
 }
 function hbResetHalf() {
   run.hb = false;
-  setHbRemaining(HB_HALF);
+  setHbRemaining(state.hb.halfMinutes * 60000);
   sound('beep');
   commit();
 }
@@ -681,7 +682,7 @@ async function resetCurrent() {
   pauseAll();
   const d = defaults();
   if (state.sport === 'football') { d.fb.teams.forEach((t, i) => { t.name = state.fb.teams[i].name; t.color = state.fb.teams[i].color; }); d.fb.halfMinutes = state.fb.halfMinutes; state.fb = d.fb; fbNotified.period = -1; }
-  else if (state.sport === 'handball') { d.hb.teams.forEach((t, i) => { t.name = state.hb.teams[i].name; t.color = state.hb.teams[i].color; }); state.hb = d.hb; }
+  else if (state.sport === 'handball') { d.hb.teams.forEach((t, i) => { t.name = state.hb.teams[i].name; t.color = state.hb.teams[i].color; }); d.hb.halfMinutes = state.hb.halfMinutes; d.hb.remaining = d.hb.halfMinutes * 60000; state.hb = d.hb; }
   else if(state.sport==='thirty'){Thirty.perform('reset');}
   else state.tn = newTennis(state.tn);
   undoStack = [];
@@ -759,7 +760,7 @@ function footballHTML() {
         <button class="btn ${run.fb ? 'pause' : 'go'}" data-action="toggle">${run.fb ? L('إيقاف') : L('بدء')}</button>
         <button class="btn sm" data-action="nudge" data-min="-1">&lrm;−1 ${L('د')}</button>
         <button class="btn sm" data-action="nudge" data-min="1">&lrm;+1 ${L('د')}</button>
-        <button class="btn sm" data-action="edit-half-duration">${L('مدة الشوط')}: ${f.halfMinutes} ${L('د')}</button>
+        <label>${L('حد المباراة')} (${L('دقائق لكل شوط')}) <input class="sel" style="width:5em" type="number" min="1" max="180" step="1" data-fb-limit value="${f.halfMinutes}"></label>
         <select class="sel" data-period aria-label="${L('الشوط')}">
           ${fbPeriods(f).map((p, i) => `<option value="${i}" ${i === f.period ? 'selected' : ''}>${L(p.name)} (${p.len}${L('د')})</option>`).join('')}
         </select>
@@ -791,12 +792,12 @@ function handballHTML() {
     <div class="box statusbar" style="--sc:var(--orange)">
       <div class="period"><span class="dot ${run.hb ? 'live' : ''}"></span>${L('كرة اليد')} · ${L(h.half === 1 ? 'الشوط الأول' : 'الشوط الثاني')}</div>
       <div class="clock-wrap" data-action="edit-clock" title="${L('اضغط لتعديل الوقت')}">
-        <span class="clock" id="hb-clock">30:00</span>
+        <span class="clock" id="hb-clock">${fmt(h.remaining)}</span>
         <div class="clock-sub"><span>${L('الوقت المتبقي')}</span></div>
       </div>
       <div class="clock-ctl">
         <button class="btn ${run.hb ? 'pause' : 'go'}" data-action="toggle">${run.hb ? L('إيقاف') : L('بدء')}</button>
-        <button class="btn sm" data-action="hb-reset-half">${L('إعادة 30د')}</button>
+        <button class="btn sm" data-action="hb-reset-half">${L('إعادة 30د')}</button><label>${L('حد المباراة')} (${L('دقائق لكل شوط')}) <input class="sel" style="width:5em" type="number" min="1" max="180" step="1" data-hb-limit value="${h.halfMinutes}"></label>
         <button class="btn sm" data-action="hb-next-half" ${h.half >= 2 ? 'disabled' : ''}>${L('الشوط التالي')}</button>
       </div>
     </div>
@@ -833,9 +834,7 @@ function tennisHTML() {
         <div class="tn-opts">
           <span>${L('المجموعة')} <b>${Math.min(t.history.length + 1, 9)}</b></span>
           <label>${L('أفضل من')}
-            <select class="sel" data-bestof aria-label="${L('عدد المجموعات')}">
-              ${[1, 3, 5].map(n => `<option value="${n}" ${n === t.bestOf ? 'selected' : ''}>${n}</option>`).join('')}
-            </select></label>
+            <input class="sel" style="width:5em" type="number" min="1" max="15" step="2" data-bestof value="${t.bestOf}" aria-label="${L('عدد المجموعات')}"></label>
           <label><input type="checkbox" data-noad ${t.noAd ? 'checked' : ''}> ${L('بدون أفضلية (No-Ad)')}</label>
           <button class="btn sm" data-action="tn-new">${L('مباراة جديدة')}</button>
         </div>
@@ -960,8 +959,19 @@ document.addEventListener('input', e => {
 
 document.addEventListener('change', e => {
   const t = e.target;
-  if ('period' in t.dataset) setPeriod(+t.value);
-  else if ('bestof' in t.dataset) { state.tn.bestOf = +t.value; commit(); }
+  if ('fbLimit' in t.dataset) {
+    const n = Number(t.value), f = state.fb;
+    if (!Number.isInteger(n) || n < 1 || n > 180) { t.value = f.halfMinutes; return; }
+    const offset = Math.max(0, f.elapsed - fbPeriods(f)[f.period].start * 60000);
+    f.halfMinutes = n; f.elapsed = fbPeriods(f)[f.period].start * 60000 + offset;
+    fbNotified.period = -1; commit();
+  } else if ('hbLimit' in t.dataset) {
+    const n = Number(t.value), h = state.hb;
+    if (!Number.isInteger(n) || n < 1 || n > 180) { t.value = h.halfMinutes; return; }
+    setHbRemaining(Math.max(0, h.remaining + (n - h.halfMinutes) * 60000));
+    h.halfMinutes = n; commit();
+  } else if ('period' in t.dataset) setPeriod(+t.value);
+  else if ('bestof' in t.dataset) { const n = Number(t.value); if (!Number.isInteger(n) || n < 1 || n > 15 || n % 2 === 0) { t.value = state.tn.bestOf; return; } state.tn.bestOf = n; commit(); }
   else if ('noad' in t.dataset) { state.tn.noAd = t.checked; commit(); }
 });
 
