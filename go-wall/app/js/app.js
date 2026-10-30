@@ -39,7 +39,7 @@ const EN = {
   'صاحب الأرض': 'Home', 'الضيف': 'Away', 'هدف': 'Goal', 'إنذار': 'Booking', 'طرد': 'Red card',
   'أخطاء': 'Fouls', 'إنذارات': 'Bookings', 'لا توجد أحداث بعد': 'No events yet',
   'اضغط لتعديل الوقت': 'Click to edit the time', 'الوقت المنقضي': 'Elapsed time', 'الوقت المتبقي': 'Time remaining',
-  'إيقاف': 'Stop', 'بدء': 'Start', 'د': 'min', 'الشوط': 'Half', 'أحداث المباراة': 'Match events',
+  'إيقاف': 'Stop', 'بدء': 'Start', 'د': 'min', 'الشوط': 'Half', 'مدة الشوط': 'Half duration', 'تعديل مدة الشوط': 'Edit half duration', 'مدة غير صالحة': 'Invalid duration', 'أحداث المباراة': 'Match events',
   'وقت مستقطع:': 'Timeouts:', 'وقت مستقطع': 'Timeout', 'إيقاف دقيقتين': '2-min suspension',
   'إعادة 30د': 'Reset 30 min', 'الشوط التالي': 'Next half',
   'المجموعات': 'Sets', 'المُرسِل': 'Server', 'تحديد المرسل': 'Set the server', 'إرسال': 'Serve',
@@ -73,6 +73,16 @@ const FB_PERIODS = [
   { name: 'الشوط الإضافي الأول', start: 90, len: 15 },
   { name: 'الشوط الإضافي الثاني', start: 105, len: 15 },
 ];
+const FB_DEFAULT_HALF = 45;
+function fbPeriods(f) {
+  const half = Number.isInteger(f.halfMinutes) && f.halfMinutes >= 1 && f.halfMinutes <= 180 ? f.halfMinutes : FB_DEFAULT_HALF;
+  return [
+    { name: 'الشوط الأول', start: 0, len: half },
+    { name: 'الشوط الثاني', start: half, len: half },
+    { name: 'الشوط الإضافي الأول', start: 2 * half, len: 15 },
+    { name: 'الشوط الإضافي الثاني', start: 2 * half + 15, len: 15 },
+  ];
+}
 const HB_HALF = 30 * 60000;
 const HB_PENALTY = 2 * 60000;
 const HB_TIMEOUTS = 3;
@@ -99,7 +109,7 @@ function defaults() {
     sound: true,
     voice: true,
     lang: 'ar',
-    fb: { teams: [newTeam('الفريق الأول', '#00f0ff'), newTeam('الفريق الثاني', '#ff2d6f')], period: 0, elapsed: 0, log: [] },
+    fb: { teams: [newTeam('الفريق الأول', '#00f0ff'), newTeam('الفريق الثاني', '#ff2d6f')], period: 0, elapsed: 0, halfMinutes: FB_DEFAULT_HALF, log: [] },
     hb: { teams: [newTeam('فريق اليد أ', '#ff6a00'), newTeam('فريق اليد ب', '#00c2ff')], half: 1, remaining: HB_HALF, pens: [[], []] },
     tn: newTennis(),
   };
@@ -129,6 +139,7 @@ function load() {
     if (!saved || typeof saved !== 'object') return base;
     for (const k of ['sport', 'sound', 'voice', 'lang']) if (k in saved) base[k] = saved[k];
     for (const k of ['fb', 'hb', 'tn']) if (saved[k]) base[k] = { ...base[k], ...saved[k] };
+    if (!Number.isInteger(base.fb.halfMinutes) || base.fb.halfMinutes < 1 || base.fb.halfMinutes > 180) base.fb.halfMinutes = FB_DEFAULT_HALF;
   } catch { /* corrupted or unavailable storage: start fresh */ }
   return base;
 }
@@ -151,9 +162,9 @@ function undo() {
   const snap = undoStack.pop();
   if (!snap) return toast(L('لا يوجد ما يمكن التراجع عنه'));
   const s = JSON.parse(snap);
-  const { elapsed, period } = state.fb;
+  const { elapsed, period, halfMinutes } = state.fb;
   const { remaining, half } = state.hb;
-  state.fb = { ...s.fb, elapsed, period };
+  state.fb = { ...s.fb, elapsed, period, halfMinutes };
   state.hb = { ...s.hb, remaining, half };
   state.tn = s.tn;
   sound('beep');
@@ -354,7 +365,7 @@ function tick() {
   if (run.fb) {
     ambientIn -= dt;
     if (ambientIn <= 0) { ambientIn = 75000 + Math.random() * 75000; speak([pickOne(['amb_1', 'amb_2', 'amb_3', 'amb_4', 'amb_5', 'amb_6', 'amb_7'])]); }
-    const f = state.fb, p = FB_PERIODS[f.period];
+    const f = state.fb, p = fbPeriods(f)[f.period];
     const before = f.elapsed;
     f.elapsed += dt;
     const end = (p.start + p.len) * 60000;
@@ -405,7 +416,7 @@ function setHbRemaining(ms) {
 }
 
 function fbLabel() {
-  const f = state.fb, p = FB_PERIODS[f.period], end = p.start + p.len;
+  const f = state.fb, p = fbPeriods(f)[f.period], end = p.start + p.len;
   const m = Math.floor(f.elapsed / 60000);
   return m >= end ? `${end}+${m - end + 1}'` : `${m + 1}'`;
 }
@@ -421,7 +432,7 @@ function toggleClock() {
   lastTick = performance.now();
   sound(run[sp] ? 'whistle' : 'beep');
   if (run[sp]) {
-    const fresh = sp === 'fb' ? state.fb.elapsed === FB_PERIODS[state.fb.period].start * 60000 : state.hb.remaining === HB_HALF;
+    const fresh = sp === 'fb' ? state.fb.elapsed === fbPeriods(state.fb)[state.fb.period].start * 60000 : state.hb.remaining === HB_HALF;
     speak(fresh ? ['kick_off', sp === 'fb' ? `period_${state.fb.period}` : `period_${state.hb.half - 1}`, 'kick_extra'] : [pickOne(['resume', 'resume_2'])], true);
   } else speak(['paused']);
   render();
@@ -499,12 +510,30 @@ function setStat(sp, team, key, delta) {
 function setPeriod(i) {
   const f = state.fb;
   f.period = i;
-  f.elapsed = FB_PERIODS[i].start * 60000;
+  f.elapsed = fbPeriods(f)[i].start * 60000;
   fbNotified.period = -1;
   run.fb = false;
   sound('beep');
   speak(['get_ready', `period_${i}`]);
   commit();
+}
+async function editHalfDuration() {
+  const f = state.fb;
+  const dlg = modal(`<form method="dialog"><h2>${L('تعديل مدة الشوط')}</h2>
+    <label for="half-minutes">${L('مدة الشوط')} (1–180 ${L('د')})</label>
+    <input id="half-minutes" type="number" min="1" max="180" step="1" value="${f.halfMinutes}" required autofocus>
+    <div class="actions"><button class="btn" value="no" formnovalidate>${L('إلغاء')}</button><button class="btn go" value="yes">${L('حفظ')}</button></div></form>`);
+  dlg.onclose = () => {
+    if (dlg.returnValue !== 'yes') return;
+    const value = Number($('#half-minutes', dlg).value);
+    if (!Number.isInteger(value) || value < 1 || value > 180) return toast(L('مدة غير صالحة'));
+    if (value === f.halfMinutes) return;
+    const elapsedInPeriod = Math.max(0, f.elapsed - fbPeriods(f)[f.period].start * 60000);
+    f.halfMinutes = value;
+    f.elapsed = fbPeriods(f)[f.period].start * 60000 + elapsedInPeriod;
+    fbNotified.period = -1;
+    commit();
+  };
 }
 function nudgeFb(min) {
   const f = state.fb;
@@ -651,7 +680,7 @@ async function resetCurrent() {
   if (!ok) return;
   pauseAll();
   const d = defaults();
-  if (state.sport === 'football') { d.fb.teams.forEach((t, i) => { t.name = state.fb.teams[i].name; t.color = state.fb.teams[i].color; }); state.fb = d.fb; fbNotified.period = -1; }
+  if (state.sport === 'football') { d.fb.teams.forEach((t, i) => { t.name = state.fb.teams[i].name; t.color = state.fb.teams[i].color; }); d.fb.halfMinutes = state.fb.halfMinutes; state.fb = d.fb; fbNotified.period = -1; }
   else if (state.sport === 'handball') { d.hb.teams.forEach((t, i) => { t.name = state.hb.teams[i].name; t.color = state.hb.teams[i].color; }); state.hb = d.hb; }
   else if(state.sport==='thirty'){Thirty.perform('reset');}
   else state.tn = newTennis(state.tn);
@@ -721,7 +750,7 @@ function footballHTML() {
     : `<span class="empty">${L('لا توجد أحداث بعد')}</span>`;
   return `
     <div class="box statusbar" style="--sc:var(--accent)">
-      <div class="period"><span class="dot ${run.fb ? 'live' : ''}"></span>${L(FB_PERIODS[f.period].name)}</div>
+      <div class="period"><span class="dot ${run.fb ? 'live' : ''}"></span>${L(fbPeriods(f)[f.period].name)}</div>
       <div class="clock-wrap" data-action="edit-clock" title="${L('اضغط لتعديل الوقت')}">
         <span class="clock" id="fb-clock">00:00</span>
         <div class="clock-sub"><span>${L('الوقت المنقضي')}</span><span class="extra" id="fb-extra"></span></div>
@@ -730,8 +759,9 @@ function footballHTML() {
         <button class="btn ${run.fb ? 'pause' : 'go'}" data-action="toggle">${run.fb ? L('إيقاف') : L('بدء')}</button>
         <button class="btn sm" data-action="nudge" data-min="-1">&lrm;−1 ${L('د')}</button>
         <button class="btn sm" data-action="nudge" data-min="1">&lrm;+1 ${L('د')}</button>
+        <button class="btn sm" data-action="edit-half-duration">${L('مدة الشوط')}: ${f.halfMinutes} ${L('د')}</button>
         <select class="sel" data-period aria-label="${L('الشوط')}">
-          ${FB_PERIODS.map((p, i) => `<option value="${i}" ${i === f.period ? 'selected' : ''}>${L(p.name)} (${p.len}${L('د')})</option>`).join('')}
+          ${fbPeriods(f).map((p, i) => `<option value="${i}" ${i === f.period ? 'selected' : ''}>${L(p.name)} (${p.len}${L('د')})</option>`).join('')}
         </select>
       </div>
     </div>
@@ -820,7 +850,7 @@ function tennisHTML() {
 function updateFbClock() {
   const el = $('#fb-clock');
   if (!el) return;
-  const f = state.fb, p = FB_PERIODS[f.period], end = (p.start + p.len) * 60000;
+  const f = state.fb, p = fbPeriods(f)[f.period], end = (p.start + p.len) * 60000;
   if (f.elapsed > end) {
     el.textContent = fmt(end);
     $('#fb-extra').textContent = '+' + fmt(f.elapsed - end);
@@ -893,6 +923,7 @@ const actions = {
   stat: d => setStat(d.sport, +d.team, d.key, +d.delta),
   nudge: d => nudgeFb(+d.min),
   'edit-clock': editClock,
+  'edit-half-duration': editHalfDuration,
   'hb-timeout': d => hbTimeout(+d.team),
   'hb-penalty': d => hbPenalty(+d.team),
   'hb-pen-del': d => hbRemovePenalty(+d.team, +d.idx),
