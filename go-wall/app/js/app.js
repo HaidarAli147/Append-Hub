@@ -760,7 +760,7 @@ function footballHTML() {
         <button class="btn ${run.fb ? 'pause' : 'go'}" data-action="toggle">${run.fb ? L('إيقاف') : L('بدء')}</button>
         <button class="btn sm" data-action="nudge" data-min="-1">&lrm;−1 ${L('د')}</button>
         <button class="btn sm" data-action="nudge" data-min="1">&lrm;+1 ${L('د')}</button>
-        <label>${L('حد المباراة')} (${L('دقائق لكل شوط')}) <input class="sel" style="width:5em" type="number" min="1" max="180" step="1" data-fb-limit value="${f.halfMinutes}"></label>
+        <label>${L('حد المباراة')} (${L('دقائق لكل شوط')}) <input class="sel" style="width:5em" type="text" inputmode="numeric" pattern="[0-9]+" maxlength="3" data-fb-limit value="${f.halfMinutes}"></label>
         <select class="sel" data-period aria-label="${L('الشوط')}">
           ${fbPeriods(f).map((p, i) => `<option value="${i}" ${i === f.period ? 'selected' : ''}>${L(p.name)} (${p.len}${L('د')})</option>`).join('')}
         </select>
@@ -797,7 +797,7 @@ function handballHTML() {
       </div>
       <div class="clock-ctl">
         <button class="btn ${run.hb ? 'pause' : 'go'}" data-action="toggle">${run.hb ? L('إيقاف') : L('بدء')}</button>
-        <button class="btn sm" data-action="hb-reset-half">${L('إعادة 30د')}</button><label>${L('حد المباراة')} (${L('دقائق لكل شوط')}) <input class="sel" style="width:5em" type="number" min="1" max="180" step="1" data-hb-limit value="${h.halfMinutes}"></label>
+        <button class="btn sm" data-action="hb-reset-half">${L('إعادة 30د')}</button><label>${L('حد المباراة')} (${L('دقائق لكل شوط')}) <input class="sel" style="width:5em" type="text" inputmode="numeric" pattern="[0-9]+" maxlength="3" data-hb-limit value="${h.halfMinutes}"></label>
         <button class="btn sm" data-action="hb-next-half" ${h.half >= 2 ? 'disabled' : ''}>${L('الشوط التالي')}</button>
       </div>
     </div>
@@ -834,7 +834,7 @@ function tennisHTML() {
         <div class="tn-opts">
           <span>${L('المجموعة')} <b>${Math.min(t.history.length + 1, 9)}</b></span>
           <label>${L('أفضل من')}
-            <input class="sel" style="width:5em" type="number" min="1" max="15" step="2" data-bestof value="${t.bestOf}" aria-label="${L('عدد المجموعات')}"></label>
+            <input class="sel" style="width:5em" type="text" inputmode="numeric" pattern="[0-9]+" maxlength="2" data-bestof value="${t.bestOf}" aria-label="${L('عدد المجموعات')}"></label>
           <label><input type="checkbox" data-noad ${t.noAd ? 'checked' : ''}> ${L('بدون أفضلية (No-Ad)')}</label>
           <button class="btn sm" data-action="tn-new">${L('مباراة جديدة')}</button>
         </div>
