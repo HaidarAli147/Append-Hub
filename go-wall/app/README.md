@@ -79,3 +79,10 @@ MIT — انظر [LICENSE](LICENSE).
 5. Use **Replay last clip**, then **Save replay**, to download or share the short replay. The recent replay buffer is still limited, so save important clips promptly.
 
 **Important limitations:** Recording takes place inside the controller browser and is temporarily held in memory. It is **not** automatically copied to the photo gallery and does not survive closing/reloading the browser. Use download or Share (where supported) to keep the files. Some phones save video to Files/Downloads first; move it to Photos/Gallery from there. The ZIP contains individual camera videos, **not** one synchronized, edited multi-camera video. Very long matches or many cameras may exhaust browser memory; test on your devices and consider shorter recording sessions. QR code and ZIP creation libraries currently load from CDNs, so pairing QR and ZIP export require them to be available.
+
+
+### Temporary 15-second VAR replays
+
+Each connected VAR camera keeps **only the latest completed 15-second replay clip** in memory. Once the next segment is finalized, it replaces the previous segment. The replay is not saved to localStorage, IndexedDB, the filesystem, or the gallery. Refreshing/closing the tab or browser discards its temporary replay data. The **Save replay** button can deliberately download/share a copy that will remain on the user's device. The separate, explicit **Record whole match** feature is unaffected.
+
+A completed segment becomes available after roughly 15 seconds. This implementation does **not** offer frame-accurate instant rewind of the rolling last 15 seconds; the newest incomplete segment isn't playable until finalized. Reliable frame-accurate instant rewind would require a more advanced segmented-media pipeline.
