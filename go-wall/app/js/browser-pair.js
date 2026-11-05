@@ -158,6 +158,11 @@ $('gw-display').onclick=()=>{
   peer.on('connection',handle);
   if(!document.body.classList.contains('tv'))toggleTv();
   const badge=document.createElement('div');badge.textContent='Goaaal code: '+code;badge.style.cssText='position:fixed;z-index:9999;top:8px;left:8px;background:#2a1a3d;color:white;padding:8px;font:18px sans-serif';document.body.append(badge);
+  const scan=document.createElement('button');scan.textContent='📱 Scan to connect';scan.style.cssText='display:block;padding:5px;margin-top:5px';
+  const panel=document.createElement('div');panel.hidden=true;panel.style.cssText='background:white;padding:8px;margin-top:8px';
+  scan.onclick=()=>{panel.hidden=!panel.hidden};
+  badge.append(scan,panel);
+  showPairQR(panel,location.origin+location.pathname+'?controller='+encodeURIComponent(code));
   setInterval(sync,500);
  });
 };
