@@ -312,8 +312,8 @@ async function startMic(){
  try{micStream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true},video:false});
  micCall=pair().peer.call(pair().displayPeerId,micStream);
  if(!micCall)throw Error('Display connection not ready');
- micCall.on('close',()=>{if(micStream)stopMic()});
- micCall.on('error',()=>{if(micStream)stopMic()});
+ micCall.on('close',()=>{if(micStream){status('Announcement connection ended. Tap Start to try again.');stopMic()}});
+ micCall.on('error',err=>{if(micStream){stopMic();status('Announcement connection error: '+(err?.type||err?.message||'network issue')+'. Check that the display is connected and audio is enabled.')}});
  $('gw-var-mic').disabled=true;$('gw-var-stop').disabled=false;status('Microphone announcement is live on the scoreboard.');
  }catch(e){micStream?.getTracks().forEach(t=>t.stop());status('Microphone failed: '+e.message)}
 }
