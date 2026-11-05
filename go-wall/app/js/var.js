@@ -214,20 +214,57 @@ function setupHub(code){
  hubPeer.on('open',()=>{const link=location.origin+location.pathname+'?var-camera='+code;$('gw-var-link').innerHTML='<p>Display and camera code: <b>'+code+'</b></p><p><a href="'+esc(link)+'" target="_blank" rel="noopener">'+esc(link)+'</a></p><div id="gw-camera-qr" style="display:inline-block;background:white;padding:12px"></div>';
    if(typeof QRCode!=='undefined')new QRCode($('gw-camera-qr'),{text:link,width:180,height:180,correctLevel:QRCode.CorrectLevel.M});
    status('Scan the QR code on another phone to add a camera.')});
- hubPeer.on('call',attachCamera);hubPeer.on('connection',c=>{if(blockedCameras.has(c.peer)){c.close();return}cameraChannels.set(c.peer,c);c.on('close',()=>{if(cameraChannels.get(c.peer)===c)cameraChannels.delete(c.peer)});c.on('data',m=>{if(m?.type==='camera-name')setCameraName(c.peer,m.name)});});hubPeer.on('error',e=>status('Camera connection error: '+e.type));
+ hubPeer.on('call',attachCamera);hubPeer.on('connection',c=>{if(blockedCameras.has(c.peer)){c.close();return}cameraChannels.set(c.peer,c);c.on('close',()=>{if(cameraChannels.get(c.peer)===c)cameraChannels.delete(c.peer)});c.on('data',m=>{if(m?.type==='camera-name')setCameraName(c.peer,m.name)});});hubPeer.on('disconnected',()=>{status('Camera pairing signaling disconnected. Retrying…');if(!hubPeer.destroyed)hubPeer.reconnect()});hubPeer.on('error',e=>status('Camera connection error: '+e.type));
+}
+let cameraRetry=null,retryCount=0,cameraRemoved=false,manualSwitch=false;
+function scheduleCameraRetry(){
+ if(cameraRemoved||cameraRetry||!validCam)return;
+ const delay=Math.min(15000,1000*Math.pow(2,Math.min(retryCount++,4)));
+ status('Camera connection interrupted. Reconnecting in '+Math.ceil(delay/1000)+' seconds…');
+ cameraRetry=setTimeout(()=>{cameraRetry=null;if(!cameraRemoved)connectCamera()},delay);
+}
+function connectCamera(){
+ if(cameraRemoved||!cameraStream?.active||camPeer&&!camPeer.destroyed)return;
+ if(!window.Peer)return status('Camera pairing library unavailable.');
+ const p=new Peer(undefined,{config:{iceServers:[{urls:'stun:stun.l.google.com:19302'},{urls:'stun:stun1.l.google.com:19302'}]}});
+ camPeer=p;
+ p.on('open',()=>{
+  if(camPeer!==p||cameraRemoved)return;
+  camData=p.connect('gowall-var-'+camCode,{reliable:true});
+  camData.on('open',()=>{retryCount=0;sendCameraName();status('Camera connected to controller.')});
+  camData.on('data',m=>{if(m?.type==='camera-removed'){
+   cameraRemoved=true;if(cameraRetry){clearTimeout(cameraRetry);cameraRetry=null}
+   cameraStream?.getTracks().forEach(t=>t.stop());cameraStream=null;p.destroy();camPeer=null;camData=null;
+   $('gw-var-self').srcObject=null;$('gw-var-switch').disabled=true;
+   status('Camera removed by controller. Select Start Camera to join again.');
+  }});
+  camData.on('close',()=>{if(camPeer===p&&!cameraRemoved){p.destroy();camPeer=null;scheduleCameraRetry()}});
+  const call=p.call('gowall-var-'+camCode,cameraStream);
+  if(!call){p.destroy();camPeer=null;scheduleCameraRetry();return}
+  call.on('close',()=>{if(camPeer===p&&!cameraRemoved){p.destroy();camPeer=null;scheduleCameraRetry()}});
+  call.on('error',()=>{if(camPeer===p&&!cameraRemoved){p.destroy();camPeer=null;scheduleCameraRetry()}});
+  status('Connecting camera to controller…');
+ });
+ p.on('disconnected',()=>{if(camPeer===p&&!p.destroyed)p.reconnect()});
+ p.on('error',err=>{if(camPeer!==p||cameraRemoved)return;status('Camera connection issue: '+err.type);p.destroy();camPeer=null;scheduleCameraRetry()});
 }
 async function startCamera(){
- try{cameraStream?.getTracks().forEach(t=>t.stop());cameraStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:cameraFacing}},audio:false});
- $('gw-var-self').srcObject=cameraStream;$('gw-var-self').play().catch(()=>{});
- if(!camPeer){camPeer=new Peer(undefined,{config:{iceServers:[{urls:'stun:stun.l.google.com:19302'}]}});camPeer.on('open',()=>{camData=camPeer.connect('gowall-var-'+camCode,{reliable:true});camData.on('open',sendCameraName);camData.on('data',m=>{if(m?.type==='camera-removed'){cameraStream?.getTracks().forEach(t=>t.stop());cameraStream=null;camPeer?.destroy();camPeer=null;camData=null;$('gw-var-self').srcObject=null;$('gw-var-switch').disabled=true;status('This camera was removed by the controller. Select Start Camera to reconnect.');}});const call=camPeer.call('gowall-var-'+camCode,cameraStream);call.on('error',()=>status('Could not connect to controller.'));status('Streaming camera to controller.');});camPeer.on('error',e=>status('Camera error: '+e.type));}
- else{camPeer.destroy();camPeer=null;startCamera();return}
- $('gw-var-switch').disabled=false;
+ try{
+  cameraRemoved=false;
+  if(cameraRetry){clearTimeout(cameraRetry);cameraRetry=null}
+  const old=cameraStream;
+  const next=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:cameraFacing}},audio:false});
+  cameraStream=next;old?.getTracks().forEach(t=>t.stop());
+  $('gw-var-self').srcObject=next;$('gw-var-self').play().catch(()=>{});
+  if(camPeer){camPeer.destroy();camPeer=null}
+  camData=null;retryCount=0;
+  connectCamera();$('gw-var-switch').disabled=false;
  }catch(e){status('Camera permission or connection failed: '+e.message)}
 }
 function sendCameraName(){if(camData?.open)camData.send({type:'camera-name',name:$('gw-var-name').value.trim().slice(0,40)||'Unnamed camera'})}
 $('gw-var-name').addEventListener('change',()=>{localStorage.setItem('gw-var-camera-name',$('gw-var-name').value.slice(0,40));sendCameraName()});
 $('gw-var-start').onclick=startCamera;
-$('gw-var-switch').onclick=()=>{cameraFacing=cameraFacing==='environment'?'user':'environment';if(camPeer){camPeer.destroy();camPeer=null}startCamera()};
+$('gw-var-switch').onclick=()=>{cameraFacing=cameraFacing==='environment'?'user':'environment';startCamera()};
 async function startMic(){
  if(!pair()?.connected||!pair()?.peer||!pair()?.displayPeerId)return status('Pair the controller with the scoreboard first.');
  try{micStream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true},video:false});
