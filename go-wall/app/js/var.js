@@ -13,6 +13,31 @@ section.innerHTML='<h2>📹 VAR · Camera & microphone</h2><p id="gw-var-status"
 document.body.append(section);
 const $=id=>document.getElementById(id),status=t=>$('gw-var-status').textContent=t;
 let hubPeer=null,camPeer=null,cameraStream=null,cameraFacing='environment',micStream=null,micCall=null,camData=null,broadcastCall=null,broadcastFeed=null,broadcastMode=null;
+let announcementAudio=null;
+const enableAudioButton=document.createElement('button');
+enableAudioButton.id='gw-enable-announcement-audio';
+enableAudioButton.textContent='🔊 Enable announcement audio';
+enableAudioButton.hidden=true;
+enableAudioButton.style.cssText='position:fixed;right:12px;bottom:70px;z-index:2147483646;padding:15px;background:#fff;color:#251331;font-weight:bold;border:2px solid #7851a9;border-radius:9px';
+document.body.append(enableAudioButton);
+function showAudioEnable(message){
+ enableAudioButton.hidden=false;
+ enableAudioButton.textContent=message||'🔊 Tap to enable announcement audio';
+}
+async function playAnnouncement(){
+ if(!announcementAudio)return;
+ try{
+  announcementAudio.muted=false;announcementAudio.volume=1;
+  await announcementAudio.play();
+  enableAudioButton.hidden=true;
+ }catch(e){showAudioEnable('🔊 Tap to hear announcements');}
+}
+enableAudioButton.addEventListener('click',()=>{
+ try{voiceCtx()?.resume?.();}catch{}
+ try{actx?.resume?.();}catch{}
+ playAnnouncement();
+});
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&announcementAudio)playAnnouncement()});
 const cameraNames=new Map();
 const REPLAY_WINDOW_MS=15000;
 // Replay clips live in memory only. Closing or refreshing the page clears them.
@@ -315,7 +340,7 @@ document.addEventListener('gowall-var-message',e=>{
   overlay.append(video);document.body.append(overlay);video.play().catch(()=>{});
  }catch(err){status('Display replay error: '+err.message)}
 });
-document.addEventListener('gowall-paired',e=>{if(pair()?.role==='controller')setupHub(e.detail.code)});document.addEventListener('gowall-role',e=>{if(e.detail.role==='controller'){section.hidden=false;$('gw-var-hub').hidden=false;status('Connect to the display to use its pairing code for all cameras.')}if(e.detail.role==='display'){section.hidden=true;const wait=setInterval(()=>{const p=pair()?.peer;if(!p)return;clearInterval(wait);p.on('call',call=>{if(call.peer!==pair()?.remotePeerId){call.close();return}
+document.addEventListener('gowall-paired',e=>{if(pair()?.role==='controller')setupHub(e.detail.code)});document.addEventListener('gowall-role',e=>{if(e.detail.role==='controller'){section.hidden=false;$('gw-var-hub').hidden=false;status('Connect to the display to use its pairing code for all cameras.')}if(e.detail.role==='display'){section.hidden=true;showAudioEnable('🔊 Tap to enable announcement audio');const wait=setInterval(()=>{const p=pair()?.peer;if(!p)return;clearInterval(wait);p.on('call',call=>{if(call.peer!==pair()?.remotePeerId){call.close();return}
 if(call.metadata?.kind==='var-broadcast'){
  call.answer();
  call.on('stream',stream=>{
@@ -327,5 +352,22 @@ if(call.metadata?.kind==='var-broadcast'){
  });
  return;
 }
-call.answer();call.on('stream',stream=>{const audio=document.createElement('audio');audio.autoplay=true;audio.srcObject=stream;audio.setAttribute('playsinline','');document.body.append(audio);audio.play().catch(()=>{});const cleanup=()=>{audio.pause();audio.srcObject=null;audio.remove()};call.on('close',cleanup);call.on('error',cleanup)})})},100)}});}
+call.answer();call.on('stream',stream=>{
+  if(announcementAudio){announcementAudio.pause();announcementAudio.srcObject=null;announcementAudio.remove()}
+  const audio=document.createElement('audio');
+  announcementAudio=audio;
+  audio.autoplay=true;audio.controls=false;audio.playsInline=true;
+  audio.setAttribute('playsinline','');
+  audio.srcObject=stream;
+  audio.addEventListener('loadedmetadata',playAnnouncement);
+  audio.addEventListener('canplay',playAnnouncement);
+  document.body.append(audio);
+  playAnnouncement();
+  const cleanup=()=>{
+   if(announcementAudio!==audio)return;
+   audio.pause();audio.srcObject=null;audio.remove();announcementAudio=null;
+   enableAudioButton.hidden=true;
+  };
+  call.on('close',cleanup);call.on('error',cleanup);
+ })})},100)}});}
 })();
