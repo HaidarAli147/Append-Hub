@@ -9,11 +9,74 @@ const validCam=/^\d{8}$/.test(camCode||'');
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const css=document.createElement('style');css.textContent='#gw-var{border:2px solid white;padding:16px;margin:16px var(--gutter)}#gw-var button,#gw-var input{padding:10px;margin:5px;background:white;color:#30213f;border:0;font:inherit}#gw-var video{max-width:100%;background:#160e1d;min-height:120px}#gw-var-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}#gw-var-grid article{border:1px solid white;padding:10px}#gw-var-status{overflow-wrap:anywhere}body.gw-controller #gw-var{display:block}body.gw-controller #gw-var video{max-height:260px}body.gw-var-camera header,body.gw-var-camera main,body.gw-var-camera footer,body.gw-var-camera #gowall-remote,body.gw-var-camera .notes{display:none!important}body.gw-var-camera #gw-var{margin:12px;min-height:85vh}#gw-var[hidden]{display:none!important}';document.head.append(css);
 const section=document.createElement('section');section.id='gw-var';section.hidden=true;
-section.innerHTML='<h2>📹 VAR · Camera & microphone</h2><p id="gw-var-status" role="status">Choose Controller on the phone first.</p><div id="gw-var-hub" hidden><p>Connect extra phones as cameras. Camera feeds stay in the controller for review.</p><div id="gw-var-link"></div><div id="gw-var-grid"></div><div><button id="gw-var-mic">🎙 Start live announcement</button><button id="gw-var-stop" disabled>■ Stop announcement</button></div><p>Allow microphone access on the controller to speak through the display device.</p></div><div id="gw-var-cam" hidden><p>Camera device: choose Start Camera and allow access. Keep this page open.</p><label>Camera name <input id="gw-var-name" maxlength="40" placeholder="Goal line camera"></label><button id="gw-var-start">📷 Start camera</button><button id="gw-var-switch" disabled>↻ Switch camera</button><video id="gw-var-self" autoplay playsinline muted></video></div>';
+section.innerHTML='<h2>📹 VAR · Camera & microphone</h2><p id="gw-var-status" role="status">Choose Controller on the phone first.</p><div id="gw-var-hub" hidden><p>Connect extra phones as cameras. Camera feeds stay in the controller for review.</p><div id="gw-var-link"></div><div><button id="gw-record-start">⏺ Record whole match (all cameras)</button><button id="gw-record-stop" disabled>■ Stop recording</button><button id="gw-record-save" disabled>💾 Save all camera recordings (ZIP)</button></div><p id="gw-record-note">Recordings are kept temporarily on this controller until downloaded. Keep it open, and save before closing.</p><div id="gw-var-grid"></div><div><button id="gw-var-mic">🎙 Start live announcement</button><button id="gw-var-stop" disabled>■ Stop announcement</button></div><p>Allow microphone access on the controller to speak through the display device.</p></div><div id="gw-var-cam" hidden><p>Camera device: choose Start Camera and allow access. Keep this page open.</p><label>Camera name <input id="gw-var-name" maxlength="40" placeholder="Goal line camera"></label><button id="gw-var-start">📷 Start camera</button><button id="gw-var-switch" disabled>↻ Switch camera</button><video id="gw-var-self" autoplay playsinline muted></video></div>';
 document.body.append(section);
 const $=id=>document.getElementById(id),status=t=>$('gw-var-status').textContent=t;
 let hubPeer=null,camPeer=null,cameraStream=null,cameraFacing='environment',micStream=null,micCall=null,camData=null,broadcastCall=null,broadcastFeed=null,broadcastMode=null;
 const cameraNames=new Map();
+let recordingMatch=false;
+const savedRecordings=[];
+function extension(blob){return /mp4/i.test(blob.type)?'mp4':'webm'}
+function recordingName(name,blob){return 'Goaaal-'+String(name||'Camera').replace(/[^a-z0-9_-]+/gi,'-')+'-'+new Date().toISOString().replace(/[:.]/g,'-')+'.'+extension(blob)}
+function downloadBlob(blob,name){
+ const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),60000);
+}
+async function saveClip(blob,name){
+ if(!blob)return status('Nothing recorded yet.');
+ const file=new File([blob],name,{type:blob.type||'video/webm'});
+ if(navigator.canShare?.({files:[file]})&&navigator.share){
+  try{await navigator.share({files:[file],title:'Goaaal recording'});return}catch(e){if(e.name==='AbortError')return}
+ }
+ downloadBlob(blob,name);
+}
+function startFullRecorder(f){
+ if(!recordingMatch||!f.active||!window.MediaRecorder||!f.stream?.active)return;
+ try{
+  const mime=['video/mp4','video/webm;codecs=vp8','video/webm'].find(t=>MediaRecorder.isTypeSupported(t));
+  const recorder=new MediaRecorder(f.stream,mime?{mimeType:mime}:undefined),parts=[];
+  f.fullRecorder=recorder;
+  recorder.ondataavailable=e=>{if(e.data.size)parts.push(e.data)};
+  recorder.onstop=()=>{
+   if(parts.length){const blob=new Blob(parts,{type:recorder.mimeType||'video/webm'});savedRecordings.push({name:recordingName(f.element.querySelector('.gw-camera-name')?.textContent,blob),blob});$('gw-record-save').disabled=false;f.fullBlob=blob;f.element.querySelector('.gw-save-match')?.removeAttribute('disabled')}
+   f.fullRecorder=null;
+  };
+  recorder.onerror=()=>status('Full-match recording error on '+f.element.querySelector('.gw-camera-name')?.textContent);
+  recorder.start(30000);
+ }catch(e){status('Recording not supported: '+e.message)}
+}
+function stopFullRecorder(f){
+ return new Promise(resolve=>{
+  const rec=f.fullRecorder;
+  if(!rec||rec.state==='inactive')return resolve();
+  rec.addEventListener('stop',resolve,{once:true});
+  try{rec.stop()}catch{resolve()}
+ });
+}
+$('gw-record-start').onclick=()=>{
+ if(!feeds.size)return status('Connect at least one camera first.');
+ savedRecordings.length=0;recordingMatch=true;
+ for(const f of feeds.values())startFullRecorder(f);
+ $('gw-record-start').disabled=true;$('gw-record-stop').disabled=false;$('gw-record-save').disabled=true;
+ status('Recording each connected camera. Save the recordings before closing the controller.');
+};
+$('gw-record-stop').onclick=async()=>{
+ recordingMatch=false;
+ await Promise.all([...feeds.values()].map(stopFullRecorder));
+ $('gw-record-start').disabled=false;$('gw-record-stop').disabled=true;
+ $('gw-record-save').disabled=!savedRecordings.length;
+ status('Recording stopped. Download your files to keep them.');
+};
+$('gw-record-save').onclick=async()=>{
+ if(!savedRecordings.length)return status('Stop the match recording first.');
+ if(typeof JSZip==='undefined')return status('ZIP export unavailable. Use each camera’s Save match button.');
+ try{
+  const zip=new JSZip();for(const f of savedRecordings)zip.file(f.name,f.blob);
+  status('Preparing your camera recordings…');
+  downloadBlob(await zip.generateAsync({type:'blob',compression:'STORE'}),'Goaaal-match-cameras.zip');
+  status('ZIP downloaded. Extract it to view a separate video from every connected camera.');
+ }catch(e){status('Could not export recordings: '+e.message)}
+};
+
 const roleBox=document.querySelector('#gowall-remote .gw-actions');
 if(roleBox){const button=document.createElement('button');button.id='gw-var-role';button.textContent='📹 VAR Camera';roleBox.append(button);button.onclick=()=>{const entered=prompt('Enter the 8-digit display pairing code:');if(entered===null)return;if(!/^\d{8}$/.test(entered.trim())){status('Enter the same 8-digit code shown on the display.');section.hidden=false;return}location.href=location.pathname+'?var-camera='+encodeURIComponent(entered.trim())};}
 const feeds=new Map();let cameraCounter=0;
@@ -66,6 +129,7 @@ function stopFeed(id){
  const f=feeds.get(id);if(!f)return;
  feeds.delete(id);
  if(broadcastFeed===f)stopBroadcast();
+ if(f.fullRecorder&&f.fullRecorder.state!=='inactive')stopFullRecorder(f);
  f.active=false;
  if(f.timer)clearTimeout(f.timer);
  if(f.rec&&f.rec.state!=='inactive')try{f.rec.stop()}catch{}
@@ -82,13 +146,14 @@ function attachCamera(call){
  call.answer();
  call.on('stream',stream=>{
   const card=document.createElement('article');
-  card.innerHTML='<strong class="gw-camera-name"></strong><video autoplay playsinline muted></video><div><button class="gw-replay" disabled>▶ Replay last clip</button><button class="gw-live">● Live</button><button class="gw-broadcast">📺 Show on display</button><button class="gw-remove">✕ Remove camera</button></div><video class="gw-replay-video" controls playsinline hidden></video>';
+  card.innerHTML='<strong class="gw-camera-name"></strong><video autoplay playsinline muted></video><div><button class="gw-replay" disabled>▶ Replay last clip</button><button class="gw-save-replay" disabled>⬇ Save replay</button><button class="gw-save-match" disabled>⬇ Save match</button><button class="gw-live">● Live</button><button class="gw-broadcast">📺 Show on display</button><button class="gw-remove">✕ Remove camera</button></div><video class="gw-replay-video" controls playsinline hidden></video>';
   $('gw-var-grid').append(card);
   const live=card.querySelector('video'),replay=card.querySelector('.gw-replay-video'),replayButton=card.querySelector('.gw-replay');
   live.srcObject=stream;live.play().catch(()=>{});
-  const f={call,element:card,chunks:[],rec:null,timer:null,active:true};
+  const f={call,element:card,chunks:[],rec:null,timer:null,active:true,stream,fullRecorder:null,fullBlob:null};
   feeds.set(id,f);
   setCameraName(call.peer,cameraNames.get(call.peer)||'Camera '+id);
+  if(recordingMatch)startFullRecorder(f);
   card.querySelector('.gw-broadcast').onclick=()=>broadcastCamera(f);
   card.querySelector('.gw-remove').onclick=()=>{const name=card.querySelector('.gw-camera-name').textContent;if(!confirm('Remove '+name+' from VAR?'))return;blockedCameras.add(call.peer);const channel=cameraChannels.get(call.peer);if(channel?.open)channel.send({type:'camera-removed'});stopFeed(id);cameraChannels.delete(call.peer);status(name+' removed from VAR.');};
   // MediaRecorder timeslice blobs may not be independently playable. Finalize each
@@ -109,7 +174,7 @@ function attachCamera(call){
        const url=URL.createObjectURL(blob);
        f.chunks.push({url,type:blob.type});
        while(f.chunks.length>3)URL.revokeObjectURL(f.chunks.shift().url);
-       replayButton.disabled=false;
+       replayButton.disabled=false;card.querySelector('.gw-save-replay').disabled=false;
       }
       recordNext();
      };
@@ -120,6 +185,12 @@ function attachCamera(call){
    };
    recordNext();
   }else status('Camera '+id+': this browser does not support video recording.');
+  card.querySelector('.gw-save-replay').onclick=()=>{
+   const clip=f.selectedClip||f.chunks.at(-1);
+   if(!clip)return status('No replay ready yet.');
+   fetch(clip.url).then(r=>r.blob()).then(blob=>saveClip(blob,recordingName(card.querySelector('.gw-camera-name').textContent+'-replay',blob))).catch(e=>status('Replay download failed: '+e.message));
+  };
+  card.querySelector('.gw-save-match').onclick=()=>saveClip(f.fullBlob,recordingName(card.querySelector('.gw-camera-name').textContent, f.fullBlob||new Blob()));
   replayButton.onclick=()=>{
    const clip=f.chunks.at(-1);
    if(!clip)return status('Replay is not ready yet. The first clip takes about 8 seconds.');
@@ -140,21 +211,60 @@ function setupHub(code){
  if(!/^\d{8}$/.test(code||''))return status('Connect the controller to the display to share its pairing code.');
  if(!window.Peer)return status('PeerJS is unavailable. Internet is required for pairing.');
  hubPeer=new Peer('gowall-var-'+code,{config:{iceServers:[{urls:'stun:stun.l.google.com:19302'}]}});
- hubPeer.on('open',()=>{const link=location.origin+location.pathname+'?var-camera='+code;$('gw-var-link').innerHTML='<p>Display and camera code: <b>'+code+'</b></p><p><a href="'+esc(link)+'" target="_blank" rel="noopener">'+esc(link)+'</a></p>';status('Share the link or code with camera devices.')});
- hubPeer.on('call',attachCamera);hubPeer.on('connection',c=>{if(blockedCameras.has(c.peer)){c.close();return}cameraChannels.set(c.peer,c);c.on('close',()=>{if(cameraChannels.get(c.peer)===c)cameraChannels.delete(c.peer)});c.on('data',m=>{if(m?.type==='camera-name')setCameraName(c.peer,m.name)});});hubPeer.on('error',e=>status('Camera connection error: '+e.type));
+ hubPeer.on('open',()=>{const link=location.origin+location.pathname+'?var-camera='+code;$('gw-var-link').innerHTML='<p>Display and camera code: <b>'+code+'</b></p><p><a href="'+esc(link)+'" target="_blank" rel="noopener">'+esc(link)+'</a></p><div id="gw-camera-qr" style="display:inline-block;background:white;padding:12px"></div>';
+   if(typeof QRCode!=='undefined')new QRCode($('gw-camera-qr'),{text:link,width:180,height:180,correctLevel:QRCode.CorrectLevel.M});
+   status('Scan the QR code on another phone to add a camera.')});
+ hubPeer.on('call',attachCamera);hubPeer.on('connection',c=>{if(blockedCameras.has(c.peer)){c.close();return}cameraChannels.set(c.peer,c);c.on('close',()=>{if(cameraChannels.get(c.peer)===c)cameraChannels.delete(c.peer)});c.on('data',m=>{if(m?.type==='camera-name')setCameraName(c.peer,m.name)});});hubPeer.on('disconnected',()=>{status('Camera pairing signaling disconnected. Retrying…');if(!hubPeer.destroyed)hubPeer.reconnect()});hubPeer.on('error',e=>status('Camera connection error: '+e.type));
+}
+let cameraRetry=null,retryCount=0,cameraRemoved=false,manualSwitch=false;
+function scheduleCameraRetry(){
+ if(cameraRemoved||cameraRetry||!validCam)return;
+ const delay=Math.min(15000,1000*Math.pow(2,Math.min(retryCount++,4)));
+ status('Camera connection interrupted. Reconnecting in '+Math.ceil(delay/1000)+' seconds…');
+ cameraRetry=setTimeout(()=>{cameraRetry=null;if(!cameraRemoved)connectCamera()},delay);
+}
+function connectCamera(){
+ if(cameraRemoved||!cameraStream?.active||camPeer&&!camPeer.destroyed)return;
+ if(!window.Peer)return status('Camera pairing library unavailable.');
+ const p=new Peer(undefined,{config:{iceServers:[{urls:'stun:stun.l.google.com:19302'},{urls:'stun:stun1.l.google.com:19302'}]}});
+ camPeer=p;
+ p.on('open',()=>{
+  if(camPeer!==p||cameraRemoved)return;
+  camData=p.connect('gowall-var-'+camCode,{reliable:true});
+  camData.on('open',()=>{retryCount=0;sendCameraName();status('Camera connected to controller.')});
+  camData.on('data',m=>{if(m?.type==='camera-removed'){
+   cameraRemoved=true;if(cameraRetry){clearTimeout(cameraRetry);cameraRetry=null}
+   cameraStream?.getTracks().forEach(t=>t.stop());cameraStream=null;p.destroy();camPeer=null;camData=null;
+   $('gw-var-self').srcObject=null;$('gw-var-switch').disabled=true;
+   status('Camera removed by controller. Select Start Camera to join again.');
+  }});
+  camData.on('close',()=>{if(camPeer===p&&!cameraRemoved){p.destroy();camPeer=null;scheduleCameraRetry()}});
+  const call=p.call('gowall-var-'+camCode,cameraStream);
+  if(!call){p.destroy();camPeer=null;scheduleCameraRetry();return}
+  call.on('close',()=>{if(camPeer===p&&!cameraRemoved){p.destroy();camPeer=null;scheduleCameraRetry()}});
+  call.on('error',()=>{if(camPeer===p&&!cameraRemoved){p.destroy();camPeer=null;scheduleCameraRetry()}});
+  status('Connecting camera to controller…');
+ });
+ p.on('disconnected',()=>{if(camPeer===p&&!p.destroyed)p.reconnect()});
+ p.on('error',err=>{if(camPeer!==p||cameraRemoved)return;status('Camera connection issue: '+err.type);p.destroy();camPeer=null;scheduleCameraRetry()});
 }
 async function startCamera(){
- try{cameraStream?.getTracks().forEach(t=>t.stop());cameraStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:cameraFacing}},audio:false});
- $('gw-var-self').srcObject=cameraStream;$('gw-var-self').play().catch(()=>{});
- if(!camPeer){camPeer=new Peer(undefined,{config:{iceServers:[{urls:'stun:stun.l.google.com:19302'}]}});camPeer.on('open',()=>{camData=camPeer.connect('gowall-var-'+camCode,{reliable:true});camData.on('open',sendCameraName);camData.on('data',m=>{if(m?.type==='camera-removed'){cameraStream?.getTracks().forEach(t=>t.stop());cameraStream=null;camPeer?.destroy();camPeer=null;camData=null;$('gw-var-self').srcObject=null;$('gw-var-switch').disabled=true;status('This camera was removed by the controller. Select Start Camera to reconnect.');}});const call=camPeer.call('gowall-var-'+camCode,cameraStream);call.on('error',()=>status('Could not connect to controller.'));status('Streaming camera to controller.');});camPeer.on('error',e=>status('Camera error: '+e.type));}
- else{camPeer.destroy();camPeer=null;startCamera();return}
- $('gw-var-switch').disabled=false;
+ try{
+  cameraRemoved=false;
+  if(cameraRetry){clearTimeout(cameraRetry);cameraRetry=null}
+  const old=cameraStream;
+  const next=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:cameraFacing}},audio:false});
+  cameraStream=next;old?.getTracks().forEach(t=>t.stop());
+  $('gw-var-self').srcObject=next;$('gw-var-self').play().catch(()=>{});
+  if(camPeer){camPeer.destroy();camPeer=null}
+  camData=null;retryCount=0;
+  connectCamera();$('gw-var-switch').disabled=false;
  }catch(e){status('Camera permission or connection failed: '+e.message)}
 }
 function sendCameraName(){if(camData?.open)camData.send({type:'camera-name',name:$('gw-var-name').value.trim().slice(0,40)||'Unnamed camera'})}
 $('gw-var-name').addEventListener('change',()=>{localStorage.setItem('gw-var-camera-name',$('gw-var-name').value.slice(0,40));sendCameraName()});
 $('gw-var-start').onclick=startCamera;
-$('gw-var-switch').onclick=()=>{cameraFacing=cameraFacing==='environment'?'user':'environment';if(camPeer){camPeer.destroy();camPeer=null}startCamera()};
+$('gw-var-switch').onclick=()=>{cameraFacing=cameraFacing==='environment'?'user':'environment';startCamera()};
 async function startMic(){
  if(!pair()?.connected||!pair()?.peer||!pair()?.displayPeerId)return status('Pair the controller with the scoreboard first.');
  try{micStream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true},video:false});

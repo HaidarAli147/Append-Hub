@@ -68,3 +68,14 @@ manifest.webmanifest  PWA
 ## الرخصة · License
 
 MIT — انظر [LICENSE](LICENSE).
+
+
+## VAR camera recording, exports and QR pairing
+
+1. On the scoreboard screen choose **Display**, then use **📱 Scan to connect** to show the controller QR code. Scan it on the controller phone to open the controller link and connect. The eight-digit code remains available if scanning is unavailable.
+2. Once the controller is paired, scan its **camera QR code** on each additional phone and allow camera access. Multiple phones can be connected as separate cameras. Keep the browser tabs open and the phones powered.
+3. On the controller, select **Record whole match (all cameras)** near kickoff and **Stop recording** at the end. Recording starts for every currently connected camera; a camera joining later starts recording on connection.
+4. Use **Save all camera recordings (ZIP)** to download a bundle containing separate camera video files, or use **Save match** for an individual camera. A disconnected camera's completed segment remains in the ZIP; reconnection may create another segment.
+5. Use **Replay last clip**, then **Save replay**, to download or share the short replay. The recent replay buffer is still limited, so save important clips promptly.
+
+**Important limitations:** Recording takes place inside the controller browser and is temporarily held in memory. It is **not** automatically copied to the photo gallery and does not survive closing/reloading the browser. Use download or Share (where supported) to keep the files. Some phones save video to Files/Downloads first; move it to Photos/Gallery from there. The ZIP contains individual camera videos, **not** one synchronized, edited multi-camera video. Very long matches or many cameras may exhaust browser memory; test on your devices and consider shorter recording sessions. QR code and ZIP creation libraries currently load from CDNs, so pairing QR and ZIP export require them to be available.

@@ -8,6 +8,12 @@ box.innerHTML='<h2>📱 Goaaal · Two devices</h2><p>Open this same page on both
 document.querySelector('.mast')?.after(box);
 const style=document.createElement('style');style.textContent='#gowall-remote{margin:16px var(--gutter);padding:20px;border:2px solid white}#gowall-remote h2{margin:0 0 8px}.gw-actions{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}.gw-actions button{padding:10px;background:#fff;color:#352246;border:0;font-weight:700}#gw-score{font-size:42px;font-weight:bold}#gw-details{overflow-wrap:anywhere}body.gw-controller .mast,body.gw-controller main,body.gw-controller .notes,body.gw-controller footer{display:none!important}body.gw-controller #gowall-remote{min-height:80vh}body.gw-controller #gw-controls:not([hidden]){display:block}';style.textContent+='.gw-remote-section{border:2px solid #fff;padding:12px;margin:12px 0}.gw-remote-section h3{margin:0 0 10px}.gw-remote-section label{display:inline-flex;gap:6px;align-items:center;margin:6px;flex-wrap:wrap}.gw-remote-section input,.gw-remote-section select{color:#222;background:white;padding:7px;max-width:180px}.gw-remote-section strong{display:block;margin:8px 0}.gw-stat{margin:8px 0}.gw-stat button{margin:3px}';style.textContent+='[hidden]{display:none!important}#gw-thirty-controls{display:grid;gap:12px;margin-top:14px}.gw-thirty-toolbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center}.gw-thirty-player{border:2px solid #fff;padding:12px}.gw-thirty-player strong{display:block;font-size:28px}.gw-thirty-player input,.gw-thirty-toolbar input{background:#fff;color:#2a1a3d;padding:9px;max-width:180px}.gw-thirty-player button:disabled{opacity:.35}';document.head.append(style);
 let peer=null,connection=null,role=null,connected=false;
+const controllerCode=new URLSearchParams(location.search).get('controller');
+function showPairQR(target,link){
+ target.innerHTML='';
+ if(typeof QRCode==='undefined'){const a=document.createElement('a');a.href=link;a.textContent='Open pairing link';target.append(a);return}
+ new QRCode(target,{text:link,width:180,height:180,correctLevel:QRCode.CorrectLevel.M});
+}
 function announcePairRole(){document.dispatchEvent(new CustomEvent('gowall-role',{detail:{role}}))}
 window.GoWallPair={get peer(){return peer},get connected(){return connected},get role(){return role},get displayPeerId(){return role==='controller'?connection?.peer:role==='display'?peer?.id:null},get remotePeerId(){return connection?.peer||null},sendVarMessage(m){if(role==='controller'&&connection?.open)connection.send(m)}};
 const escGw=v=>String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -59,7 +65,7 @@ function initPeer(id,cb){
  peer=new Peer(id,{config:{iceServers:[{urls:'stun:stun.l.google.com:19302'},{urls:'stun:stun1.l.google.com:19302'}]},debug:1});
  peer.on('open',cb);
  peer.on('error',err=>{message('Pairing error: '+err.type+'. Refresh both devices and retry.');console.error('Goaaal pairing',err)});
- peer.on('disconnected',()=>message('Signaling disconnected. Reopen the page to retry.'));
+ peer.on('disconnected',()=>{message('Signaling interrupted. Reconnecting…');if(!peer.destroyed)peer.reconnect()});
 }
 function snapshot(){return {sport:state.sport,fb:state.fb,hb:state.hb,tn:state.tn,thirty:Thirty.snapshot(),lang:state.lang,run:{...run}}}
 function sync(){if(role==='display'&&connected&&connection?.open)connection.send({type:'state',data:snapshot()})}
@@ -70,7 +76,7 @@ function handle(c){
  if(connection?.open){c.close();return}
  connection=c;
  c.on('open',()=>{connected=true;message(role==='display'?'Controller connected. Keep this screen open.':'Paired! Control the scoreboard below.');if(role==='controller'){$('gw-controls').hidden=false;document.dispatchEvent(new CustomEvent('gowall-paired',{detail:{code:c.peer.replace(/^gowall-/,'')}}))}if(role==='display')sync()});
- c.on('close',()=>{connected=false;$('gw-controls').hidden=true;message('Connection lost. Reload both devices to reconnect.')});
+ c.on('close',()=>{connected=false;$('gw-controls').hidden=true;message('Connection lost. Retrying…');if(role==='controller'&&peer&&!peer.destroyed&&c===connection){setTimeout(()=>{if(!connected&&peer&&!peer.destroyed&&connection===c)handle(peer.connect(c.peer,{reliable:true}))},2500)}});
  c.on('error',err=>{connected=false;$('gw-controls').hidden=true;message('Connection error. Check that both devices are on the same Wi-Fi.');console.error('Goaaal channel',err)});
  c.on('data',m=>{
   if(!m||typeof m!=='object')return;
@@ -146,10 +152,17 @@ $('gw-display').onclick=()=>{
  // This tap unlocks the display's Web Audio before remote events arrive.
  try{voiceCtx();vctx?.resume();actx?.resume?.();}catch{}
  initPeer('gowall-'+code,()=>{
-  message('Pairing code: '+code+' · Open this page on your phone, select Controller, and enter the code.');
+  message('Pairing code: '+code+' · Scan the QR to connect the controller.');
+  const qr=document.createElement('div');qr.id='gw-controller-qr';qr.style.cssText='background:white;display:inline-block;padding:12px;margin:10px';details.append(qr);
+  showPairQR(qr,location.origin+location.pathname+'?controller='+encodeURIComponent(code));
   peer.on('connection',handle);
   if(!document.body.classList.contains('tv'))toggleTv();
   const badge=document.createElement('div');badge.textContent='Goaaal code: '+code;badge.style.cssText='position:fixed;z-index:9999;top:8px;left:8px;background:#2a1a3d;color:white;padding:8px;font:18px sans-serif';document.body.append(badge);
+  const scan=document.createElement('button');scan.textContent='📱 Scan to connect';scan.style.cssText='display:block;padding:5px;margin-top:5px';
+  const panel=document.createElement('div');panel.hidden=true;panel.style.cssText='background:white;padding:8px;margin-top:8px';
+  scan.onclick=()=>{panel.hidden=!panel.hidden};
+  badge.append(scan,panel);
+  showPairQR(panel,location.origin+location.pathname+'?controller='+encodeURIComponent(code));
   setInterval(sync,500);
  });
 };
@@ -163,8 +176,9 @@ $('gw-control').onclick=()=>{
  initPeer(undefined,()=>{button.disabled=false;button.title='';button.onclick=()=>{
   if(!/^\d{8}$/.test(input.value)){message('Enter the 8-digit code shown on the display.');return}
   message('Connecting…');const c=peer.connect('gowall-'+input.value,{reliable:true});handle(c);
- };});
+ };if(/^\d{8}$/.test(controllerCode||'')){input.value=controllerCode;button.click()}});
 };
+if(/^\d{8}$/.test(controllerCode||''))$('gw-control').click();
 box.addEventListener('change',e=>{const t=e.target;
  if(t.dataset.remoteName){command('edit-name',{sport:t.dataset.remoteName,team:+t.dataset.team,value:t.value});return}
  if(t.dataset.remoteColor){command('edit-color',{sport:t.dataset.remoteColor,team:+t.dataset.team,value:t.value});return}
