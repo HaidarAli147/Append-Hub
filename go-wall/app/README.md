@@ -86,3 +86,8 @@ MIT — انظر [LICENSE](LICENSE).
 Each connected VAR camera keeps **only the latest completed 15-second replay clip** in memory. Once the next segment is finalized, it replaces the previous segment. The replay is not saved to localStorage, IndexedDB, the filesystem, or the gallery. Refreshing/closing the tab or browser discards its temporary replay data. The **Save replay** button can deliberately download/share a copy that will remain on the user's device. The separate, explicit **Record whole match** feature is unaffected.
 
 A completed segment becomes available after roughly 15 seconds. This implementation does **not** offer frame-accurate instant rewind of the rolling last 15 seconds; the newest incomplete segment isn't playable until finalized. Reliable frame-accurate instant rewind would require a more advanced segmented-media pipeline.
+
+
+### Announcements on iPhone / Android displays
+
+Mobile browsers can block incoming WebRTC audio until the receiving device has received a user tap. When using a phone as the **Display**, tap **🔊 Enable announcement audio** on the display device and leave its Goaaal browser page visible. If autoplay is blocked, the button appears again so that audio can be started explicitly. The controller must grant microphone permission, and the display must have its media volume enabled. This does not bypass iOS/Android background playback restrictions or network/WebRTC issues: when a stream cannot connect (for instance across restrictive NATs without TURN relay), browser code alone cannot guarantee a connection. Test PC→phone and phone→phone with both devices on the same network before testing other networks.
