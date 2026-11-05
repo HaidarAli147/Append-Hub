@@ -9,11 +9,21 @@ const validCam=/^\d{8}$/.test(camCode||'');
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const css=document.createElement('style');css.textContent='#gw-var{border:2px solid white;padding:16px;margin:16px var(--gutter)}#gw-var button,#gw-var input{padding:10px;margin:5px;background:white;color:#30213f;border:0;font:inherit}#gw-var video{max-width:100%;background:#160e1d;min-height:120px}#gw-var-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}#gw-var-grid article{border:1px solid white;padding:10px}#gw-var-status{overflow-wrap:anywhere}body.gw-controller #gw-var{display:block}body.gw-controller #gw-var video{max-height:260px}body.gw-var-camera header,body.gw-var-camera main,body.gw-var-camera footer,body.gw-var-camera #gowall-remote,body.gw-var-camera .notes{display:none!important}body.gw-var-camera #gw-var{margin:12px;min-height:85vh}#gw-var[hidden]{display:none!important}';document.head.append(css);
 const section=document.createElement('section');section.id='gw-var';section.hidden=true;
-section.innerHTML='<h2>📹 VAR · Camera & microphone</h2><p id="gw-var-status" role="status">Choose Controller on the phone first.</p><div id="gw-var-hub" hidden><p>Connect extra phones as cameras. Camera feeds stay in the controller for review.</p><div id="gw-var-link"></div><div><button id="gw-record-start">⏺ Record whole match (all cameras)</button><button id="gw-record-stop" disabled>■ Stop recording</button><button id="gw-record-save" disabled>💾 Save all camera recordings (ZIP)</button></div><p id="gw-record-note">Recordings are kept temporarily on this controller until downloaded. Keep it open, and save before closing.</p><div id="gw-var-grid"></div><div><button id="gw-var-mic">🎙 Start live announcement</button><button id="gw-var-stop" disabled>■ Stop announcement</button></div><p>Allow microphone access on the controller to speak through the display device.</p></div><div id="gw-var-cam" hidden><p>Camera device: choose Start Camera and allow access. Keep this page open.</p><label>Camera name <input id="gw-var-name" maxlength="40" placeholder="Goal line camera"></label><button id="gw-var-start">📷 Start camera</button><button id="gw-var-switch" disabled>↻ Switch camera</button><video id="gw-var-self" autoplay playsinline muted></video></div>';
+section.innerHTML='<h2>📹 VAR · Camera & microphone</h2><p id="gw-var-status" role="status">Choose Controller on the phone first.</p><div id="gw-var-hub" hidden><p>Connect extra phones as cameras. Camera feeds stay in the controller for review.</p><div id="gw-var-link"></div><div><button id="gw-record-start">⏺ Record whole match (all cameras)</button><button id="gw-record-stop" disabled>■ Stop recording</button><button id="gw-record-save" disabled>💾 Save all camera recordings (ZIP)</button></div><p id="gw-record-note">Recordings are kept temporarily on this controller until downloaded. Keep it open, and save before closing.</p><p>Instant replays are kept only in this browser tab (latest completed 15-second segment per camera). They are deleted on refresh or close. Use Save replay to keep a copy.</p><div id="gw-var-grid"></div><div><button id="gw-var-mic">🎙 Start live announcement</button><button id="gw-var-stop" disabled>■ Stop announcement</button></div><p>Allow microphone access on the controller to speak through the display device.</p></div><div id="gw-var-cam" hidden><p>Camera device: choose Start Camera and allow access. Keep this page open.</p><label>Camera name <input id="gw-var-name" maxlength="40" placeholder="Goal line camera"></label><button id="gw-var-start">📷 Start camera</button><button id="gw-var-switch" disabled>↻ Switch camera</button><video id="gw-var-self" autoplay playsinline muted></video></div>';
 document.body.append(section);
 const $=id=>document.getElementById(id),status=t=>$('gw-var-status').textContent=t;
 let hubPeer=null,camPeer=null,cameraStream=null,cameraFacing='environment',micStream=null,micCall=null,camData=null,broadcastCall=null,broadcastFeed=null,broadcastMode=null;
 const cameraNames=new Map();
+const REPLAY_WINDOW_MS=15000;
+// Replay clips live in memory only. Closing or refreshing the page clears them.
+window.addEventListener('pagehide',()=>{
+ for(const f of feeds.values()){
+  if(f.timer)clearTimeout(f.timer);
+  if(f.rec?.state==='recording')try{f.rec.stop()}catch{}
+  for(const clip of f.chunks)URL.revokeObjectURL(clip.url);
+  if(f.selectedClip&&!f.chunks.includes(f.selectedClip))URL.revokeObjectURL(f.selectedClip.url);
+ }
+});
 let recordingMatch=false;
 const savedRecordings=[];
 function extension(blob){return /mp4/i.test(blob.type)?'mp4':'webm'}
@@ -137,6 +147,7 @@ function stopFeed(id){
  f.element.querySelector('video')?.pause();
  f.element.querySelector('video')?.srcObject && (f.element.querySelector('video').srcObject=null);
  f.chunks.forEach(x=>URL.revokeObjectURL(x.url));
+ if(f.selectedClip&&!f.chunks.includes(f.selectedClip))URL.revokeObjectURL(f.selectedClip.url);
  const replay=f.element.querySelector('.gw-replay-video');if(replay){replay.pause();replay.removeAttribute('src');replay.load()}
  f.element.remove();
 }
@@ -146,7 +157,7 @@ function attachCamera(call){
  call.answer();
  call.on('stream',stream=>{
   const card=document.createElement('article');
-  card.innerHTML='<strong class="gw-camera-name"></strong><video autoplay playsinline muted></video><div><button class="gw-replay" disabled>▶ Replay last clip</button><button class="gw-save-replay" disabled>⬇ Save replay</button><button class="gw-save-match" disabled>⬇ Save match</button><button class="gw-live">● Live</button><button class="gw-broadcast">📺 Show on display</button><button class="gw-remove">✕ Remove camera</button></div><video class="gw-replay-video" controls playsinline hidden></video>';
+  card.innerHTML='<strong class="gw-camera-name"></strong><video autoplay playsinline muted></video><div><button class="gw-replay" disabled>▶ Replay last 15 sec</button><button class="gw-save-replay" disabled>⬇ Save replay</button><button class="gw-save-match" disabled>⬇ Save match</button><button class="gw-live">● Live</button><button class="gw-broadcast">📺 Show on display</button><button class="gw-remove">✕ Remove camera</button></div><video class="gw-replay-video" controls playsinline hidden></video>';
   $('gw-var-grid').append(card);
   const live=card.querySelector('video'),replay=card.querySelector('.gw-replay-video'),replayButton=card.querySelector('.gw-replay');
   live.srcObject=stream;live.play().catch(()=>{});
@@ -157,7 +168,7 @@ function attachCamera(call){
   card.querySelector('.gw-broadcast').onclick=()=>broadcastCamera(f);
   card.querySelector('.gw-remove').onclick=()=>{const name=card.querySelector('.gw-camera-name').textContent;if(!confirm('Remove '+name+' from VAR?'))return;blockedCameras.add(call.peer);const channel=cameraChannels.get(call.peer);if(channel?.open)channel.send({type:'camera-removed'});stopFeed(id);cameraChannels.delete(call.peer);status(name+' removed from VAR.');};
   // MediaRecorder timeslice blobs may not be independently playable. Finalize each
-  // recording before offering it for replay; retain the most recent three clips.
+  // recording before offering it for replay; keep only the latest finalized 15-second clip.
   const mime=window.MediaRecorder&&['video/mp4','video/webm;codecs=vp8','video/webm'].find(t=>MediaRecorder.isTypeSupported(t));
   if(window.MediaRecorder){
    const recordNext=()=>{
@@ -173,14 +184,17 @@ function attachCamera(call){
        const blob=new Blob(parts,{type:rec.mimeType||parts[0].type||'video/webm'});
        const url=URL.createObjectURL(blob);
        f.chunks.push({url,type:blob.type});
-       while(f.chunks.length>3)URL.revokeObjectURL(f.chunks.shift().url);
+       while(f.chunks.length>1){
+        const old=f.chunks.shift();
+        if(old!==f.selectedClip)URL.revokeObjectURL(old.url);
+       }
        replayButton.disabled=false;card.querySelector('.gw-save-replay').disabled=false;
       }
       recordNext();
      };
      rec.onerror=()=>{status('Camera '+id+': replay recording failed. Live video is still available.');f.active=false};
      rec.start();
-     f.timer=setTimeout(()=>{if(rec.state==='recording')rec.stop()},8000);
+     f.timer=setTimeout(()=>{if(rec.state==='recording')rec.stop()},REPLAY_WINDOW_MS);
     }catch(e){status('Camera '+id+': recording not supported on this device.');console.warn('VAR recording unavailable',e)}
    };
    recordNext();
@@ -193,16 +207,19 @@ function attachCamera(call){
   card.querySelector('.gw-save-match').onclick=()=>saveClip(f.fullBlob,recordingName(card.querySelector('.gw-camera-name').textContent, f.fullBlob||new Blob()));
   replayButton.onclick=()=>{
    const clip=f.chunks.at(-1);
-   if(!clip)return status('Replay is not ready yet. The first clip takes about 8 seconds.');
+   if(!clip)return status('Replay is not ready yet. The first complete clip takes about 15 seconds.');
    f.selectedClip=clip;replay.pause();replay.src=clip.url;replay.hidden=false;live.hidden=true;
    if(broadcastFeed===f){stopBroadcast();broadcastCamera(f)}
    replay.load();replay.play().catch(()=>status('Playback blocked or unsupported on this browser. Use Live to return to the camera.'));
   };
   card.querySelector('.gw-live').onclick=()=>{
-   replay.pause();replay.hidden=true;live.hidden=false;live.play().catch(()=>{});
+   const selected=f.selectedClip;
+   f.selectedClip=null;
+   replay.removeAttribute('src');replay.load();replay.hidden=true;live.hidden=false;live.play().catch(()=>{});
+   if(selected&&!f.chunks.includes(selected))URL.revokeObjectURL(selected.url);
    if(broadcastFeed===f){stopBroadcast();broadcastCamera(f)}
   };
-  status('Camera '+id+' connected. Replay will be ready after the first 8-second clip.');
+  status('Camera '+id+' connected. A temporary 15-second replay will be ready after the first completed clip. Closing this page clears replay memory.');
  });
  call.on('close',()=>stopFeed(id));call.on('error',()=>stopFeed(id));
 }
