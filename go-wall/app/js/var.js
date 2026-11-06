@@ -5,11 +5,13 @@ const pair=()=>window.GoWallPair;
 const params=new URLSearchParams(location.search);
 const camCode=params.get('var-camera');
 const requestedCam=camCode!==null;
+const matchViewRequested=params.has('match-view');
+const matchViewCode=params.get('match-view')||'';
 const validCam=/^\d{8}$/.test(camCode||'');
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const css=document.createElement('style');css.textContent='#gw-var{border:2px solid white;padding:16px;margin:16px var(--gutter)}#gw-var button,#gw-var input{padding:10px;margin:5px;background:white;color:#30213f;border:0;font:inherit}#gw-var video{max-width:100%;background:#160e1d;min-height:120px}#gw-var-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}#gw-var-grid article{border:1px solid white;padding:10px}#gw-var-status{overflow-wrap:anywhere}body.gw-controller #gw-var{display:block}body.gw-controller #gw-var video{max-height:260px}body.gw-var-camera header,body.gw-var-camera main,body.gw-var-camera footer,body.gw-var-camera #gowall-remote,body.gw-var-camera .notes{display:none!important}body.gw-var-camera #gw-var{margin:12px;min-height:85vh}#gw-var[hidden]{display:none!important}';document.head.append(css);
+const css=document.createElement('style');css.textContent='#gw-var{border:2px solid white;padding:16px;margin:16px var(--gutter)}#gw-var button,#gw-var input{padding:10px;margin:5px;background:white;color:#30213f;border:0;font:inherit}#gw-var video{max-width:100%;background:#160e1d;min-height:120px}#gw-var-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}#gw-var-grid article{border:1px solid white;padding:10px}#gw-var-status{overflow-wrap:anywhere}body.gw-controller #gw-var{display:block}body.gw-controller #gw-var video{max-height:260px}body.gw-var-camera header,body.gw-var-camera main,body.gw-var-camera footer,body.gw-var-camera #gowall-remote,body.gw-var-camera .notes,body.gw-match-view header,body.gw-match-view main,body.gw-match-view footer,body.gw-match-view #gowall-remote,body.gw-match-view .notes,body.gw-match-view .mast,body.gw-match-view .tv-exit{display:none!important}body.gw-var-camera #gw-var{margin:12px;min-height:85vh}body.gw-match-view #gw-var{margin:0;min-height:100vh;box-sizing:border-box;background:#101321;color:#fff;border:none}#gw-match-video{display:block;width:100%;height:min(75vh,850px);object-fit:contain;background:#000}#gw-match-viewer input{font-size:22px;max-width:180px}#gw-var[hidden]{display:none!important}';document.head.append(css);
 const section=document.createElement('section');section.id='gw-var';section.hidden=true;
-section.innerHTML='<h2>📹 VAR · Camera & microphone</h2><p id="gw-var-status" role="status">Choose Controller on the phone first.</p><div id="gw-var-hub" hidden><p>Connect extra phones as cameras. Camera feeds stay in the controller for review.</p><div id="gw-var-link"></div><div><button id="gw-record-start">⏺ Record whole match (all cameras)</button><button id="gw-record-stop" disabled>■ Stop recording</button><button id="gw-record-save" disabled>💾 Save all camera recordings (ZIP)</button></div><p id="gw-record-note">Recordings are kept temporarily on this controller until downloaded. Keep it open, and save before closing.</p><p>Instant replays are kept only in this browser tab (latest completed 15-second segment per camera). They are deleted on refresh or close. Use Save replay to keep a copy.</p><div id="gw-var-grid"></div><div><button id="gw-var-mic">🎙 Start live announcement</button><button id="gw-var-stop" disabled>■ Stop announcement</button></div><p>Allow microphone access on the controller to speak through the display device.</p></div><div id="gw-var-cam" hidden><p>Camera device: choose Start Camera and allow access. Keep this page open.</p><label>Camera name <input id="gw-var-name" maxlength="40" placeholder="Goal line camera"></label><button id="gw-var-start">📷 Start camera</button><button id="gw-var-switch" disabled>↻ Switch camera</button><video id="gw-var-self" autoplay playsinline muted></video></div>';
+section.innerHTML='<h2>📹 VAR · Camera & microphone</h2><p id="gw-var-status" role="status">Choose Controller on the phone first.</p><div id="gw-var-hub" hidden><p>Connect extra phones as cameras. Camera feeds stay in the controller for review.</p><div id="gw-var-link"></div><div id="gw-match-link"></div><p>To show the actual match on Retro TV or another screen, open Live Match Viewer there and enter this session code. Select a camera using its <b>📺 Send live match</b> button.</p><div><button id="gw-record-start">⏺ Record whole match (all cameras)</button><button id="gw-record-stop" disabled>■ Stop recording</button><button id="gw-record-save" disabled>💾 Save all camera recordings (ZIP)</button></div><p id="gw-record-note">Recordings are kept temporarily on this controller until downloaded. Keep it open, and save before closing.</p><p>Instant replays are kept only in this browser tab (latest completed 15-second segment per camera). They are deleted on refresh or close. Use Save replay to keep a copy.</p><div id="gw-var-grid"></div><div><button id="gw-var-mic">🎙 Start live announcement</button><button id="gw-var-stop" disabled>■ Stop announcement</button></div><p>Allow microphone access on the controller to speak through the display device.</p></div><div id="gw-match-viewer" hidden><h2>📺 Goaaal · Live Match Viewer</h2><p>Live camera video only. No scoreboard.</p><label>Match code <input id="gw-match-code" inputmode="numeric" maxlength="8" placeholder="8-digit code"></label><button id="gw-match-connect">▶ Connect to live match</button><p id="gw-match-status" role="status">Enter the code from the Goaaal controller.</p><video id="gw-match-video" autoplay playsinline controls></video></div><div id="gw-var-cam" hidden><p>Camera device: choose Start Camera and allow access. Keep this page open.</p><label>Camera name <input id="gw-var-name" maxlength="40" placeholder="Goal line camera"></label><button id="gw-var-start">📷 Start camera</button><button id="gw-var-switch" disabled>↻ Switch camera</button><video id="gw-var-self" autoplay playsinline muted></video></div>';
 document.body.append(section);
 const $=id=>document.getElementById(id),status=t=>$('gw-var-status').textContent=t;
 let hubPeer=null,camPeer=null,cameraStream=null,cameraFacing='environment',micStream=null,micCall=null,camData=null,broadcastCall=null,broadcastFeed=null,broadcastMode=null;
@@ -117,6 +119,35 @@ if(roleBox){const button=document.createElement('button');button.id='gw-var-role
 const feeds=new Map();let cameraCounter=0;
 const blockedCameras=new Set();
 const cameraChannels=new Map();
+const matchViewers=new Map(); // peer ID -> {channel, call}
+let selectedMatchFeed=null;
+function matchViewerLink(code){return location.origin+location.pathname+'?match-view='+encodeURIComponent(code)}
+function stopMatchViewerCalls(){
+ for(const viewer of matchViewers.values()){if(viewer.call){viewer.call.close();viewer.call=null}}
+}
+function startMatchViewerCall(viewer){
+ if(!selectedMatchFeed?.active||!selectedMatchFeed.stream?.getVideoTracks().some(t=>t.readyState==='live')||!hubPeer?.open)return;
+ if(viewer.call){viewer.call.close();viewer.call=null}
+ try{
+  const call=hubPeer.call(viewer.channel.peer,selectedMatchFeed.stream,{metadata:{kind:'match-live'}});
+  if(!call)throw Error('Viewer call unavailable');
+  viewer.call=call;
+  call.on('error',()=>{if(viewer.call===call){viewer.call=null;status('Live match viewer connection failed. Reconnect viewer if needed.')}});
+  call.on('close',()=>{if(viewer.call===call)viewer.call=null});
+ }catch(e){status('Could not share live match: '+e.message)}
+}
+function sendLiveMatch(f){
+ if(!f.active||!f.stream?.getVideoTracks().some(t=>t.readyState==='live'))return status('Camera is not ready.');
+ selectedMatchFeed=f;
+ stopMatchViewerCalls();
+ for(const viewer of matchViewers.values())startMatchViewerCall(viewer);
+ for(const feed of feeds.values()){
+  const button=feed.element.querySelector('.gw-match-send');
+  if(button)button.textContent=feed===f?'● Sending live match':'📺 Send live match';
+ }
+ status('Live match camera selected: '+f.element.querySelector('.gw-camera-name').textContent+'. Connect a viewer using the code or QR above.');
+}
+
 function setCameraName(peerId,name){
  const safe=String(name||'').trim().slice(0,40)||'Unnamed camera';
  cameraNames.set(peerId,safe);
@@ -164,6 +195,7 @@ function stopFeed(id){
  const f=feeds.get(id);if(!f)return;
  feeds.delete(id);
  if(broadcastFeed===f)stopBroadcast();
+ if(selectedMatchFeed===f){selectedMatchFeed=null;stopMatchViewerCalls();status('Selected live match camera disconnected. Select another camera.')}
  if(f.fullRecorder&&f.fullRecorder.state!=='inactive')stopFullRecorder(f);
  f.active=false;
  if(f.timer)clearTimeout(f.timer);
@@ -182,7 +214,7 @@ function attachCamera(call){
  call.answer();
  call.on('stream',stream=>{
   const card=document.createElement('article');
-  card.innerHTML='<strong class="gw-camera-name"></strong><video autoplay playsinline muted></video><div><button class="gw-replay" disabled>▶ Replay last 15 sec</button><button class="gw-save-replay" disabled>⬇ Save replay</button><button class="gw-save-match" disabled>⬇ Save match</button><button class="gw-live">● Live</button><button class="gw-broadcast">📺 Show on display</button><button class="gw-remove">✕ Remove camera</button></div><video class="gw-replay-video" controls playsinline hidden></video>';
+  card.innerHTML='<strong class="gw-camera-name"></strong><video autoplay playsinline muted></video><div><button class="gw-replay" disabled>▶ Replay last 15 sec</button><button class="gw-save-replay" disabled>⬇ Save replay</button><button class="gw-save-match" disabled>⬇ Save match</button><button class="gw-live">● Live</button><button class="gw-broadcast">📺 Show on display</button><button class="gw-match-send">📺 Send live match</button><button class="gw-remove">✕ Remove camera</button></div><video class="gw-replay-video" controls playsinline hidden></video>';
   $('gw-var-grid').append(card);
   const live=card.querySelector('video'),replay=card.querySelector('.gw-replay-video'),replayButton=card.querySelector('.gw-replay');
   live.srcObject=stream;live.play().catch(()=>{});
@@ -191,6 +223,7 @@ function attachCamera(call){
   setCameraName(call.peer,cameraNames.get(call.peer)||'Camera '+id);
   if(recordingMatch)startFullRecorder(f);
   card.querySelector('.gw-broadcast').onclick=()=>broadcastCamera(f);
+  card.querySelector('.gw-match-send').onclick=()=>sendLiveMatch(f);
   card.querySelector('.gw-remove').onclick=()=>{const name=card.querySelector('.gw-camera-name').textContent;if(!confirm('Remove '+name+' from VAR?'))return;blockedCameras.add(call.peer);const channel=cameraChannels.get(call.peer);if(channel?.open)channel.send({type:'camera-removed'});stopFeed(id);cameraChannels.delete(call.peer);status(name+' removed from VAR.');};
   // MediaRecorder timeslice blobs may not be independently playable. Finalize each
   // recording before offering it for replay; keep only the latest finalized 15-second clip.
@@ -255,8 +288,23 @@ function setupHub(code){
  hubPeer=new Peer('gowall-var-'+code,{config:{iceServers:[{urls:'stun:stun.l.google.com:19302'}]}});
  hubPeer.on('open',()=>{const link=location.origin+location.pathname+'?var-camera='+code;$('gw-var-link').innerHTML='<p>Display and camera code: <b>'+code+'</b></p><p><a href="'+esc(link)+'" target="_blank" rel="noopener">'+esc(link)+'</a></p><div id="gw-camera-qr" style="display:inline-block;background:white;padding:12px"></div>';
    if(typeof QRCode!=='undefined')new QRCode($('gw-camera-qr'),{text:link,width:180,height:180,correctLevel:QRCode.CorrectLevel.M});
+   const matchLink=matchViewerLink(code);
+   $('gw-match-link').innerHTML='<h3>📺 Live Match Viewer · Retro TV</h3><p>Match code: <b>'+code+'</b></p><p><a href="'+esc(matchLink)+'" target="_blank" rel="noopener">'+esc(matchLink)+'</a></p><div id="gw-match-qr" style="display:inline-block;background:white;padding:12px"></div>';
+   if(typeof QRCode!=='undefined')new QRCode($('gw-match-qr'),{text:matchLink,width:180,height:180,correctLevel:QRCode.CorrectLevel.M});
    status('Scan the QR code on another phone to add a camera.')});
- hubPeer.on('call',attachCamera);hubPeer.on('connection',c=>{if(blockedCameras.has(c.peer)){c.close();return}cameraChannels.set(c.peer,c);c.on('close',()=>{if(cameraChannels.get(c.peer)===c)cameraChannels.delete(c.peer)});c.on('data',m=>{if(m?.type==='camera-name')setCameraName(c.peer,m.name)});});hubPeer.on('disconnected',()=>{status('Camera pairing signaling disconnected. Retrying…');if(!hubPeer.destroyed)hubPeer.reconnect()});hubPeer.on('error',e=>status('Camera connection error: '+e.type));
+ hubPeer.on('call',attachCamera);hubPeer.on('connection',c=>{if(blockedCameras.has(c.peer)){c.close();return}cameraChannels.set(c.peer,c);c.on('close',()=>{
+  if(cameraChannels.get(c.peer)===c)cameraChannels.delete(c.peer);
+  const viewer=matchViewers.get(c.peer);
+  if(viewer?.channel===c){viewer.call?.close();matchViewers.delete(c.peer)}
+ });c.on('data',m=>{
+  if(m?.type==='camera-name')setCameraName(c.peer,m.name);
+  if(m?.type==='match-viewer-join'){
+   const viewer={channel:c,call:null};
+   matchViewers.set(c.peer,viewer);
+   c.send({type:'match-viewer-ack',camera:selectedMatchFeed?.element.querySelector('.gw-camera-name')?.textContent||null});
+   startMatchViewerCall(viewer);
+  }
+ });});hubPeer.on('disconnected',()=>{status('Camera pairing signaling disconnected. Retrying…');if(!hubPeer.destroyed)hubPeer.reconnect()});hubPeer.on('error',e=>status('Camera connection error: '+e.type));
 }
 let cameraRetry=null,retryCount=0,cameraRemoved=false,manualSwitch=false;
 function scheduleCameraRetry(){
@@ -319,7 +367,55 @@ async function startMic(){
 }
 function stopMic(){micCall?.close();micCall=null;micStream?.getTracks().forEach(t=>t.stop());micStream=null;$('gw-var-mic').disabled=false;$('gw-var-stop').disabled=true;status('Announcement stopped.')}
 $('gw-var-mic').onclick=startMic;$('gw-var-stop').onclick=stopMic;
-if(requestedCam){$('gw-var-name').value=localStorage.getItem('gw-var-camera-name')||'';document.body.classList.add('gw-var-camera');section.hidden=false;$('gw-var-cam').hidden=false;status(validCam?'Camera mode. Connect to controller code '+camCode+'.':'Invalid camera code. Open a new link from the controller.');$('gw-var-start').disabled=!validCam;if(validCam){status('Connecting camera…');startCamera()}}
+function initMatchViewer(){
+ document.body.classList.add('gw-match-view');
+ section.hidden=false;$('gw-var-hub').hidden=true;$('gw-var-cam').hidden=true;$('gw-match-viewer').hidden=false;
+ const input=$('gw-match-code'),btn=$('gw-match-connect'),video=$('gw-match-video'),msg=$('gw-match-status');
+ input.value=/^\d{8}$/.test(matchViewCode)?matchViewCode:'';
+ let viewerPeer=null,viewerChannel=null,viewerCall=null;
+ function setMessage(value){msg.textContent=value}
+ function connect(){
+  const code=input.value.trim();
+  if(!/^\d{8}$/.test(code))return setMessage('Enter the 8-digit code from the Goaaal controller.');
+  if(!window.Peer)return setMessage('WebRTC pairing is unavailable. Check the internet connection.');
+  if(viewerPeer){viewerPeer.destroy();viewerPeer=null}
+  if(viewerCall){viewerCall.close();viewerCall=null}
+  video.pause();video.srcObject=null;
+  setMessage('Connecting to the live match…');
+  const expectedPeer='gowall-var-'+code;
+  const peer=new Peer(undefined,{config:{iceServers:[{urls:'stun:stun.l.google.com:19302'},{urls:'stun:stun1.l.google.com:19302'}]}});
+  viewerPeer=peer;
+  peer.on('open',()=>{
+   if(viewerPeer!==peer)return;
+   const channel=peer.connect(expectedPeer,{reliable:true});
+   viewerChannel=channel;
+   channel.on('open',()=>{channel.send({type:'match-viewer-join'});setMessage('Connected. Waiting for the controller to select a live camera.')});
+   channel.on('data',m=>{if(m?.type==='match-viewer-ack')setMessage(m.camera?'Waiting for '+m.camera+' stream…':'Connected. Select a camera on the controller.')});
+   channel.on('close',()=>{if(viewerChannel===channel)setMessage('Controller disconnected. Press Connect to retry.')});
+   channel.on('error',()=>setMessage('Cannot contact controller. Check the match code and network.'));
+  });
+  peer.on('call',call=>{
+   if(call.peer!==expectedPeer||call.metadata?.kind!=='match-live'){call.close();return}
+   if(viewerCall)viewerCall.close();
+   viewerCall=call;
+   call.answer();
+   call.on('stream',stream=>{
+    video.srcObject=stream;
+    video.muted=false;
+    video.play().then(()=>setMessage('● LIVE MATCH')).catch(()=>setMessage('Live feed received. Press Play on the video to start.'));
+   });
+   call.on('close',()=>{if(viewerCall===call){viewerCall=null;video.srcObject=null;setMessage('Video stopped. Waiting for another camera…')}});
+   call.on('error',()=>setMessage('Live camera disconnected. Ask the controller to resend.'));
+  });
+  peer.on('disconnected',()=>{if(viewerPeer===peer&&!peer.destroyed)peer.reconnect()});
+  peer.on('error',e=>setMessage('Connection error: '+e.type+'. Check match code or try again.'));
+ }
+ btn.onclick=connect;
+ input.addEventListener('keydown',e=>{if(e.key==='Enter')connect()});
+ if(/^\d{8}$/.test(matchViewCode))connect();
+}
+if(matchViewRequested){initMatchViewer()}
+else if(requestedCam){$('gw-var-name').value=localStorage.getItem('gw-var-camera-name')||'';document.body.classList.add('gw-var-camera');section.hidden=false;$('gw-var-cam').hidden=false;status(validCam?'Camera mode. Connect to controller code '+camCode+'.':'Invalid camera code. Open a new link from the controller.');$('gw-var-start').disabled=!validCam;if(validCam){status('Connecting camera…');startCamera()}}
 else {let currentReplayUrl=null;
 document.addEventListener('gowall-var-message',e=>{
  const m=e.detail;
