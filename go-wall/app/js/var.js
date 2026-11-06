@@ -115,6 +115,13 @@ $('gw-record-save').onclick=async()=>{
 };
 
 const roleBox=document.querySelector('#gowall-remote .gw-actions');
+const watchLink=document.createElement('a');
+watchLink.href=location.pathname+'?match-view';
+watchLink.textContent='📺 Open Live Match Viewer (video only)';
+watchLink.style.cssText='display:inline-block;margin:8px 0;padding:12px 16px;border:2px solid currentColor;color:inherit;font-weight:bold';
+watchLink.id='gw-open-match-viewer';
+const remoteBox=document.getElementById('gowall-remote');
+if(remoteBox&&!matchViewRequested&&!requestedCam)remoteBox.append(watchLink);
 if(roleBox){const button=document.createElement('button');button.id='gw-var-role';button.textContent='📹 VAR Camera';roleBox.append(button);button.onclick=()=>{const entered=prompt('Enter the 8-digit display pairing code:');if(entered===null)return;if(!/^\d{8}$/.test(entered.trim())){status('Enter the same 8-digit code shown on the display.');section.hidden=false;return}location.href=location.pathname+'?var-camera='+encodeURIComponent(entered.trim())};}
 const feeds=new Map();let cameraCounter=0;
 const blockedCameras=new Set();
@@ -436,7 +443,7 @@ document.addEventListener('gowall-var-message',e=>{
   overlay.append(video);document.body.append(overlay);video.play().catch(()=>{});
  }catch(err){status('Display replay error: '+err.message)}
 });
-document.addEventListener('gowall-paired',e=>{if(pair()?.role==='controller')setupHub(e.detail.code)});document.addEventListener('gowall-role',e=>{if(e.detail.role==='controller'){section.hidden=false;$('gw-var-hub').hidden=false;status('Connect to the display to use its pairing code for all cameras.')}if(e.detail.role==='display'){section.hidden=true;showAudioEnable('🔊 Tap to enable announcement audio');const wait=setInterval(()=>{const p=pair()?.peer;if(!p)return;clearInterval(wait);p.on('call',call=>{if(call.peer!==pair()?.remotePeerId){call.close();return}
+document.addEventListener('gowall-paired',e=>{if(pair()?.role==='controller')setupHub(e.detail.code)});document.addEventListener('gowall-role',e=>{if(e.detail.role==='controller'){section.hidden=false;$('gw-var-hub').hidden=false;status('First pair this controller with a display, then add a camera. The 📺 Send live match button appears below each connected camera. Live Match Viewer is a separate video-only screen.')}if(e.detail.role==='display'){section.hidden=true;showAudioEnable('🔊 Tap to enable announcement audio');const wait=setInterval(()=>{const p=pair()?.peer;if(!p)return;clearInterval(wait);p.on('call',call=>{if(call.peer!==pair()?.remotePeerId){call.close();return}
 if(call.metadata?.kind==='var-broadcast'){
  call.answer();
  call.on('stream',stream=>{
