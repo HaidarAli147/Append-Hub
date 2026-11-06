@@ -91,3 +91,15 @@ A completed segment becomes available after roughly 15 seconds. This implementat
 ### Announcements on iPhone / Android displays
 
 Mobile browsers can block incoming WebRTC audio until the receiving device has received a user tap. When using a phone as the **Display**, tap **🔊 Enable announcement audio** on the display device and leave its Goaaal browser page visible. If autoplay is blocked, the button appears again so that audio can be started explicitly. The controller must grant microphone permission, and the display must have its media volume enabled. This does not bypass iOS/Android background playback restrictions or network/WebRTC issues: when a stream cannot connect (for instance across restrictive NATs without TURN relay), browser code alone cannot guarantee a connection. Test PC→phone and phone→phone with both devices on the same network before testing other networks.
+
+
+## Live match viewer for Retro TV and extra screens
+
+The **Live Match Viewer** is a separate video-only receiver: **it never displays the Goaaal scoreboard**. It shows the live camera chosen by the controller. Multiple viewer screens can connect to the same session.
+
+1. Start **Display** on one device, and connect a **Controller** to it as usual. Add one or more VAR camera phones through the camera QR code.
+2. On the controller's VAR section, locate **📺 Live Match Viewer · Retro TV**. The viewer link and QR share the session's eight-digit code.
+3. On Retro TV, open the new **GOAAAL LIVE** home tile (or visit `https://appendhub.com/go-wall/app/?match-view` on any browser), type the eight-digit match code, and click **Connect to live match**. You can also scan the viewer QR on another device, which opens the session-specific link.
+4. On the controller, click **📺 Send live match** under the camera that should appear. To switch cameras, click the same button on a different camera. The viewer never changes or displays the scoreboard.
+
+**Requirements and limitations:** This uses PeerJS signaling and direct WebRTC video, with no video storage or public broadcast server. The controller needs to stay connected and open. The viewer's browser must support WebRTC and playback; Retro TV's embedded WebKitGTK may require a compatible build and media codecs. If the Pi's embedded web view cannot play the WebRTC stream, open the viewer URL in Chromium on the Pi as a fallback. For best reliability use devices on the same network; router/firewall restrictions and NAT may require TURN relay infrastructure. The camera code is also the viewer join code: only share it with people permitted to watch the match.
