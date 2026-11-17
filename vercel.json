@@ -8,7 +8,7 @@
           "value": "goaaal.appendhub.com"
         }
       ],
-      "destination": "/go-wall/app",
+      "destination": "/go-wall/app/",
       "permanent": false
     },
     {
